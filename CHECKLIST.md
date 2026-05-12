@@ -9,8 +9,8 @@
 - [x] **Angelo:** Configuración básica del servidor Node.js/Express. *(¡Listo!)*
 - [x] **Angelo:** Estructurar carpetas del backend (rutas, controladores, middlewares).
 - [ ] **Angelo:** Crear middleware JWT para proteger rutas del API.
-- [ ] **Javicho:** Crear tablas en Supabase (`empresas`, `usuarios`, `productos`).
-- [ ] **Javicho:** Configurar Row Level Security (RLS) en Supabase.
+- [x] **Javicho:** Crear tablas en Supabase (`empresas`, `usuarios`, `productos`).
+- [x] **Javicho:** Configurar Row Level Security (RLS) en Supabase.
 
 ## Semana 2: Core SaaS (Gestión de Inventario)
 - [ ] **Davi:** UI del Dashboard (Layout principal).
