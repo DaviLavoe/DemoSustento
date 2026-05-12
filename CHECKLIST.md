@@ -4,7 +4,7 @@
 
 ## Semana 1: Arquitectura, Base de Datos y Autenticación
 - [x] **Davi:** Inicializar proyecto React con Vite y configurar TailwindCSS.
-- [ ] **Davi:** Configurar enrutamiento y crear vistas de Login/Registro.
+- [x] **Davi:** Configurar enrutamiento y crear vistas de Login/Registro.
 - [ ] **Davi:** Integrar Login/Registro directo con Supabase Auth en el Frontend.
 - [x] **Angelo:** Configuración básica del servidor Node.js/Express. *(¡Listo!)*
 - [ ] **Angelo:** Estructurar carpetas del backend (rutas, controladores, middlewares).
