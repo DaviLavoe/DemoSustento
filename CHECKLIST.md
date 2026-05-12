@@ -7,7 +7,7 @@
 - [x] **Davi:** Configurar enrutamiento y crear vistas de Login/Registro.
 - [ ] **Davi:** Integrar Login/Registro directo con Supabase Auth en el Frontend.
 - [x] **Angelo:** Configuración básica del servidor Node.js/Express. *(¡Listo!)*
-- [ ] **Angelo:** Estructurar carpetas del backend (rutas, controladores, middlewares).
+- [x] **Angelo:** Estructurar carpetas del backend (rutas, controladores, middlewares).
 - [ ] **Angelo:** Crear middleware JWT para proteger rutas del API.
 - [ ] **Javicho:** Crear tablas en Supabase (`empresas`, `usuarios`, `productos`).
 - [ ] **Javicho:** Configurar Row Level Security (RLS) en Supabase.
