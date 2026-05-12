@@ -3,7 +3,7 @@
 > **Nota para la IA y el Equipo:** Al iniciar una nueva sesión de trabajo, revisemos este archivo para conocer el progreso actual del proyecto y saber exactamente qué sigue. Podemos marcar las casillas usando `[x]`.
 
 ## Semana 1: Arquitectura, Base de Datos y Autenticación
-- [ ] **Davi:** Inicializar proyecto React con Vite y configurar TailwindCSS.
+- [x] **Davi:** Inicializar proyecto React con Vite y configurar TailwindCSS.
 - [ ] **Davi:** Configurar enrutamiento y crear vistas de Login/Registro.
 - [ ] **Davi:** Integrar Login/Registro directo con Supabase Auth en el Frontend.
 - [x] **Angelo:** Configuración básica del servidor Node.js/Express. *(¡Listo!)*
