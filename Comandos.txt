@@ -1,0 +1,11 @@
+COMANDOS:
+Set-ExecutionPolicy Unrestricted -Scope CurrentUser : Pa los permisos
+cd frontend: Pa entrar al front para que puedan ejecutar el trabajo
+npm run dev : Pa correr el server
+cd .. : Pa salir del frontend
+npm install: Para instalar las dependencias 
+npm install: Para instalar todas las dependencias
+
+Para ver de manera visual el login primero tienen que entrar como adm por eso el primer comando, ya luego entran
+a la carpeta del front y por ultimo corren el comando npm run dev pa correr el server que es la simulacion que se va a presentar.
+
