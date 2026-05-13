@@ -5,6 +5,7 @@ npm run dev : Pa correr el server
 cd .. : Pa salir del frontend
 npm install: Para instalar las dependencias 
 npm install: Para instalar todas las dependencias
+npm install @splinetool/react-spline : Instalar dependencias Spline para la animacion
 
 Para ver de manera visual el login primero tienen que entrar como adm por eso el primer comando, ya luego entran
 a la carpeta del front y por ultimo corren el comando npm run dev pa correr el server que es la simulacion que se va a presentar.
