@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import Spline from '@splinetool/react-spline';
+import ClickSpark from '../components/ClickSpark';
 
 export default function IniciarSesion() {
   const [email, setEmail] = useState('');
@@ -41,10 +42,17 @@ export default function IniciarSesion() {
     <div className="min-h-screen w-full flex bg-white selection:bg-[#1a1a1a] selection:text-white">
 
       {/* Lado izquierdo: Decorativo (Solo visible en pantallas grandes) */}
-      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden bg-black">
-
-        {/* Escena 3D de Spline */}
-        <div className="absolute inset-0 z-0 scale-[1.2] translate-x-12 -translate-y-4 spline-watermark-hide">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-black">
+        <ClickSpark
+          sparkColor='#fff'
+          sparkSize={12}
+          sparkRadius={20}
+          sparkCount={8}
+          duration={400}
+        >
+          <div className="relative w-full h-full flex flex-col justify-between p-12">
+            {/* Escena 3D de Spline */}
+            <div className="absolute inset-0 z-0 scale-[1.2] translate-x-12 -translate-y-4 spline-watermark-hide">
           <Spline scene="https://prod.spline.design/LjmP8z5grXutLGK3/scene.splinecode" />
         </div>
 
@@ -69,13 +77,23 @@ export default function IniciarSesion() {
             Una plataforma diseñada con precisión y estética superior para gestionar tus activos con absoluta claridad.
           </p>
         </div>
+          </div>
+        </ClickSpark>
       </div>
 
       {/* Lado derecho: Formulario de inicio de sesión */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 sm:p-12 bg-white relative">
-        <div className="w-full max-w-sm">
+      <div className="w-full lg:w-1/2 relative bg-white">
+        <ClickSpark
+          sparkColor='#000'
+          sparkSize={12}
+          sparkRadius={20}
+          sparkCount={8}
+          duration={400}
+        >
+          <div className="w-full h-full flex flex-col items-center justify-center p-6 sm:p-12">
+            <div className="w-full max-w-sm">
 
-          <header className="mb-10 text-left animate-fade-in-up">
+              <header className="mb-10 text-left animate-fade-in-up">
             <h1 className="font-serif text-4xl font-semibold tracking-tight text-[#1a1a1a] mb-3">Bienvenido</h1>
             <p className="text-[#666666] text-base">Ingresa a tu cuenta para continuar.</p>
           </header>
@@ -159,7 +177,9 @@ export default function IniciarSesion() {
               </Link>
             </p>
           </div>
-        </div>
+            </div>
+          </div>
+        </ClickSpark>
       </div>
     </div>
   );
