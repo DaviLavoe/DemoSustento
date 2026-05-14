@@ -17,7 +17,7 @@ Este documento detalla el plan de trabajo de 5 semanas para construir la platafo
 ## Cronograma de 5 Semanas
 
 ### Semana 1: Arquitectura, Base de Datos y Autenticación
-- **Davi (Front):** Inicializar el proyecto React con Vite. Configurar enrutamiento y crear las vistas de Login y Registro integrando Supabase Auth. Configurar TailwindCSS.
+- **Davi (Front):** Inicializar el proyecto React con Vite. Configurar enrutamiento y crear las vistas de Login y Registro integrando Supabase Auth. Configurar TailwindCSS. Mejorar la experiencia visual del Login (modelos 3D con Spline, microinteracciones con Click Spark, visibilidad de contraseña) y robustecer la conexión con Supabase mediante `.env`.
 - **Angelo (Back):** Estructurar el backend (separar rutas, controladores, middlewares). Crear middleware para verificar tokens JWT de Supabase en rutas protegidas.
 - **Javicho (Data):** Diseñar las tablas core en Supabase (`empresas`, `usuarios`, `productos`). Configurar las políticas de seguridad (RLS) para garantizar que una empresa no vea los datos de otra.
 

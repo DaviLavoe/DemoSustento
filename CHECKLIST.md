@@ -6,6 +6,10 @@
 - [x] **Davi:** Inicializar proyecto React con Vite y configurar TailwindCSS.
 - [x] **Davi:** Configurar enrutamiento y crear vistas de Login/Registro.
 - [x] **Davi:** Integrar Login/Registro directo con Supabase Auth en el Frontend.
+- [x] **Davi:** Restructuración visual del Login (Integración de modelo 3D Spline).
+- [x] **Davi:** Integración del icono "Ojo" para ver/ocultar contraseña en Login.
+- [x] **Davi:** Integración de "Click Spark" para interactividad visual.
+- [x] **Davi:** Reconfiguración de `supabase.js` y manejo seguro de `.env` en front.
 - [x] **Angelo:** Configuración básica del servidor Node.js/Express. *(¡Listo!)*
 - [x] **Angelo:** Estructurar carpetas del backend (rutas, controladores, middlewares).
 - [ ] **Angelo:** Crear middleware JWT para proteger rutas del API.
