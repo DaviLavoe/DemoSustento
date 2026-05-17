@@ -12,14 +12,14 @@
 - [x] **Davi:** Reconfiguración de `supabase.js` y manejo seguro de `.env` en front.
 - [x] **Angelo:** Configuración básica del servidor Node.js/Express. *(¡Listo!)*
 - [x] **Angelo:** Estructurar carpetas del backend (rutas, controladores, middlewares).
-- [ ] **Angelo:** Crear middleware JWT para proteger rutas del API.
+- [x] **Angelo:** Crear middleware JWT para proteger rutas del API.
 - [x] **Javicho:** Crear tablas en Supabase (`empresas`, `usuarios`, `productos`).
 - [x] **Javicho:** Configurar Row Level Security (RLS) en Supabase.
 
 ## Semana 2: Core SaaS (Gestión de Inventario)
 - [ ] **Davi:** UI del Dashboard (Layout principal).
 - [ ] **Davi:** Vistas y modales de CRUD de productos.
-- [ ] **Angelo:** Endpoints POST, PUT, DELETE para `productos`.
+- [x] **Angelo:** Endpoints POST, PUT, DELETE para `productos`.
 - [ ] **Javicho:** Configurar Supabase Storage para imágenes.
 - [ ] **Javicho/Davi:** Integrar subida de imágenes.
 

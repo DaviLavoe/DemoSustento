@@ -11,46 +11,16 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Inicializar cliente de Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error("Faltan las credenciales de Supabase en el archivo .env");
-  process.exit(1);
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Rutas
+// Endpoint raíz
 app.get('/', (req, res) => {
   res.json({ message: 'Bienvenido al API del Sistema de Gestión de Inventario' });
 });
 
-// Endpoint de prueba: Obtener productos
-app.get('/api/productos', async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from('productos')
-      .select('*');
+// Rutas
+const productosRoutes = require('./routes/productos');
 
-    if (error) {
-      throw error;
-    }
-
-    res.json({ 
-      success: true, 
-      data 
-    });
-  } catch (error) {
-    console.error('Error al obtener productos:', error.message);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al obtener productos', 
-      error: error.message 
-    });
-  }
-});
+// Rutas del API
+app.use('/api/productos', productosRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => {
