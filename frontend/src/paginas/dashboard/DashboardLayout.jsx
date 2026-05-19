@@ -14,6 +14,8 @@ export default function DashboardLayout() {
     activePageTitle
   } = useDashboard();
 
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Usuario';
+
   return (
     <div className="min-h-screen w-full flex bg-[#fafafa] selection:bg-[#1a1a1a] selection:text-white">
       <ClickSpark
@@ -78,7 +80,7 @@ export default function DashboardLayout() {
                     <User size={14} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[#1a1a1a] truncate">David (Lead)</p>
+                    <p className="text-xs font-semibold text-[#1a1a1a] truncate capitalize">{displayName}</p>
                     <p className="text-[10px] text-[#666666] truncate">{user.email}</p>
                   </div>
                 </div>
@@ -120,7 +122,7 @@ export default function DashboardLayout() {
 
               {/* Botón rápido del perfil */}
               <div className="flex items-center gap-3">
-                <span className="hidden sm:inline text-xs font-medium text-[#666666]">David</span>
+                <span className="hidden sm:inline text-xs font-medium text-[#666666] capitalize">{user ? displayName : ''}</span>
                 <div className="w-9 h-9 rounded-xl bg-[#fafafa] border border-[#e5e5e5] flex items-center justify-center text-[#1a1a1a] shadow-sm">
                   <User size={16} />
                 </div>
