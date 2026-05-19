@@ -1,3 +1,4 @@
+// Backend API - Semana 2: Core SaaS (Gestión de Inventario)
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
