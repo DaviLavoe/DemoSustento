@@ -1,16 +1,12 @@
 COMANDOS:
 Set-ExecutionPolicy Unrestricted -Scope CurrentUser : Pa los permisos
-
---- NUEVO MODO ULTRA-RÁPIDO ---
-Si estás en la carpeta raíz del proyecto (DemoSustento):
-1. npm install : Para instalar las herramientas en la raíz (solo la primera vez)
-2. npm run dev : Corre el Frontend y el Backend juntos en una sola consola 🚀
-
---- MODO INDIVIDUAL ---
 cd frontend: Pa entrar al front para que puedan ejecutar el trabajo
 npm run dev : Pa correr el server
 cd .. : Pa salir del frontend
-
+npm install: Para instalar las dependencias 
 npm install: Para instalar todas las dependencias
 npm install @splinetool/react-spline : Instalar dependencias Spline para la animacion
+
+Para ver de manera visual el login primero tienen que entrar como adm por eso el primer comando, ya luego entran
+a la carpeta del front y por ultimo corren el comando npm run dev pa correr el server que es la simulacion que se va a presentar.
 
