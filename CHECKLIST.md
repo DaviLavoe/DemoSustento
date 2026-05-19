@@ -17,8 +17,8 @@
 - [x] **Javicho:** Configurar Row Level Security (RLS) en Supabase.
 
 ## Semana 2: Core SaaS (Gestión de Inventario)
-- [ ] **Davi:** UI del Dashboard (Layout principal).
-- [ ] **Davi:** Vistas y modales de CRUD de productos.
+- [x] **Davi:** UI del Dashboard (Layout principal).
+- [x] **Davi:** Vistas y modales de CRUD de productos.
 - [x] **Angelo:** Endpoints POST, PUT, DELETE para `productos`.
 - [ ] **Javicho:** Configurar Supabase Storage para imágenes.
 - [ ] **Javicho/Davi:** Integrar subida de imágenes.
