@@ -19,9 +19,15 @@ app.get('/', (req, res) => {
 
 // Rutas
 const productosRoutes = require('./routes/productos');
+const catalogoRoutes = require('./routes/catalogo');
+const authRoutes = require('./routes/auth');
 
 // Rutas del API
 app.use('/api/productos', productosRoutes);
+// Ruta pública — no requiere autenticación
+app.use('/api/catalogo', catalogoRoutes);
+// Ruta de autenticación y perfil de usuario
+app.use('/api/auth', authRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => {

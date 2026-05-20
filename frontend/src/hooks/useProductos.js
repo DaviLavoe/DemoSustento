@@ -39,17 +39,24 @@ export function useProductos() {
   };
 
   // Cargar datos del API
-  const fetchProductos = async () => {
+  const fetchProductos = async (signal) => {
     setIsLoading(true);
     setError(null);
+
+    // Timeout de 10 segundos adicional por si el AbortController tarda más
+    const timeoutId = setTimeout(() => {
+      if (signal && !signal.aborted) signal.dispatchEvent(new Event('abort'));
+    }, 10000);
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No se detectó una sesión activa');
+      if (!session) throw new Error('No se detectó una sesión activa. Por favor, vuelve a iniciar sesión.');
 
       const response = await fetch('http://localhost:3000/api/productos', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
-        }
+        },
+        signal
       });
 
       const resData = await response.json();
@@ -59,15 +66,27 @@ export function useProductos() {
 
       setProductos(resData.data || []);
     } catch (err) {
+      if (err.name === 'AbortError') {
+        // Fetch cancelado por navegación — no mostrar error
+        return;
+      }
       console.error('Error fetching productos:', err);
       setError(err.message);
     } finally {
+      clearTimeout(timeoutId);
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProductos();
+    // Crear un AbortController para cancelar el fetch si el componente se desmonta
+    const controller = new AbortController();
+    fetchProductos(controller.signal);
+
+    // Cleanup: abortar la petición cuando el usuario navegue a otra vista
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   // Controladores de Modales

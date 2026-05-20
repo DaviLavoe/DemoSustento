@@ -1,15 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { ShoppingCart, Search, Filter, MessageSquare, ArrowUpRight, Grid, List } from 'lucide-react';
-import { supabase } from '../config/supabase';
 import useSmoothScroll from '../hooks/useSmoothScroll';
 import PantallaCargaPublica from '../components/ui/PantallaCargaPublica';
 import Tilt3D from '../components/ui/Tilt3D';
 
 export default function CatalogoPublico() {
   const { slug } = useParams();
-  const [loading, setLoading] = useState(true);
+  // Bug fix: track animation and data separately so we never show empty content
+  const [animationDone, setAnimationDone] = useState(false);
+  const [dataReady, setDataReady] = useState(false);
+  const loading = !animationDone || !dataReady;
+
   const [company, setCompany] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,122 +29,31 @@ export default function CatalogoPublico() {
   useEffect(() => {
     async function fetchCatalogData() {
       try {
-        // 1. Obtener datos de la empresa por su slug
-        let companyData = null;
-        if (slug) {
-          const { data, error } = await supabase
-            .from('empresas')
-            .select('*')
-            .eq('slug', slug)
-            .single();
-            
-          if (!error && data) {
-            companyData = data;
+        const response = await fetch(`http://localhost:3000/api/catalogo/${slug}`, {
+          signal: AbortSignal.timeout(8000)
+        });
+
+        if (response.ok) {
+          const resData = await response.json();
+          if (resData.success && resData.empresa) {
+            setCompany(resData.empresa);
+            const productsData = resData.productos || [];
+            setProducts(productsData);
+            setFilteredProducts(productsData);
+            const uniqueCategories = ['Todas', ...new Set(productsData.map(p => p.categoria).filter(Boolean))];
+            setCategories(uniqueCategories);
+          } else {
+            // Empresa no encontrada en la BD
+            setNotFound(true);
           }
+        } else {
+          setNotFound(true);
         }
-
-        // Si no hay base de datos o empresa, usar valores de demostración premium
-        if (!companyData) {
-          companyData = {
-            id: 'demo-id',
-            nombre: 'Sustento Concept Store',
-            slug: slug || 'sustento-demo',
-            telefono_whatsapp: '51999999999',
-            logo_url: null,
-            descripcion: 'Muebles de diseño y decoración minimalista con materiales sustentables.',
-            config: {
-              primaryColor: '#1a1a1a',
-              secondaryColor: '#f5f5f7',
-              accentColor: '#d4af37',
-              fontFamily: 'serif'
-            }
-          };
-        }
-        setCompany(companyData);
-
-        // 2. Obtener productos activos de la empresa
-        let productsData = [];
-        if (companyData.id !== 'demo-id') {
-          const { data, error } = await supabase
-            .from('productos')
-            .select('*')
-            .eq('empresa_id', companyData.id)
-            .eq('activo', true);
-
-          if (!error && data) {
-            productsData = data;
-          }
-        }
-
-        // Cargar lista de demostración de alta calidad solo para la tienda de demo
-        if (companyData.id === 'demo-id') {
-          productsData = [
-            {
-              id: '1',
-              nombre: 'Silla Minimalista Nórdica',
-              categoria: 'Sillas',
-              precio: 189.00,
-              stock: 12,
-              descripcion: 'Silla de madera de roble con cojín ergonómico de lino natural.',
-              imagen_url: 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?auto=format&fit=crop&q=80&w=600'
-            },
-            {
-              id: '2',
-              nombre: 'Lámpara de Pie Éter',
-              categoria: 'Iluminación',
-              precio: 245.00,
-              stock: 8,
-              descripcion: 'Lámpara con base de travertino y difusor de vidrio soplado opalino.',
-              imagen_url: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&q=80&w=600'
-            },
-            {
-              id: '3',
-              nombre: 'Mesa de Centro Orgánica',
-              categoria: 'Mesas',
-              precio: 420.00,
-              stock: 4,
-              descripcion: 'Mesa de madera maciza de nogal recuperada con acabado de cera de abejas.',
-              imagen_url: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&q=80&w=600'
-            },
-            {
-              id: '4',
-              nombre: 'Jarrón Wabi-Sabi Grande',
-              categoria: 'Decoración',
-              precio: 95.00,
-              stock: 15,
-              descripcion: 'Cerámica artesanal texturizada con engobe de cenizas volcánicas.',
-              imagen_url: 'https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&q=80&w=600'
-            },
-            {
-              id: '5',
-              nombre: 'Sillón Bauhaus Cuero',
-              categoria: 'Sillones',
-              precio: 780.00,
-              stock: 3,
-              descripcion: 'Estructura tubular cromada con cuero italiano de curtido vegetal.',
-              imagen_url: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?auto=format&fit=crop&q=80&w=600'
-            },
-            {
-              id: '6',
-              nombre: 'Macetero Escultural Terra',
-              categoria: 'Decoración',
-              precio: 110.00,
-              stock: 20,
-              descripcion: 'Maceta de concreto aligerado ideal para interiores y terrazas semi-cubiertas.',
-              imagen_url: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&q=80&w=600'
-            }
-          ];
-        }
-
-        setProducts(productsData);
-        setFilteredProducts(productsData);
-
-        // Extraer categorías únicas
-        const uniqueCategories = ['Todas', ...new Set(productsData.map(p => p.categoria).filter(Boolean))];
-        setCategories(uniqueCategories);
-
       } catch (err) {
         console.error('Error al cargar datos del catálogo:', err);
+        setNotFound(true);
+      } finally {
+        setDataReady(true);
       }
     }
 
@@ -220,12 +133,27 @@ export default function CatalogoPublico() {
       
       {/* 1. Loader Interactivo Premium */}
       <PantallaCargaPublica 
-        nombreTienda={company?.nombre || "Sustento"} 
-        onComplete={() => setLoading(false)} 
+        nombreTienda="Catálogo"
+        onComplete={() => setAnimationDone(true)} 
       />
 
-      {/* Solo renderizar el contenido cuando termine la animación de carga */}
-      {!loading && (
+      {/* Pantalla de "Tienda no encontrada" */}
+      {!loading && notFound && (
+        <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#1a1a1a]/5 border border-[#e5e5e5] flex items-center justify-center text-4xl">
+            🔍
+          </div>
+          <div className="space-y-2">
+            <h1 className="font-serif text-3xl font-bold text-[#1a1a1a]">Tienda no encontrada</h1>
+            <p className="text-neutral-500 text-sm max-w-sm leading-relaxed">
+              No existe ninguna tienda con el enlace <span className="font-mono bg-[#fafafa] border border-[#e5e5e5] px-2 py-0.5 rounded-md text-xs">{slug}</span>. Verifica que el enlace sea correcto.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Solo renderizar el catálogo cuando carguen los datos correctamente */}
+      {!loading && !notFound && (
         <div className="animate-reveal duration-1000">
           
           {/* 2. Barra de Navegación */}

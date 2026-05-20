@@ -5,38 +5,39 @@ import { Package, Settings } from 'lucide-react';
 
 export function useDashboard() {
   const [user, setUser] = useState(null);
+  const [empresa, setEmpresa] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [empresaSlug, setEmpresaSlug] = useState('sustento-demo');
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const getEmpresaData = async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      setUser(currentUser);
-      if (currentUser) {
-        // Obtener empresa_id de la tabla usuarios
-        const { data: usuarioData, error: userError } = await supabase
-          .from('usuarios')
-          .select('empresa_id')
-          .eq('id', currentUser.id)
-          .single();
+    async function cargarDatosUsuario() {
+      // supabase.auth funciona bien aunque el REST API no acepte la key
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
 
-        if (!userError && usuarioData) {
-          // Obtener slug de la tabla empresas
-          const { data: empresaData, error: empresaError } = await supabase
-            .from('empresas')
-            .select('slug')
-            .eq('id', usuarioData.empresa_id)
-            .single();
+      setUser(session.user);
 
-          if (!empresaError && empresaData) {
-            setEmpresaSlug(empresaData.slug);
+      // Llamar al backend para obtener la empresa (el backend tiene acceso correcto a Supabase)
+      try {
+        const response = await fetch('http://localhost:3000/api/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.empresa) {
+            setEmpresa(data.empresa);
           }
         }
+      } catch (err) {
+        console.error('useDashboard: error al cargar empresa:', err);
       }
-    };
-    getEmpresaData();
+    }
+
+    cargarDatosUsuario();
   }, []);
 
   const handleCerrarSesion = async () => {
@@ -69,21 +70,31 @@ export function useDashboard() {
     return location.pathname === path;
   };
 
-  const activePageTitle = () => {
-    if (location.pathname === '/dashboard' || location.pathname === '/dashboard/inventario') {
-      return 'Inventario';
-    }
-    return location.pathname.split('/').pop();
+  const pageTitles = {
+    '/dashboard': empresa?.nombre || 'Inventario',
+    '/dashboard/inventario': empresa?.nombre || 'Inventario',
+    '/dashboard/configuracion': 'Configuración',
   };
+
+  const activePageTitle = () => pageTitles[location.pathname] || 'Dashboard';
+
+  // Actualizar el título del tab del navegador dinámicamente
+  useEffect(() => {
+    const title = pageTitles[location.pathname] || 'Dashboard';
+    document.title = empresa
+      ? `${title} · ${empresa.nombre}`
+      : `${title} · Sustento`;
+  }, [location.pathname, empresa]);
 
   return {
     user,
+    empresa,
     sidebarOpen,
     setSidebarOpen,
     handleCerrarSesion,
     navItems,
     isActive,
     activePageTitle,
-    empresaSlug
+    empresaSlug: empresa?.slug || null
   };
 }

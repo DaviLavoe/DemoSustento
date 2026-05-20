@@ -6,6 +6,7 @@ import { useDashboard } from '../../hooks/useDashboard';
 export default function DashboardLayout() {
   const {
     user,
+    empresa,
     sidebarOpen,
     setSidebarOpen,
     handleCerrarSesion,
@@ -16,6 +17,8 @@ export default function DashboardLayout() {
   } = useDashboard();
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Usuario';
+  const brandLetter = empresa?.nombre ? empresa.nombre.charAt(0).toUpperCase() : 'S';
+  const brandName = empresa?.nombre || 'Sustento';
 
   return (
     <div className="min-h-screen w-full flex bg-[#fafafa] selection:bg-[#1a1a1a] selection:text-white">
@@ -37,9 +40,9 @@ export default function DashboardLayout() {
             <div className="p-6 border-b border-[#e5e5e5] flex items-center justify-between">
               <Link to="/dashboard" className="flex items-center gap-3 group">
                 <div className="w-9 h-9 bg-[#1a1a1a] rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-105 shadow-md">
-                  <span className="text-white font-serif font-bold text-xl italic leading-none">S</span>
+                  <span className="text-white font-serif font-bold text-xl italic leading-none">{brandLetter}</span>
                 </div>
-                <span className="text-[#1a1a1a] text-lg font-medium tracking-widest uppercase">Sustento</span>
+                <span className="text-[#1a1a1a] text-sm font-medium tracking-widest uppercase truncate max-w-[120px]">{brandName}</span>
               </Link>
               {/* Botón de cerrar sidebar en móvil */}
               <button 
@@ -72,20 +75,22 @@ export default function DashboardLayout() {
                 );
               })}
               
-              {/* Enlace externo al catálogo público */}
-              <a
-                href={`/catalogo/${empresaSlug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setSidebarOpen(false)}
-                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-[#666666] hover:text-[#1a1a1a] hover:bg-[#fafafa] hover:translate-x-0.5 transition-all duration-200 group mt-4 border border-dashed border-[#e5e5e5]"
-              >
-                <span className="flex items-center gap-3.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                  Catálogo Público
-                </span>
-                <ExternalLink size={14} className="text-[#666666] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </a>
+              {/* Enlace al catálogo público — solo visible cuando se resuelve el slug real */}
+              {empresaSlug && (
+                <a
+                  href={`/catalogo/${empresaSlug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setSidebarOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-[#666666] hover:text-[#1a1a1a] hover:bg-[#fafafa] hover:translate-x-0.5 transition-all duration-200 group mt-4 border border-dashed border-[#e5e5e5]"
+                >
+                  <span className="flex items-center gap-3.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                    Catálogo Público
+                  </span>
+                  <ExternalLink size={14} className="text-[#666666] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </a>
+              )}
             </nav>
 
             {/* Footer del Sidebar: Usuario & Cerrar Sesión */}
@@ -136,7 +141,7 @@ export default function DashboardLayout() {
                 </h1>
               </div>
 
-              {/* Botón rápido del perfil */}
+              {/* Info del usuario */}
               <div className="flex items-center gap-3">
                 <span className="hidden sm:inline text-xs font-medium text-[#666666] capitalize">{user ? displayName : ''}</span>
                 <div className="w-9 h-9 rounded-xl bg-[#fafafa] border border-[#e5e5e5] flex items-center justify-center text-[#1a1a1a] shadow-sm">
