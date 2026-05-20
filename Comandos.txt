@@ -56,4 +56,10 @@ npm install
 npm run dev
 ```
 
+# En todo caso ya esta todo nada mas correr:
+
+npm run dev 
+
+desde la terminal de la raiz y listo.
+
 El frontend estará disponible en `http://localhost:5173/` y el backend en `http://localhost:3000/`.
