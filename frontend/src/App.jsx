@@ -5,6 +5,7 @@ import RutaProtegida from './components/RutaProtegida';
 import DashboardLayout from './paginas/dashboard/DashboardLayout';
 import Inventario from './paginas/dashboard/Inventario';
 import Configuracion from './paginas/dashboard/Configuracion';
+import CatalogoPublico from './paginas/CatalogoPublico';
 
 function App() {
   return (
@@ -13,6 +14,9 @@ function App() {
         {/* Rutas de Autenticación */}
         <Route path="/iniciar-sesion" element={<IniciarSesion />} />
         <Route path="/registro" element={<Registro />} />
+        
+        {/* Catálogo Público de la Empresa */}
+        <Route path="/catalogo/:slug" element={<CatalogoPublico />} />
         
         {/* Panel de Control Protegido */}
         <Route path="/dashboard" element={

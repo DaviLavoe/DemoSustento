@@ -30,6 +30,7 @@ export function useProductos() {
     imagen_url: '',
     activo: true
   });
+  const [imageFile, setImageFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   const triggerNotification = (msg) => {
@@ -81,6 +82,7 @@ export function useProductos() {
       imagen_url: '',
       activo: true
     });
+    setImageFile(null);
     setIsModalOpen(true);
   };
 
@@ -96,6 +98,7 @@ export function useProductos() {
       imagen_url: producto.imagen_url || '',
       activo: producto.activo !== undefined ? producto.activo : true
     });
+    setImageFile(null);
     setIsModalOpen(true);
   };
 
@@ -114,13 +117,37 @@ export function useProductos() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Sesión expirada');
 
+      let finalImageUrl = formData.imagen_url;
+
+      // Subir archivo a Supabase Storage si se ha seleccionado uno nuevo
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('productos')
+          .upload(filePath, imageFile);
+
+        if (uploadError) {
+          throw new Error(`Error al subir la imagen: ${uploadError.message}`);
+        }
+
+        // Obtener la URL pública del archivo subido
+        const { data: { publicUrl } } = supabase.storage
+          .from('productos')
+          .getPublicUrl(filePath);
+
+        finalImageUrl = publicUrl;
+      }
+
       const payload = {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
         precio: parseFloat(formData.precio),
         stock: parseInt(formData.stock, 10) || 0,
         categoria: formData.categoria,
-        imagen_url: formData.imagen_url,
+        imagen_url: finalImageUrl,
         activo: formData.activo
       };
 
@@ -252,6 +279,8 @@ export function useProductos() {
     modalMode,
     formData,
     setFormData,
+    imageFile,
+    setImageFile,
     submitting,
     handleOpenCreate,
     handleOpenEdit,

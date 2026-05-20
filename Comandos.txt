@@ -1,12 +1,59 @@
-COMANDOS:
-Set-ExecutionPolicy Unrestricted -Scope CurrentUser : Pa los permisos
-cd frontend: Pa entrar al front para que puedan ejecutar el trabajo
-npm run dev : Pa correr el server
-cd .. : Pa salir del frontend
-npm install: Para instalar las dependencias 
-npm install: Para instalar todas las dependencias
-npm install @splinetool/react-spline : Instalar dependencias Spline para la animacion
+# Guía de Configuración y Comandos - DemoSustento
 
-Para ver de manera visual el login primero tienen que entrar como adm por eso el primer comando, ya luego entran
-a la carpeta del front y por ultimo corren el comando npm run dev pa correr el server que es la simulacion que se va a presentar.
+Esta guía contiene los pasos ordenados para clonar y ejecutar el proyecto desde cero en cualquier computadora nueva.
 
+
+## 🔑 1. Configuración de Variables de Entorno (.env)
+
+Debes crear dos archivos `.env` (uno en la carpeta `backend` y otro en `frontend`).
+
+### Backend (`backend/.env`)
+Crea un archivo llamado `.env` dentro de la carpeta `backend` con el siguiente contenido:
+```env
+PORT=3000
+SUPABASE_URL=https://tu_proyecto.supabase.co
+SUPABASE_KEY=tu_service_role_secret_key_aqui
+```
+*⚠️ **IMPORTANTE:** Para el backend debes usar la clave **`service_role` (secret)** de Supabase para poder saltar las políticas de seguridad RLS.*
+
+### Frontend (`frontend/.env`)
+Crea un archivo llamado `.env` dentro de la carpeta `frontend` con el siguiente contenido:
+```env
+VITE_SUPABASE_URL=https://tu_proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu_anon_public_key_aqui
+```
+
+---
+
+## 🚀 2. Ejecución del Proyecto (Comandos en orden)
+
+Para iniciar el proyecto por primera vez, abre dos terminales (una para el Backend y otra para el Frontend):
+
+### Terminal 1: Backend 🖥️
+```bash
+# Permisos de PowerShell (Solo si tu PC de Windows da error de scripts)
+Set-ExecutionPolicy Unrestricted -Scope CurrentUser
+
+# Entrar al backend
+cd backend
+
+# Instalar dependencias
+npm install
+
+# Iniciar en modo desarrollo (con auto-recarga al guardar)
+npm run dev
+```
+
+### Terminal 2: Frontend 🌐
+```bash
+# Entrar al frontend
+cd frontend
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+```
+
+El frontend estará disponible en `http://localhost:5173/` y el backend en `http://localhost:3000/`.

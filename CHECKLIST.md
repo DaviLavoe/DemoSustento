@@ -23,16 +23,20 @@
 - [ ] **Javicho:** Configurar Supabase Storage para imágenes.
 - [ ] **Javicho/Davi:** Integrar subida de imágenes.
 
-## Semana 3: Micro-CMS y Catálogo Público (Vitrina)
+## Semana 3: Micro-CMS, Catálogo Público y Cuentas de Clientes
 - [ ] **Davi:** Vista pública del catálogo (`/catalogo/:slug`).
-- [ ] **Angelo:** Endpoints públicos GET para productos.
+- [ ] **Davi:** Login/Registro de Clientes y panel de "Mi Cuenta" (Pedidos y Dirección).
+- [ ] **Angelo:** Endpoints públicos GET para productos e historial del cliente.
 - [ ] **Javicho:** Crear tabla `configuracion_catalogo`.
+- [ ] **Javicho:** Crear tabla `clientes` y configurar políticas RLS de seguridad.
 
-## Semana 4: Carrito de Compras e Integración con WhatsApp
-- [ ] **Davi:** Lógica del carrito de compras y checkout UI.
+## Semana 4: Carrito, Checkout y Reportes Animados
+- [ ] **Davi:** Lógica del carrito de compras y checkout UI pre-rellenado.
 - [ ] **Davi:** Generar enlace `wa.me` dinámico.
-- [ ] **Angelo:** Endpoint para registrar pedidos.
+- [ ] **Davi:** Dashboard Admin: Reportes y estadísticas con gráficos animados (Recharts).
+- [ ] **Angelo:** Endpoint para registrar pedidos y consultar analíticas de ventas.
 - [ ] **Javicho:** Tablas `pedidos` y `detalles_pedido`.
+- [ ] **Javicho:** Programar trigger de base de datos para reducción de stock automática.
 
 ## Semana 5: Pruebas, Refinamiento y Despliegue
 - [ ] **Davi:** Pulido UI/UX y Mobile First.

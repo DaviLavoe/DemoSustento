@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, UploadCloud } from 'lucide-react';
 
 export default function ModalProducto({
   isOpen,
@@ -7,10 +7,31 @@ export default function ModalProducto({
   mode,
   formData,
   setFormData,
+  imageFile,
+  setImageFile,
   onSubmit,
   submitting
 }) {
   if (!isOpen) return null;
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+    }
+  };
+
+  const getPreviewUrl = () => {
+    if (imageFile) {
+      return URL.createObjectURL(imageFile);
+    }
+    return formData.imagen_url;
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setFormData({ ...formData, imagen_url: '' });
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -116,17 +137,55 @@ export default function ModalProducto({
               ></textarea>
             </div>
 
-            {/* Enlace de Imagen */}
+            {/* Imagen del Producto (Supabase Storage) */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#666666]">Enlace / URL de la Imagen</label>
-              <input
-                type="url"
-                value={formData.imagen_url}
-                onChange={(e) => setFormData({...formData, imagen_url: e.target.value})}
-                placeholder="https://ejemplo.com/foto.jpg"
-                className="w-full px-4 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-sm text-[#1a1a1a] placeholder-[#a1a1aa] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 focus:border-[#1a1a1a] transition-all duration-200 hover:border-[#e5e5e5]"
-              />
-              <p className="text-[10px] text-[#666666] italic mt-0.5">*(Integración de carga de archivos en Supabase Storage pendiente por Javicho)*</p>
+              <label className="text-xs font-semibold uppercase tracking-wider text-[#666666]">
+                Imagen del Producto
+              </label>
+              
+              {getPreviewUrl() ? (
+                <div className="relative group rounded-xl overflow-hidden border border-[#e5e5e5] bg-[#fafafa] flex items-center justify-center h-48 transition-all">
+                  <img
+                    src={getPreviewUrl()}
+                    alt="Vista previa"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                    <label className="px-3 py-1.5 bg-white text-[#1a1a1a] text-xs font-semibold rounded-lg cursor-pointer hover:bg-zinc-100 active:scale-[0.98] transition-all">
+                      Cambiar
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-lg hover:bg-red-700 active:scale-[0.98] transition-all"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center border border-dashed border-[#e5e5e5] hover:border-zinc-400 bg-[#fafafa] hover:bg-[#fafafa]/50 rounded-xl p-6 cursor-pointer group transition-all h-48">
+                  <UploadCloud className="text-zinc-400 group-hover:text-zinc-600 mb-2 transition-colors" size={32} />
+                  <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-800">
+                    Haz clic para subir una imagen
+                  </span>
+                  <span className="text-[10px] text-zinc-400 mt-1">
+                    Formatos recomendados: PNG, JPG, WEBP (Max. 5MB)
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
 
           </div>

@@ -30,6 +30,8 @@ export default function Inventario() {
     modalMode,
     formData,
     setFormData,
+    imageFile,
+    setImageFile,
     submitting,
     handleOpenCreate,
     handleOpenEdit,
@@ -121,6 +123,8 @@ export default function Inventario() {
         mode={modalMode}
         formData={formData}
         setFormData={setFormData}
+        imageFile={imageFile}
+        setImageFile={setImageFile}
         onSubmit={handleSubmit}
         submitting={submitting}
       />
