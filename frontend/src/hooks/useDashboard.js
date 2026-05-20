@@ -6,15 +6,37 @@ import { Package, Settings } from 'lucide-react';
 export function useDashboard() {
   const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [empresaSlug, setEmpresaSlug] = useState('sustento-demo');
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    const getUserData = async () => {
+    const getEmpresaData = async () => {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       setUser(currentUser);
+      if (currentUser) {
+        // Obtener empresa_id de la tabla usuarios
+        const { data: usuarioData, error: userError } = await supabase
+          .from('usuarios')
+          .select('empresa_id')
+          .eq('id', currentUser.id)
+          .single();
+
+        if (!userError && usuarioData) {
+          // Obtener slug de la tabla empresas
+          const { data: empresaData, error: empresaError } = await supabase
+            .from('empresas')
+            .select('slug')
+            .eq('id', usuarioData.empresa_id)
+            .single();
+
+          if (!empresaError && empresaData) {
+            setEmpresaSlug(empresaData.slug);
+          }
+        }
+      }
     };
-    getUserData();
+    getEmpresaData();
   }, []);
 
   const handleCerrarSesion = async () => {
@@ -61,6 +83,7 @@ export function useDashboard() {
     handleCerrarSesion,
     navItems,
     isActive,
-    activePageTitle
+    activePageTitle,
+    empresaSlug
   };
 }

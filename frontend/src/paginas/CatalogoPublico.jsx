@@ -72,8 +72,8 @@ export default function CatalogoPublico() {
           }
         }
 
-        // Si no hay productos, cargar lista de demostración de alta calidad
-        if (productsData.length === 0) {
+        // Cargar lista de demostración de alta calidad solo para la tienda de demo
+        if (companyData.id === 'demo-id') {
           productsData = [
             {
               id: '1',
@@ -233,9 +233,19 @@ export default function CatalogoPublico() {
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
               
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-[#1a1a1a] rounded-xl flex items-center justify-center">
-                  <span className="text-white font-serif font-bold text-xl italic leading-none">S</span>
-                </div>
+                {company?.logo_url ? (
+                  <img 
+                    src={company.logo_url} 
+                    alt="Logo" 
+                    className="w-9 h-9 rounded-xl object-contain border border-[#e5e5e5]" 
+                  />
+                ) : (
+                  <div className="w-9 h-9 bg-[#1a1a1a] rounded-xl flex items-center justify-center">
+                    <span className="text-white font-serif font-bold text-xl italic leading-none">
+                      {company?.nombre ? company.nombre.charAt(0).toUpperCase() : 'S'}
+                    </span>
+                  </div>
+                )}
                 <span className="font-serif text-xl font-semibold tracking-wider uppercase">{company?.nombre}</span>
               </div>
 

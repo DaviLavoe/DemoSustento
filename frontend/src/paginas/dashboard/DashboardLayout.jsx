@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'react-router-dom';
-import { Menu, X, LogOut, User } from 'lucide-react';
+import { Menu, X, LogOut, User, ExternalLink } from 'lucide-react';
 import ClickSpark from '../../components/ClickSpark';
 import { useDashboard } from '../../hooks/useDashboard';
 
@@ -11,7 +11,8 @@ export default function DashboardLayout() {
     handleCerrarSesion,
     navItems,
     isActive,
-    activePageTitle
+    activePageTitle,
+    empresaSlug
   } = useDashboard();
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Usuario';
@@ -70,6 +71,21 @@ export default function DashboardLayout() {
                   </Link>
                 );
               })}
+              
+              {/* Enlace externo al catálogo público */}
+              <a
+                href={`/catalogo/${empresaSlug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium text-[#666666] hover:text-[#1a1a1a] hover:bg-[#fafafa] hover:translate-x-0.5 transition-all duration-200 group mt-4 border border-dashed border-[#e5e5e5]"
+              >
+                <span className="flex items-center gap-3.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                  Catálogo Público
+                </span>
+                <ExternalLink size={14} className="text-[#666666] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </a>
             </nav>
 
             {/* Footer del Sidebar: Usuario & Cerrar Sesión */}
