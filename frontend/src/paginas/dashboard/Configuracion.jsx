@@ -4,7 +4,9 @@ import { Settings, Phone, Palette, HelpCircle, UploadCloud, Loader2, CheckCircle
 import { supabase } from '../../config/supabase';
 
 export default function Configuracion() {
-  const { empresa, setEmpresa } = useOutletContext();
+  const context = useOutletContext();
+  const empresa = context?.empresa;
+  const setEmpresa = context?.setEmpresa || (() => {});
   const [nombre, setNombre] = useState('');
   const [colorPrimario, setColorPrimario] = useState('#1a1a1a');
   const [telefonoWhatsapp, setTelefonoWhatsapp] = useState('');

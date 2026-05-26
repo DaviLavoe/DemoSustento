@@ -7,6 +7,7 @@ export default function DashboardLayout() {
   const {
     user,
     empresa,
+    setEmpresa,
     sidebarOpen,
     setSidebarOpen,
     handleCerrarSesion,
