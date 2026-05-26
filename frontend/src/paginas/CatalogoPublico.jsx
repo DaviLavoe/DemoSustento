@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShoppingCart, Search, Filter, MessageSquare, ArrowUpRight, Grid, List, User } from 'lucide-react';
+import { ShoppingCart, Search, Filter, MessageSquare, ArrowUpRight, Grid, List, User, ArrowLeft, Loader2, Sparkles, Send } from 'lucide-react';
 import useSmoothScroll from '../hooks/useSmoothScroll';
 import PantallaCargaPublica from '../components/ui/PantallaCargaPublica';
 import Tilt3D from '../components/ui/Tilt3D';
 import { useClienteAuth } from '../hooks/useClienteAuth';
 import DrawerCuentaCliente from '../components/catalogo/DrawerCuentaCliente';
+import { supabase } from '../config/supabase';
 
 export default function CatalogoPublico() {
   const { slug } = useParams();
@@ -28,6 +29,27 @@ export default function CatalogoPublico() {
   // Portal de Clientes
   const clienteAuth = useClienteAuth();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+
+  // Lógica del Checkout
+  const [isCheckoutMode, setIsCheckoutMode] = useState(false);
+  const [checkoutNombre, setCheckoutNombre] = useState('');
+  const [checkoutTelefono, setCheckoutTelefono] = useState('');
+  const [checkoutDireccion, setCheckoutDireccion] = useState('');
+  const [checkoutSubmitting, setCheckoutSubmitting] = useState(false);
+  const [checkoutError, setCheckoutError] = useState(null);
+
+  // Pre-rellenar campos de checkout si el cliente tiene sesión
+  useEffect(() => {
+    if (clienteAuth.cliente) {
+      setCheckoutNombre(clienteAuth.cliente.nombre || '');
+      setCheckoutTelefono(clienteAuth.cliente.telefono || '');
+      setCheckoutDireccion(clienteAuth.cliente.direccion || '');
+    } else {
+      setCheckoutNombre('');
+      setCheckoutTelefono('');
+      setCheckoutDireccion('');
+    }
+  }, [clienteAuth.cliente, isCartOpen]);
 
   // Activar scroll suave con Lenis una vez que termine la carga de datos
   useSmoothScroll(!loading);
@@ -111,41 +133,93 @@ export default function CatalogoPublico() {
     }));
   };
 
-  // Generar link dinámico de WhatsApp y registrar pedido
-  const sendWhatsAppOrder = () => {
-    if (cart.length === 0 || !company) return;
-
-    let message = `*Nuevo pedido de ${company.nombre}*\n\n`;
-    let total = 0;
-
-    cart.forEach(item => {
-      const subtotal = item.precio * item.cantidad;
-      message += `• ${item.cantidad}x *${item.nombre}* - $${item.precio.toFixed(2)} (Subtotal: $${subtotal.toFixed(2)})\n`;
-      total += subtotal;
-    });
-
-    message += `\n*Total a pagar: $${total.toFixed(2)}*\n\n`;
-
-    // Si el cliente está autenticado, pre-rellenar datos de contacto y registrar pedido en el historial
-    if (clienteAuth.cliente) {
-      const { nombre, telefono, direccion } = clienteAuth.cliente;
-      message += `*Datos de Entrega:*\n`;
-      message += `👤 Cliente: ${nombre}\n`;
-      message += `📞 Teléfono: ${telefono || 'No registrado'}\n`;
-      message += `📍 Dirección: ${direccion || 'No registrada'}\n\n`;
-
-      // Registrar pedido localmente en el historial de Mi Cuenta
-      clienteAuth.registrarPedido(cart, total);
+  // Confirmar pedido (Checkout) y enviar a API + WhatsApp
+  const handleCheckoutSubmit = async (e) => {
+    e.preventDefault();
+    if (!checkoutNombre || !checkoutTelefono) {
+      setCheckoutError('El nombre y el teléfono móvil son requeridos.');
+      return;
     }
+    setCheckoutSubmitting(true);
+    setCheckoutError(null);
 
-    message += `_Por favor, confírmame disponibilidad y método de pago._`;
-    
-    const encodedText = encodeURIComponent(message);
-    const phoneNumber = company.telefono_whatsapp || '51999999999';
-    window.open(`https://wa.me/${phoneNumber}?text=${encodedText}`, '_blank');
-    
-    // Vaciar el carrito de compras local tras realizar el pedido
-    setCart([]);
+    try {
+      // 1. Preparar payload para la API
+      const payload = {
+        nombre_cliente: checkoutNombre,
+        telefono_cliente: checkoutTelefono,
+        total: totalCartPrice,
+        empresa_id: company.id,
+        productos: cart.map(item => ({
+          producto_id: item.id,
+          cantidad: item.cantidad,
+          precio_unitario: item.precio
+        }))
+      };
+
+      // 2. Comprobar sesión de cliente para enviar el token JWT
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers = { 'Content-Type': 'application/json' };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      // 3. Registrar el pedido en el Backend de Angelo
+      const res = await fetch('http://localhost:3000/api/pedidos', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payload)
+      });
+
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData.message || 'Error al registrar el pedido en el servidor');
+      }
+
+      const pedidoGuardado = resData.data?.pedido;
+
+      // 4. Registrar localmente en el historial si está logueado
+      if (clienteAuth.cliente) {
+        clienteAuth.registrarPedido(cart, totalCartPrice);
+      }
+
+      // 5. Redireccionar a WhatsApp dinámicamente con mensaje detallado
+      let message = `*Nuevo pedido de ${company.nombre}*\n`;
+      if (pedidoGuardado?.id) {
+        message += `*Pedido ID:* ${pedidoGuardado.id.substring(0, 8).toUpperCase()}\n`;
+      }
+      message += `----------------------------------------\n\n`;
+
+      cart.forEach(item => {
+        const subtotal = item.precio * item.cantidad;
+        message += `• ${item.cantidad}x *${item.nombre}* - $${item.precio.toFixed(2)} (Subtotal: $${subtotal.toFixed(2)})\n`;
+      });
+
+      message += `\n*Total a pagar: $${totalCartPrice.toFixed(2)}*\n\n`;
+      message += `*Datos de Entrega:*\n`;
+      message += `👤 Cliente: ${checkoutNombre}\n`;
+      message += `📞 Teléfono: ${checkoutTelefono}\n`;
+      if (checkoutDireccion) {
+        message += `📍 Dirección: ${checkoutDireccion}\n`;
+      }
+      message += `\n_Por favor, confírmame disponibilidad y método de pago._`;
+
+      const encodedText = encodeURIComponent(message);
+      const phoneNumber = company.telefono_whatsapp || '51999999999';
+
+      // 6. Resetear carrito y cerrar cajones
+      setCart([]);
+      setIsCartOpen(false);
+      setIsCheckoutMode(false);
+
+      // Abrir enlace de WhatsApp
+      window.open(`https://wa.me/${phoneNumber}?text=${encodedText}`, '_blank');
+    } catch (err) {
+      console.error('Error al completar pedido en API:', err);
+      setCheckoutError(err.message || 'Error interno al registrar el pedido en el servidor.');
+    } finally {
+      setCheckoutSubmitting(false);
+    }
   };
 
   // Reordenar productos desde el historial de pedidos de Mi Cuenta
@@ -421,7 +495,6 @@ export default function CatalogoPublico() {
                   </div>
                 ))}
               </div>
-
             )}
 
           </main>
@@ -430,87 +503,181 @@ export default function CatalogoPublico() {
           {isCartOpen && (
             <div className="fixed inset-0 z-50 overflow-hidden">
               <div 
-                onClick={() => setIsCartOpen(false)}
+                onClick={() => {
+                  setIsCartOpen(false);
+                  setIsCheckoutMode(false);
+                  setCheckoutError(null);
+                }}
                 className="absolute inset-0 bg-black/40 backdrop-blur-xs transition-opacity duration-300"
               />
 
               <div className="absolute inset-y-0 right-0 max-w-full flex">
                 <div className="w-screen max-w-md bg-white border-l border-[#e5e5e5] shadow-2xl flex flex-col justify-between animate-reveal h-full">
                   
-                  {/* Cabecera del Carrito */}
+                  {/* Cabecera del Carrito / Checkout */}
                   <div className="px-6 py-6 border-b border-[#e5e5e5] flex items-center justify-between bg-[#fafafa]">
-                    <div className="flex items-center gap-3">
-                      <ShoppingCart size={20} className="text-[#1a1a1a]" />
-                      <h2 className="font-serif text-xl font-bold text-[#1a1a1a]">Tu Carrito</h2>
-                      <span className="px-2 py-0.5 bg-[#1a1a1a]/5 text-[#1a1a1a] text-[10px] font-bold rounded-md">
-                        {totalCartItems}
-                      </span>
-                    </div>
+                    {isCheckoutMode ? (
+                      <button 
+                        onClick={() => {
+                          setIsCheckoutMode(false);
+                          setCheckoutError(null);
+                        }}
+                        className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-black font-semibold transition-colors"
+                      >
+                        <ArrowLeft size={16} /> Volver al Carrito
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <ShoppingCart size={20} className="text-[#1a1a1a]" />
+                        <h2 className="font-serif text-xl font-bold text-[#1a1a1a]">Tu Carrito</h2>
+                        <span className="px-2 py-0.5 bg-[#1a1a1a]/5 text-[#1a1a1a] text-[10px] font-bold rounded-md">
+                          {totalCartItems}
+                        </span>
+                      </div>
+                    )}
                     <button 
-                      onClick={() => setIsCartOpen(false)}
+                      onClick={() => {
+                        setIsCartOpen(false);
+                        setIsCheckoutMode(false);
+                        setCheckoutError(null);
+                      }}
                       className="px-3 py-1.5 rounded-xl border border-[#e5e5e5] hover:bg-[#fafafa] text-xs font-medium transition-all"
                     >
                       Cerrar
                     </button>
                   </div>
 
-                  {/* Listado de Productos en Carrito */}
-                  <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                    {cart.length === 0 ? (
-                      <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
-                        <ShoppingCart size={40} className="text-neutral-300 animate-bounce" />
-                        <p className="text-neutral-500 text-sm">Tu carrito está vacío.</p>
-                        <button 
-                          onClick={() => setIsCartOpen(false)}
-                          className="text-xs font-bold text-[#1a1a1a] underline underline-offset-4"
-                        >
-                          Explorar productos
-                        </button>
-                      </div>
-                    ) : (
-                      cart.map((item) => (
-                        <div key={item.id} className="flex gap-4 p-3 bg-[#fafafa] rounded-xl border border-[#e5e5e5]/50 animate-reveal">
-                          <img 
-                            src={item.imagen_url || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=600'} 
-                            alt={item.nombre} 
-                            className="w-16 h-16 object-cover rounded-lg bg-neutral-100 shrink-0"
-                          />
-                          <div className="flex-1 min-w-0 flex flex-col justify-between">
-                            <div>
-                              <h4 className="text-sm font-semibold text-[#1a1a1a] truncate">{item.nombre}</h4>
-                              <p className="text-neutral-500 text-xs font-bold font-mono mt-0.5">${item.precio.toFixed(2)}</p>
-                            </div>
-                            
-                            {/* Selector de cantidad */}
-                            <div className="flex items-center gap-2 mt-2">
-                              <button 
-                                onClick={() => updateQuantity(item.id, -1)}
-                                className="w-6 h-6 rounded-md border border-[#e5e5e5] hover:bg-white flex items-center justify-center text-xs font-bold active:scale-90 transition-all"
-                              >
-                                -
-                              </button>
-                              <span className="text-xs font-bold font-mono w-6 text-center">{item.cantidad}</span>
-                              <button 
-                                onClick={() => updateQuantity(item.id, 1)}
-                                className="w-6 h-6 rounded-md border border-[#e5e5e5] hover:bg-white flex items-center justify-center text-xs font-bold active:scale-90 transition-all"
-                              >
-                                +
-                              </button>
-                            </div>
+                  {/* Cuerpo del Drawer: Listado de Productos o Formulario de Checkout */}
+                  <div className="flex-1 overflow-y-auto p-6 scrollbar-none space-y-4">
+                    {isCheckoutMode ? (
+                      /* ================== FLUJO DE CHECKOUT ================== */
+                      <form onSubmit={handleCheckoutSubmit} className="space-y-5 animate-reveal">
+                        <div>
+                          <h3 className="font-serif text-lg font-bold text-[#1a1a1a]">Datos del Destinatario</h3>
+                          <p className="text-xs text-neutral-400 font-light mt-0.5">Ingresa los datos para registrar tu pedido y enviarlo por WhatsApp.</p>
+                        </div>
+
+                        {/* Alerta de Error en Checkout */}
+                        {checkoutError && (
+                          <div className="p-3.5 bg-red-50 border border-red-100 text-red-600 text-xs rounded-xl text-center">
+                            {checkoutError}
                           </div>
-                          
+                        )}
+
+                        <div className="space-y-3.5">
+                          {/* Campo Nombre */}
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[#1a1a1a]">Nombre Completo *</label>
+                            <input
+                              type="text"
+                              required
+                              value={checkoutNombre}
+                              onChange={(e) => setCheckoutNombre(e.target.value)}
+                              placeholder="Ej. Juan Pérez"
+                              className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                            />
+                          </div>
+
+                          {/* Campo Teléfono */}
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-xs font-semibold text-[#1a1a1a]">Teléfono Móvil *</label>
+                            <input
+                              type="tel"
+                              required
+                              value={checkoutTelefono}
+                              onChange={(e) => setCheckoutTelefono(e.target.value)}
+                              placeholder="Ej. +51 999 999 999"
+                              className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                            />
+                          </div>
+
+                          {/* Campo Dirección */}
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex justify-between items-baseline">
+                              <label className="text-xs font-semibold text-[#1a1a1a]">Dirección de Entrega</label>
+                              <span className="text-[10px] text-neutral-400">Opcional</span>
+                            </div>
+                            <textarea
+                              rows="3"
+                              value={checkoutDireccion}
+                              onChange={(e) => setCheckoutDireccion(e.target.value)}
+                              placeholder="Calle, Edificio, Referencias de entrega..."
+                              className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5] resize-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Resumen Compacto de Artículos */}
+                        <div className="p-4 bg-neutral-50 rounded-2xl border border-neutral-100 space-y-2.5">
+                          <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Resumen de Artículos</p>
+                          <div className="max-h-28 overflow-y-auto space-y-1.5 text-xs text-neutral-600">
+                            {cart.map((item) => (
+                              <div key={item.id} className="flex justify-between">
+                                <span>{item.cantidad}x {item.nombre}</span>
+                                <span className="font-mono text-neutral-400">${(item.precio * item.cantidad).toFixed(2)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </form>
+                    ) : (
+                      /* ================== LISTA DEL CARRITO ================== */
+                      cart.length === 0 ? (
+                        <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
+                          <ShoppingCart size={40} className="text-neutral-300 animate-bounce" />
+                          <p className="text-neutral-500 text-sm">Tu carrito está vacío.</p>
                           <button 
-                            onClick={() => removeFromCart(item.id)}
-                            className="text-neutral-400 hover:text-red-500 transition-colors text-xs font-semibold self-start"
+                            onClick={() => setIsCartOpen(false)}
+                            className="text-xs font-bold text-[#1a1a1a] underline underline-offset-4"
                           >
-                            Quitar
+                            Explorar productos
                           </button>
                         </div>
-                      ))
+                      ) : (
+                        cart.map((item) => (
+                          <div key={item.id} className="flex gap-4 p-3 bg-[#fafafa] rounded-xl border border-[#e5e5e5]/50 animate-reveal">
+                            <img 
+                              src={item.imagen_url || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=600'} 
+                              alt={item.nombre} 
+                              className="w-16 h-16 object-cover rounded-lg bg-neutral-100 shrink-0"
+                            />
+                            <div className="flex-1 min-w-0 flex flex-col justify-between">
+                              <div>
+                                <h4 className="text-sm font-semibold text-[#1a1a1a] truncate">{item.nombre}</h4>
+                                <p className="text-neutral-500 text-xs font-bold font-mono mt-0.5">${item.precio.toFixed(2)}</p>
+                              </div>
+                              
+                              {/* Selector de cantidad */}
+                              <div className="flex items-center gap-2 mt-2">
+                                <button 
+                                  onClick={() => updateQuantity(item.id, -1)}
+                                  className="w-6 h-6 rounded-md border border-[#e5e5e5] hover:bg-white flex items-center justify-center text-xs font-bold active:scale-90 transition-all"
+                                >
+                                  -
+                                </button>
+                                <span className="text-xs font-bold font-mono w-6 text-center">{item.cantidad}</span>
+                                <button 
+                                  onClick={() => updateQuantity(item.id, 1)}
+                                  className="w-6 h-6 rounded-md border border-[#e5e5e5] hover:bg-white flex items-center justify-center text-xs font-bold active:scale-90 transition-all"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                            
+                            <button 
+                              onClick={() => removeFromCart(item.id)}
+                              className="text-neutral-400 hover:text-red-500 transition-colors text-xs font-semibold self-start"
+                            >
+                              Quitar
+                            </button>
+                          </div>
+                        ))
+                      )
                     )}
                   </div>
 
-                  {/* Resumen & Botón Pedido WhatsApp */}
+                  {/* Resumen, Totales y Botones */}
                   {cart.length > 0 && (
                     <div className="p-6 border-t border-[#e5e5e5] bg-[#fafafa] space-y-4">
                       <div className="flex justify-between items-baseline">
@@ -518,16 +685,36 @@ export default function CatalogoPublico() {
                         <span className="font-serif text-2xl font-bold text-[#1a1a1a]">${totalCartPrice.toFixed(2)}</span>
                       </div>
                       
-                      <button
-                        onClick={sendWhatsAppOrder}
-                        className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/10 hover:shadow-emerald-600/20"
-                      >
-                        <MessageSquare size={16} />
-                        Enviar Pedido a WhatsApp
-                      </button>
+                      {isCheckoutMode ? (
+                        <button
+                          onClick={handleCheckoutSubmit}
+                          disabled={checkoutSubmitting}
+                          className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/10 hover:shadow-emerald-600/20 disabled:opacity-75 disabled:cursor-not-allowed"
+                        >
+                          {checkoutSubmitting ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" /> Registrando pedido...
+                            </>
+                          ) : (
+                            <>
+                              <Send size={16} /> Confirmar y Enviar Pedido
+                            </>
+                          )}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setIsCheckoutMode(true)}
+                          className="w-full py-3.5 bg-black text-white rounded-2xl text-sm font-semibold hover:bg-black/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/5"
+                        >
+                          <Sparkles size={16} />
+                          Proceder al Checkout
+                        </button>
+                      )}
                       
                       <p className="text-[10px] text-neutral-500 text-center leading-relaxed">
-                        Redirigirá a WhatsApp con la lista de tus productos seleccionados para acordar la compra con el negocio.
+                        {isCheckoutMode 
+                          ? 'Al confirmar, tu pedido será registrado de forma segura y se abrirá WhatsApp con los detalles.' 
+                          : 'Continúa al checkout para ingresar tus datos y confirmar el pedido.'}
                       </p>
                     </div>
                   )}

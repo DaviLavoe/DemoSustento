@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../config/supabase';
-import { Package, Settings } from 'lucide-react';
+import { Package, Settings, BarChart3 } from 'lucide-react';
 
 export function useDashboard() {
   const [user, setUser] = useState(null);
@@ -57,6 +57,11 @@ export function useDashboard() {
       icon: Package,
     },
     {
+      name: 'Reportes',
+      path: '/dashboard/reportes',
+      icon: BarChart3,
+    },
+    {
       name: 'Configuración',
       path: '/dashboard/configuracion',
       icon: Settings,
@@ -73,6 +78,7 @@ export function useDashboard() {
   const pageTitles = {
     '/dashboard': empresa?.nombre || 'Inventario',
     '/dashboard/inventario': empresa?.nombre || 'Inventario',
+    '/dashboard/reportes': 'Reportes y Analíticas',
     '/dashboard/configuracion': 'Configuración',
   };
 

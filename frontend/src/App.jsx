@@ -6,6 +6,7 @@ import DashboardLayout from './paginas/dashboard/DashboardLayout';
 import Inventario from './paginas/dashboard/Inventario';
 import Configuracion from './paginas/dashboard/Configuracion';
 import CatalogoPublico from './paginas/CatalogoPublico';
+import Reportes from './paginas/dashboard/Reportes';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         }>
           <Route index element={<Navigate to="inventario" replace />} />
           <Route path="inventario" element={<Inventario />} />
+          <Route path="reportes" element={<Reportes />} />
           <Route path="configuracion" element={<Configuracion />} />
         </Route>
         

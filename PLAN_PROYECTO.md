@@ -37,6 +37,7 @@ Este documento detalla el plan de trabajo de 5 semanas para construir la platafo
 - **Davi (Front):** Implementar la lógica del carrito de compras local en el Frontend y diseñar el panel de checkout. Generar dinámicamente el enlace de `wa.me`.
 - **Angelo (Back):** Crear un endpoint para registrar los "Pedidos" en la base de datos de la empresa antes de redirigir al usuario a WhatsApp, manteniendo un historial.
 - **Javicho (Data):** Diseñar la tabla de `pedidos` y `detalles_pedido`. Integrar estas tablas con el panel de administración (Front) para que la empresa vea sus pedidos.
+- **Estado:** ✅ Carrito de compras, Checkout pre-rellenado con sesión de cliente, registro de pedidos en base de datos API, redirección automatizada a WhatsApp y Dashboard con gráficos animados de Recharts completados al 100%.
 
 ### Semana 5: Pruebas, Refinamiento y Despliegue
 - **Davi (Front):** Pulir el diseño (*UI polish*), asegurar que el catálogo sea 100% *Mobile First*, y realizar pruebas de usabilidad.

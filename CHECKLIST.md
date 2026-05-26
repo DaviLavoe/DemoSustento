@@ -33,9 +33,9 @@
 - [x] **Javicho:** Crear tabla `clientes` y configurar políticas RLS de seguridad.
 
 ## Semana 4: Carrito, Checkout y Reportes Animados
-- [ ] **Davi:** Lógica del carrito de compras y checkout UI pre-rellenado.
-- [ ] **Davi:** Generar enlace `wa.me` dinámico.
-- [ ] **Davi:** Dashboard Admin: Reportes y estadísticas con gráficos animados (Recharts).
+- [x] **Davi:** Lógica del carrito de compras y checkout UI pre-rellenado.
+- [x] **Davi:** Generar enlace `wa.me` dinámico.
+- [x] **Davi:** Dashboard Admin: Reportes y estadísticas con gráficos animados (Recharts).
 - [x] **Angelo:** Endpoint para registrar pedidos y consultar analíticas de ventas.
 - [x] **Javicho:** Tablas `pedidos` y `detalles_pedido`.
 - [x] **Javicho:** Programar trigger de base de datos para reducción de stock automática.
