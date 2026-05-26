@@ -20,8 +20,8 @@
 - [x] **Davi:** UI del Dashboard (Layout principal).
 - [x] **Davi:** Vistas y modales de CRUD de productos.
 - [x] **Angelo:** Endpoints POST, PUT, DELETE para `productos`.
-- [ ] **Javicho:** Configurar Supabase Storage para imágenes.
-- [ ] **Javicho/Davi:** Integrar subida de imágenes.
+- [x] **Javicho:** Configurar Supabase Storage para imágenes.
+- [x] **Javicho/Davi:** Integrar subida de imágenes.
 - [x] **Javicho/Davi:** Solución al bug de carga infinita del inventario al desmontar/montar vistas (implementación de limpieza con AbortController).
 
 ## Semana 3: Micro-CMS, Catálogo Público y Cuentas de Clientes
@@ -29,8 +29,8 @@
 - [ ] **Davi:** Login/Registro de Clientes y panel de "Mi Cuenta" (Pedidos y Dirección).
 - [x] **Angelo/Javicho:** Endpoints públicos GET para datos de empresa y productos del catálogo (`/api/catalogo/:slug`).
 - [x] **Javicho:** Crear endpoint autenticado `/api/auth/me` para obtener los datos de la empresa del usuario activo de forma segura en el dashboard.
-- [ ] **Javicho:** Crear tabla `configuracion_catalogo`.
-- [ ] **Javicho:** Crear tabla `clientes` y configurar políticas RLS de seguridad.
+- [x] **Javicho:** Crear tabla `configuracion_catalogo`.
+- [x] **Javicho:** Crear tabla `clientes` y configurar políticas RLS de seguridad.
 
 ## Semana 4: Carrito, Checkout y Reportes Animados
 - [ ] **Davi:** Lógica del carrito de compras y checkout UI pre-rellenado.

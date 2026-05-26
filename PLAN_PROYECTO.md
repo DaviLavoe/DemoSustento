@@ -25,13 +25,13 @@ Este documento detalla el plan de trabajo de 5 semanas para construir la platafo
 - **Davi (Front):** Construir la UI del panel de administración (Dashboard): Tablas de inventario, y modales/formularios para crear, editar y eliminar productos. Corregir fallos de carga infinita utilizando controladores de aborto (`AbortController`) al desmontar las vistas del Dashboard.
 - **Angelo (Back):** Crear endpoints CRUD completos para el inventario (`POST`, `PUT`, `DELETE` en `/api/productos`).
 - **Javicho (Data):** Configurar Supabase *Storage* para el almacenamiento de imágenes de los productos. Apoyar a Davi en la integración de subida de archivos. Implementar el puente de autenticación seguro `/api/auth/me` para evitar el uso directo de Supabase REST en el front, solucionando fallas de API keys en cabeceras HTTP.
-- **Estado:** ✅ CRUD de productos básico y estabilidad del Dashboard completados.
+- **Estado:** ✅ CRUD de productos básico, estabilidad del Dashboard y subida de imágenes a Supabase Storage completados.
 
 ### Semana 3: Micro-CMS y Catálogo Público (Vitrina)
 - **Davi (Front):** Crear la vista pública del catálogo (`/catalogo/:slug-empresa`) con diseño dinámico. Resolver el slug dinámicamente y enlazar directamente el catálogo real desde la barra de navegación del Dashboard (con logos y nombres dinámicos).
 - **Angelo/Javicho (Back):** Crear endpoints públicos `/api/catalogo/:slug` para consultar los productos y metadatos de la empresa sin requerir JWT, delegando la consulta a Supabase desde el backend seguro.
 - **Javicho (Data):** Crear la tabla `configuracion_catalogo` en Supabase (para guardar colores, logo, y mensaje de WhatsApp de cada empresa). Crear la tabla de `clientes` y configurar políticas RLS para soportar cuentas de clientes.
-- **Estado:** ⏳ Catálogo digital dinámico básico completado y conectado de manera segura a la base de datos a través del API Backend. Pendiente la configuración avanzada de estilos y cuentas de clientes.
+- **Estado:** ⏳ Catálogo digital dinámico conectado de manera segura a la base de datos a través del API Backend. Creadas las tablas configuracion_catalogo y clientes con RLS. Pendiente desarrollo de UI en front para configuraciones y clientes.
 
 ### Semana 4: Carrito de Compras e Integración con WhatsApp
 - **Davi (Front):** Implementar la lógica del carrito de compras local en el Frontend y diseñar el panel de checkout. Generar dinámicamente el enlace de `wa.me`.
