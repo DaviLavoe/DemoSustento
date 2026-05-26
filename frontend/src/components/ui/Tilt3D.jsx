@@ -83,8 +83,8 @@ export default function Tilt3D({ children, maxTilt = 12, scale = 1.02, className
         }}
       />
       
-      {/* Contenedor del contenido que habilita el renderizado 3D para hijos con translateZ */}
-      <div style={{ transform: 'translateZ(20px)', transformStyle: 'preserve-3d' }} className="relative z-20 w-full h-full">
+      {/* Contenedor del contenido que habilita el renderizado 3D */}
+      <div style={{ transformStyle: 'preserve-3d' }} className="relative z-20 w-full h-full">
         {children}
       </div>
     </div>

@@ -46,9 +46,10 @@ export default function PantallaCargaPublica({ onComplete, nombreTienda = "Suste
 
       {/* Panel Principal (Negro o Gris muy Oscuro) */}
       <div 
-        className={`absolute inset-0 bg-neutral-950 flex flex-col justify-between p-10 sm:p-16 transition-transform duration-700 cubic-bezier(0.85, 0, 0.15, 1) pointer-events-auto`}
+        className={`absolute inset-0 bg-neutral-950 flex flex-col justify-between p-10 sm:p-16 transition-transform duration-700 cubic-bezier(0.85, 0, 0.15, 1)`}
         style={{ 
-          transform: isExiting ? 'translateY(-100%)' : 'translateY(0%)'
+          transform: isExiting ? 'translateY(-100%)' : 'translateY(0%)',
+          pointerEvents: isExiting ? 'none' : 'auto'
         }}
       >
         {/* Cabecera del Loader */}
