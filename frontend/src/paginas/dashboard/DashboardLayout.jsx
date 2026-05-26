@@ -39,9 +39,17 @@ export default function DashboardLayout() {
             {/* Header del Sidebar */}
             <div className="p-6 border-b border-[#e5e5e5] flex items-center justify-between">
               <Link to="/dashboard" className="flex items-center gap-3 group">
-                <div className="w-9 h-9 bg-[#1a1a1a] rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-105 shadow-md">
-                  <span className="text-white font-serif font-bold text-xl italic leading-none">{brandLetter}</span>
-                </div>
+                {empresa?.logo_url ? (
+                  <img 
+                    src={empresa.logo_url} 
+                    alt="Logo" 
+                    className="w-9 h-9 rounded-xl object-contain border border-[#e5e5e5] transition-all duration-200 group-hover:scale-105 shadow-sm" 
+                  />
+                ) : (
+                  <div className="w-9 h-9 bg-[#1a1a1a] rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-105 shadow-md">
+                    <span className="text-white font-serif font-bold text-xl italic leading-none">{brandLetter}</span>
+                  </div>
+                )}
                 <span className="text-[#1a1a1a] text-sm font-medium tracking-widest uppercase truncate max-w-[120px]">{brandName}</span>
               </Link>
               {/* Botón de cerrar sidebar en móvil */}
@@ -153,7 +161,7 @@ export default function DashboardLayout() {
             {/* Panel de Contenido Dinámico */}
             <main className="flex-1 overflow-y-auto p-6 md:p-8">
               <div className="max-w-7xl mx-auto h-full">
-                <Outlet />
+                <Outlet context={{ empresa, setEmpresa }} />
               </div>
             </main>
           </div>

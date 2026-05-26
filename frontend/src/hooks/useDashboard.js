@@ -95,6 +95,7 @@ export function useDashboard() {
   return {
     user,
     empresa,
+    setEmpresa,
     sidebarOpen,
     setSidebarOpen,
     handleCerrarSesion,
