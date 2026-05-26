@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShoppingCart, Search, Filter, MessageSquare, ArrowUpRight, Grid, List } from 'lucide-react';
+import { ShoppingCart, Search, Filter, MessageSquare, ArrowUpRight, Grid, List, User } from 'lucide-react';
 import useSmoothScroll from '../hooks/useSmoothScroll';
 import PantallaCargaPublica from '../components/ui/PantallaCargaPublica';
 import Tilt3D from '../components/ui/Tilt3D';
+import { useClienteAuth } from '../hooks/useClienteAuth';
+import DrawerCuentaCliente from '../components/catalogo/DrawerCuentaCliente';
 
 export default function CatalogoPublico() {
   const { slug } = useParams();
@@ -22,6 +24,10 @@ export default function CatalogoPublico() {
   const [viewMode, setViewMode] = useState('grid'); // grid | list
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Portal de Clientes
+  const clienteAuth = useClienteAuth();
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   // Activar scroll suave con Lenis una vez que termine la carga de datos
   useSmoothScroll(!loading);
@@ -105,7 +111,7 @@ export default function CatalogoPublico() {
     }));
   };
 
-  // Generar link dinámico de WhatsApp
+  // Generar link dinámico de WhatsApp y registrar pedido
   const sendWhatsAppOrder = () => {
     if (cart.length === 0 || !company) return;
 
@@ -118,11 +124,53 @@ export default function CatalogoPublico() {
       total += subtotal;
     });
 
-    message += `\n*Total a pagar: $${total.toFixed(2)}*\n\n_Por favor, confírmame disponibilidad y método de pago._`;
+    message += `\n*Total a pagar: $${total.toFixed(2)}*\n\n`;
+
+    // Si el cliente está autenticado, pre-rellenar datos de contacto y registrar pedido en el historial
+    if (clienteAuth.cliente) {
+      const { nombre, telefono, direccion } = clienteAuth.cliente;
+      message += `*Datos de Entrega:*\n`;
+      message += `👤 Cliente: ${nombre}\n`;
+      message += `📞 Teléfono: ${telefono || 'No registrado'}\n`;
+      message += `📍 Dirección: ${direccion || 'No registrada'}\n\n`;
+
+      // Registrar pedido localmente en el historial de Mi Cuenta
+      clienteAuth.registrarPedido(cart, total);
+    }
+
+    message += `_Por favor, confírmame disponibilidad y método de pago._`;
     
     const encodedText = encodeURIComponent(message);
     const phoneNumber = company.telefono_whatsapp || '51999999999';
     window.open(`https://wa.me/${phoneNumber}?text=${encodedText}`, '_blank');
+    
+    // Vaciar el carrito de compras local tras realizar el pedido
+    setCart([]);
+  };
+
+  // Reordenar productos desde el historial de pedidos de Mi Cuenta
+  const handleReorder = (orderProducts) => {
+    setCart(prev => {
+      let updatedCart = [...prev];
+      orderProducts.forEach(prod => {
+        const originalProduct = products.find(p => p.nombre.toLowerCase() === prod.nombre.toLowerCase());
+        if (originalProduct) {
+          const exists = updatedCart.find(item => item.id === originalProduct.id);
+          if (exists) {
+            updatedCart = updatedCart.map(item => 
+              item.id === originalProduct.id 
+                ? { ...item, cantidad: item.cantidad + prod.cantidad } 
+                : item
+            );
+          } else {
+            updatedCart.push({ ...originalProduct, cantidad: prod.cantidad });
+          }
+        }
+      });
+      return updatedCart;
+    });
+    setIsAccountOpen(false);
+    setIsCartOpen(true);
   };
 
   const totalCartPrice = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
@@ -177,19 +225,34 @@ export default function CatalogoPublico() {
                 <span className="font-serif text-xl font-semibold tracking-wider uppercase">{company?.nombre}</span>
               </div>
 
-              {/* Botón Carrito */}
-              <button 
-                onClick={() => setIsCartOpen(true)}
-                className="relative p-2.5 rounded-xl bg-white border border-[#e5e5e5] hover:bg-[#fafafa] active:scale-95 transition-all duration-200 shadow-sm flex items-center gap-2 group"
-              >
-                <ShoppingCart size={18} className="text-[#1a1a1a]" />
-                <span className="text-xs font-semibold font-mono hidden sm:inline">Carrito</span>
-                {totalCartItems > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#1a1a1a] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white animate-pulse">
-                    {totalCartItems}
+              <div className="flex items-center gap-3">
+                {/* Botón Mi Cuenta */}
+                <button 
+                  onClick={() => setIsAccountOpen(true)}
+                  className={`relative p-2.5 rounded-xl bg-white border border-[#e5e5e5] hover:bg-[#fafafa] active:scale-95 transition-all duration-200 shadow-sm flex items-center gap-2 group ${
+                    clienteAuth.cliente ? 'border-black bg-neutral-50' : ''
+                  }`}
+                >
+                  <User size={18} className={clienteAuth.cliente ? 'text-black' : 'text-neutral-500'} />
+                  <span className="text-xs font-semibold font-mono hidden sm:inline">
+                    {clienteAuth.cliente ? 'Mi Cuenta' : 'Ingresar'}
                   </span>
-                )}
-              </button>
+                </button>
+
+                {/* Botón Carrito */}
+                <button 
+                  onClick={() => setIsCartOpen(true)}
+                  className="relative p-2.5 rounded-xl bg-white border border-[#e5e5e5] hover:bg-[#fafafa] active:scale-95 transition-all duration-200 shadow-sm flex items-center gap-2 group"
+                >
+                  <ShoppingCart size={18} className="text-[#1a1a1a]" />
+                  <span className="text-xs font-semibold font-mono hidden sm:inline">Carrito</span>
+                  {totalCartItems > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#1a1a1a] text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white animate-pulse">
+                      {totalCartItems}
+                    </span>
+                  )}
+                </button>
+              </div>
 
             </div>
           </nav>
@@ -473,6 +536,14 @@ export default function CatalogoPublico() {
               </div>
             </div>
           )}
+
+          {/* 7. Drawer de Cuenta del Cliente (Login / Registro / Mi Cuenta) */}
+          <DrawerCuentaCliente
+            isOpen={isAccountOpen}
+            onClose={() => setIsAccountOpen(false)}
+            clienteAuth={clienteAuth}
+            onReorder={handleReorder}
+          />
 
         </div>
       )}
