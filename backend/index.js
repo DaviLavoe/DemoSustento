@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
 const productosRoutes = require('./routes/productos');
 const catalogoRoutes = require('./routes/catalogo');
 const authRoutes = require('./routes/auth');
+const pedidosRoutes = require('./routes/pedidos');
 
 // Rutas del API
 app.use('/api/productos', productosRoutes);
@@ -28,6 +29,8 @@ app.use('/api/productos', productosRoutes);
 app.use('/api/catalogo', catalogoRoutes);
 // Ruta de autenticación y perfil de usuario
 app.use('/api/auth', authRoutes);
+// Ruta de pedidos y analíticas
+app.use('/api/pedidos', pedidosRoutes);
 
 // Iniciar servidor
 app.listen(PORT, () => {

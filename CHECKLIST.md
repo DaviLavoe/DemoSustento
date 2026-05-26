@@ -36,9 +36,9 @@
 - [ ] **Davi:** Lógica del carrito de compras y checkout UI pre-rellenado.
 - [ ] **Davi:** Generar enlace `wa.me` dinámico.
 - [ ] **Davi:** Dashboard Admin: Reportes y estadísticas con gráficos animados (Recharts).
-- [ ] **Angelo:** Endpoint para registrar pedidos y consultar analíticas de ventas.
-- [ ] **Javicho:** Tablas `pedidos` y `detalles_pedido`.
-- [ ] **Javicho:** Programar trigger de base de datos para reducción de stock automática.
+- [x] **Angelo:** Endpoint para registrar pedidos y consultar analíticas de ventas.
+- [x] **Javicho:** Tablas `pedidos` y `detalles_pedido`.
+- [x] **Javicho:** Programar trigger de base de datos para reducción de stock automática.
 
 ## Semana 5: Pruebas, Refinamiento y Despliegue
 - [ ] **Davi:** Pulido UI/UX y Mobile First.
