@@ -191,8 +191,9 @@ export default function CatalogoPublico() {
       message += `----------------------------------------\n\n`;
 
       cart.forEach(item => {
-        const subtotal = item.precio * item.cantidad;
-        message += `• ${item.cantidad}x *${item.nombre}* - $${item.precio.toFixed(2)} (Subtotal: $${subtotal.toFixed(2)})\n`;
+        const itemPrecio = Number(item.precio);
+        const subtotal = itemPrecio * item.cantidad;
+        message += `• ${item.cantidad}x *${item.nombre}* - $${itemPrecio.toFixed(2)} (Subtotal: $${subtotal.toFixed(2)})\n`;
       });
 
       message += `\n*Total a pagar: $${totalCartPrice.toFixed(2)}*\n\n`;
@@ -247,8 +248,9 @@ export default function CatalogoPublico() {
     setIsCartOpen(true);
   };
 
-  const totalCartPrice = cart.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+  const totalCartPrice = cart.reduce((acc, item) => acc + (Number(item.precio) * item.cantidad), 0);
   const totalCartItems = cart.reduce((acc, item) => acc + item.cantidad, 0);
+  const primaryColor = company?.color_primario || '#1a1a1a';
 
   return (
     <div className="min-h-screen bg-[#fafafa] text-[#1a1a1a] font-sans">
@@ -276,7 +278,8 @@ export default function CatalogoPublico() {
 
       {/* Solo renderizar el catálogo cuando carguen los datos correctamente */}
       {!loading && !notFound && (
-        <div className="animate-reveal duration-1000">
+        <>
+          <div className="animate-reveal duration-1000">
           
           {/* 2. Barra de Navegación */}
           <nav className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-[#e5e5e5] z-30 transition-all duration-300">
@@ -368,9 +371,10 @@ export default function CatalogoPublico() {
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all duration-200 ${
                     selectedCategory === cat
-                      ? 'bg-[#1a1a1a] text-white shadow-md shadow-black/5'
+                      ? 'text-white shadow-md shadow-black/5'
                       : 'bg-white border border-[#e5e5e5] text-neutral-600 hover:text-[#1a1a1a] hover:bg-[#fafafa]'
                   }`}
+                  style={selectedCategory === cat ? { backgroundColor: primaryColor } : {}}
                 >
                   {cat}
                 </button>
@@ -445,7 +449,8 @@ export default function CatalogoPublico() {
                           </span>
                           <button
                             onClick={() => addToCart(product)}
-                            className="flex items-center gap-1.5 px-4 py-2.5 bg-[#1a1a1a] text-white hover:bg-black active:scale-95 text-xs font-semibold rounded-xl transition-all duration-200 group/btn shadow-md hover:shadow-lg shadow-black/5"
+                            className="flex items-center gap-1.5 px-4 py-2.5 text-white active:scale-95 text-xs font-semibold rounded-xl transition-all duration-200 group/btn shadow-md hover:shadow-lg shadow-black/5 filter hover:brightness-95"
+                            style={{ backgroundColor: primaryColor }}
                           >
                             Añadir
                             <ArrowUpRight size={14} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
@@ -487,7 +492,8 @@ export default function CatalogoPublico() {
                       <span className="font-serif text-lg font-bold text-[#1a1a1a]">${product.precio.toFixed(2)}</span>
                       <button
                         onClick={() => addToCart(product)}
-                        className="px-4 py-2.5 bg-[#1a1a1a] text-white hover:bg-black active:scale-95 text-xs font-semibold rounded-xl transition-all"
+                        className="px-4 py-2.5 text-white active:scale-95 text-xs font-semibold rounded-xl transition-all filter hover:brightness-95"
+                        style={{ backgroundColor: primaryColor }}
                       >
                         Añadir al Carrito
                       </button>
@@ -498,10 +504,11 @@ export default function CatalogoPublico() {
             )}
 
           </main>
+        </div>
 
           {/* 6. Cajón Flotante del Carrito (Drawer Lateral Animado) */}
           {isCartOpen && (
-            <div className="fixed inset-0 z-50 overflow-hidden">
+            <div className="fixed inset-0 z-[100] overflow-hidden">
               <div 
                 onClick={() => {
                   setIsCartOpen(false);
@@ -614,7 +621,7 @@ export default function CatalogoPublico() {
                             {cart.map((item) => (
                               <div key={item.id} className="flex justify-between">
                                 <span>{item.cantidad}x {item.nombre}</span>
-                                <span className="font-mono text-neutral-400">${(item.precio * item.cantidad).toFixed(2)}</span>
+                                <span className="font-mono text-neutral-400">${(Number(item.precio) * item.cantidad).toFixed(2)}</span>
                               </div>
                             ))}
                           </div>
@@ -644,7 +651,7 @@ export default function CatalogoPublico() {
                             <div className="flex-1 min-w-0 flex flex-col justify-between">
                               <div>
                                 <h4 className="text-sm font-semibold text-[#1a1a1a] truncate">{item.nombre}</h4>
-                                <p className="text-neutral-500 text-xs font-bold font-mono mt-0.5">${item.precio.toFixed(2)}</p>
+                                <p className="text-neutral-500 text-xs font-bold font-mono mt-0.5">${Number(item.precio).toFixed(2)}</p>
                               </div>
                               
                               {/* Selector de cantidad */}
@@ -704,7 +711,8 @@ export default function CatalogoPublico() {
                       ) : (
                         <button
                           onClick={() => setIsCheckoutMode(true)}
-                          className="w-full py-3.5 bg-black text-white rounded-2xl text-sm font-semibold hover:bg-black/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/5"
+                          className="w-full py-3.5 text-white rounded-2xl text-sm font-semibold filter hover:brightness-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/5"
+                          style={{ backgroundColor: primaryColor }}
                         >
                           <Sparkles size={16} />
                           Proceder al Checkout
@@ -732,7 +740,7 @@ export default function CatalogoPublico() {
             onReorder={handleReorder}
           />
 
-        </div>
+        </>
       )}
 
     </div>
