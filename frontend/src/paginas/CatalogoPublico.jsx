@@ -452,7 +452,7 @@ export default function CatalogoPublico() {
                             className="flex items-center gap-1.5 px-4 py-2.5 text-white active:scale-95 text-xs font-semibold rounded-xl transition-all duration-200 group/btn shadow-md hover:shadow-lg shadow-black/5 filter hover:brightness-95"
                             style={{ backgroundColor: primaryColor }}
                           >
-                            Añadir
+                            <span>Añadir</span>
                             <ArrowUpRight size={14} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
                           </button>
                         </div>
@@ -495,7 +495,7 @@ export default function CatalogoPublico() {
                         className="px-4 py-2.5 text-white active:scale-95 text-xs font-semibold rounded-xl transition-all filter hover:brightness-95"
                         style={{ backgroundColor: primaryColor }}
                       >
-                        Añadir al Carrito
+                        <span>Añadir al Carrito</span>
                       </button>
                     </div>
                   </div>
@@ -523,25 +523,29 @@ export default function CatalogoPublico() {
                   
                   {/* Cabecera del Carrito / Checkout */}
                   <div className="px-6 py-6 border-b border-[#e5e5e5] flex items-center justify-between bg-[#fafafa]">
-                    {isCheckoutMode ? (
-                      <button 
-                        onClick={() => {
-                          setIsCheckoutMode(false);
-                          setCheckoutError(null);
-                        }}
-                        className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-black font-semibold transition-colors"
-                      >
-                        <ArrowLeft size={16} /> Volver al Carrito
-                      </button>
-                    ) : (
-                      <div className="flex items-center gap-3">
-                        <ShoppingCart size={20} className="text-[#1a1a1a]" />
-                        <h2 className="font-serif text-xl font-bold text-[#1a1a1a]">Tu Carrito</h2>
-                        <span className="px-2 py-0.5 bg-[#1a1a1a]/5 text-[#1a1a1a] text-[10px] font-bold rounded-md">
-                          {totalCartItems}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center">
+                      {isCheckoutMode ? (
+                        <button 
+                          key="back-to-cart-btn"
+                          onClick={() => {
+                            setIsCheckoutMode(false);
+                            setCheckoutError(null);
+                          }}
+                          className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-black font-semibold transition-colors"
+                        >
+                          <ArrowLeft size={16} />
+                          <span>Volver al Carrito</span>
+                        </button>
+                      ) : (
+                        <div key="cart-header-title" className="flex items-center gap-3">
+                          <ShoppingCart size={20} className="text-[#1a1a1a]" />
+                          <h2 className="font-serif text-xl font-bold text-[#1a1a1a]">Tu Carrito</h2>
+                          <span className="px-2 py-0.5 bg-[#1a1a1a]/5 text-[#1a1a1a] text-[10px] font-bold rounded-md">
+                            {totalCartItems}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                     <button 
                       onClick={() => {
                         setIsCartOpen(false);
@@ -550,7 +554,7 @@ export default function CatalogoPublico() {
                       }}
                       className="px-3 py-1.5 rounded-xl border border-[#e5e5e5] hover:bg-[#fafafa] text-xs font-medium transition-all"
                     >
-                      Cerrar
+                      <span>Cerrar</span>
                     </button>
                   </div>
 
@@ -558,7 +562,7 @@ export default function CatalogoPublico() {
                   <div className="flex-1 overflow-y-auto p-6 scrollbar-none space-y-4">
                     {isCheckoutMode ? (
                       /* ================== FLUJO DE CHECKOUT ================== */
-                      <form onSubmit={handleCheckoutSubmit} className="space-y-5 animate-reveal">
+                      <form key="checkout-form" onSubmit={handleCheckoutSubmit} className="space-y-5 animate-reveal">
                         <div>
                           <h3 className="font-serif text-lg font-bold text-[#1a1a1a]">Datos del Destinatario</h3>
                           <p className="text-xs text-neutral-400 font-light mt-0.5">Ingresa los datos para registrar tu pedido y enviarlo por WhatsApp.</p>
@@ -629,58 +633,60 @@ export default function CatalogoPublico() {
                       </form>
                     ) : (
                       /* ================== LISTA DEL CARRITO ================== */
-                      cart.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
-                          <ShoppingCart size={40} className="text-neutral-300 animate-bounce" />
-                          <p className="text-neutral-500 text-sm">Tu carrito está vacío.</p>
-                          <button 
-                            onClick={() => setIsCartOpen(false)}
-                            className="text-xs font-bold text-[#1a1a1a] underline underline-offset-4"
-                          >
-                            Explorar productos
-                          </button>
-                        </div>
-                      ) : (
-                        cart.map((item) => (
-                          <div key={item.id} className="flex gap-4 p-3 bg-[#fafafa] rounded-xl border border-[#e5e5e5]/50 animate-reveal">
-                            <img 
-                              src={item.imagen_url || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=600'} 
-                              alt={item.nombre} 
-                              className="w-16 h-16 object-cover rounded-lg bg-neutral-100 shrink-0"
-                            />
-                            <div className="flex-1 min-w-0 flex flex-col justify-between">
-                              <div>
-                                <h4 className="text-sm font-semibold text-[#1a1a1a] truncate">{item.nombre}</h4>
-                                <p className="text-neutral-500 text-xs font-bold font-mono mt-0.5">${Number(item.precio).toFixed(2)}</p>
-                              </div>
-                              
-                              {/* Selector de cantidad */}
-                              <div className="flex items-center gap-2 mt-2">
-                                <button 
-                                  onClick={() => updateQuantity(item.id, -1)}
-                                  className="w-6 h-6 rounded-md border border-[#e5e5e5] hover:bg-white flex items-center justify-center text-xs font-bold active:scale-90 transition-all"
-                                >
-                                  -
-                                </button>
-                                <span className="text-xs font-bold font-mono w-6 text-center">{item.cantidad}</span>
-                                <button 
-                                  onClick={() => updateQuantity(item.id, 1)}
-                                  className="w-6 h-6 rounded-md border border-[#e5e5e5] hover:bg-white flex items-center justify-center text-xs font-bold active:scale-90 transition-all"
-                                >
-                                  +
-                                </button>
-                              </div>
-                            </div>
-                            
+                      <div key="cart-items-list" className="space-y-4">
+                        {cart.length === 0 ? (
+                          <div className="h-full flex flex-col items-center justify-center gap-4 text-center">
+                            <ShoppingCart size={40} className="text-neutral-300 animate-bounce" />
+                            <p className="text-neutral-500 text-sm">Tu carrito está vacío.</p>
                             <button 
-                              onClick={() => removeFromCart(item.id)}
-                              className="text-neutral-400 hover:text-red-500 transition-colors text-xs font-semibold self-start"
+                              onClick={() => setIsCartOpen(false)}
+                              className="text-xs font-bold text-[#1a1a1a] underline underline-offset-4"
                             >
-                              Quitar
+                              Explorar productos
                             </button>
                           </div>
-                        ))
-                      )
+                        ) : (
+                          cart.map((item) => (
+                            <div key={item.id} className="flex gap-4 p-3 bg-[#fafafa] rounded-xl border border-[#e5e5e5]/50 animate-reveal">
+                              <img 
+                                src={item.imagen_url || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=600'} 
+                                alt={item.nombre} 
+                                className="w-16 h-16 object-cover rounded-lg bg-neutral-100 shrink-0"
+                              />
+                              <div className="flex-1 min-w-0 flex flex-col justify-between">
+                                <div>
+                                  <h4 className="text-sm font-semibold text-[#1a1a1a] truncate">{item.nombre}</h4>
+                                  <p className="text-neutral-500 text-xs font-bold font-mono mt-0.5">${Number(item.precio).toFixed(2)}</p>
+                                </div>
+                                
+                                {/* Selector de cantidad */}
+                                <div className="flex items-center gap-2 mt-2">
+                                  <button 
+                                    onClick={() => updateQuantity(item.id, -1)}
+                                    className="w-6 h-6 rounded-md border border-[#e5e5e5] hover:bg-white flex items-center justify-center text-xs font-bold active:scale-90 transition-all"
+                                  >
+                                    -
+                                  </button>
+                                  <span className="text-xs font-bold font-mono w-6 text-center">{item.cantidad}</span>
+                                  <button 
+                                    onClick={() => updateQuantity(item.id, 1)}
+                                    className="w-6 h-6 rounded-md border border-[#e5e5e5] hover:bg-white flex items-center justify-center text-xs font-bold active:scale-90 transition-all"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              </div>
+                              
+                              <button 
+                                onClick={() => removeFromCart(item.id)}
+                                className="text-neutral-400 hover:text-red-500 transition-colors text-xs font-semibold self-start"
+                              >
+                                Quitar
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -688,42 +694,52 @@ export default function CatalogoPublico() {
                   {cart.length > 0 && (
                     <div className="p-6 border-t border-[#e5e5e5] bg-[#fafafa] space-y-4">
                       <div className="flex justify-between items-baseline">
-                        <span className="text-neutral-500 text-sm">Total Estimado</span>
-                        <span className="font-serif text-2xl font-bold text-[#1a1a1a]">${totalCartPrice.toFixed(2)}</span>
+                        <span className="text-neutral-500 text-sm"><span>Total Estimado</span></span>
+                        <span className="font-serif text-2xl font-bold text-[#1a1a1a]"><span>$</span>{totalCartPrice.toFixed(2)}</span>
                       </div>
                       
-                      {isCheckoutMode ? (
-                        <button
-                          onClick={handleCheckoutSubmit}
-                          disabled={checkoutSubmitting}
-                          className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/10 hover:shadow-emerald-600/20 disabled:opacity-75 disabled:cursor-not-allowed"
-                        >
-                          {checkoutSubmitting ? (
-                            <>
-                              <Loader2 size={16} className="animate-spin" /> Registrando pedido...
-                            </>
-                          ) : (
-                            <>
-                              <Send size={16} /> Confirmar y Enviar Pedido
-                            </>
-                          )}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setIsCheckoutMode(true)}
-                          className="w-full py-3.5 text-white rounded-2xl text-sm font-semibold filter hover:brightness-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/5"
-                          style={{ backgroundColor: primaryColor }}
-                        >
-                          <Sparkles size={16} />
-                          Proceder al Checkout
-                        </button>
-                      )}
-                      
-                      <p className="text-[10px] text-neutral-500 text-center leading-relaxed">
-                        {isCheckoutMode 
-                          ? 'Al confirmar, tu pedido será registrado de forma segura y se abrirá WhatsApp con los detalles.' 
-                          : 'Continúa al checkout para ingresar tus datos y confirmar el pedido.'}
-                      </p>
+                      <div className="space-y-4">
+                        {isCheckoutMode ? (
+                          <button
+                            key="confirm-order-btn"
+                            onClick={handleCheckoutSubmit}
+                            disabled={checkoutSubmitting}
+                            className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl text-sm font-semibold hover:bg-emerald-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/10 hover:shadow-emerald-600/20 disabled:opacity-75 disabled:cursor-not-allowed"
+                          >
+                            {checkoutSubmitting ? (
+                              <span className="flex items-center justify-center gap-2">
+                                <Loader2 size={16} className="animate-spin" />
+                                <span>Registrando pedido...</span>
+                              </span>
+                            ) : (
+                              <span className="flex items-center justify-center gap-2">
+                                <Send size={16} />
+                                <span>Confirmar y Enviar Pedido</span>
+                              </span>
+                            )}
+                          </button>
+                        ) : (
+                          <button
+                            key="proceed-checkout-btn"
+                            onClick={() => setIsCheckoutMode(true)}
+                            className="w-full py-3.5 text-white rounded-2xl text-sm font-semibold filter hover:brightness-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-black/5"
+                            style={{ backgroundColor: primaryColor }}
+                          >
+                            <Sparkles size={16} />
+                            <span>Proceder al Checkout</span>
+                          </button>
+                        )}
+                        
+                        {isCheckoutMode ? (
+                          <p key="checkout-desc" className="text-[10px] text-neutral-500 text-center leading-relaxed">
+                            <span>Al confirmar, tu pedido será registrado de forma segura y se abrirá WhatsApp con los detalles.</span>
+                          </p>
+                        ) : (
+                          <p key="cart-desc" className="text-[10px] text-neutral-500 text-center leading-relaxed">
+                            <span>Continúa al checkout para ingresar tus datos y confirmar el pedido.</span>
+                          </p>
+                        )}
+                      </div>
                     </div>
                   )}
 

@@ -213,7 +213,7 @@ export default function DrawerCuentaCliente({
                           disabled={submitting}
                           className="px-3.5 py-2 rounded-xl bg-black text-white hover:bg-black/90 text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
                         >
-                          {submitting ? 'Guardando...' : <>Guardar Cambios</>}
+                          {submitting ? <span>Guardando...</span> : <span>Guardar Cambios</span>}
                         </button>
                       </div>
                     </form>
@@ -290,7 +290,7 @@ export default function DrawerCuentaCliente({
                               className="text-[11px] font-bold text-black border border-black hover:bg-black hover:text-white px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 active:scale-95"
                             >
                               <ShoppingBag size={12} />
-                              Reordenar
+                              <span>Reordenar</span>
                             </button>
                           </div>
                         </div>

@@ -86,3 +86,34 @@ body {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* Forzar color de texto y placeholders en campos de entrada para evitar textos invisibles/blancos */
+input:not([type="color"]), textarea, select {
+  color: #1a1a1a !important;
+}
+
+/* Asegurar estilo para navegadores con modo oscuro forzado o autofill */
+input:not([type="color"])::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  color: #737373 !important;
+  opacity: 1 !important;
+}
+
+input:not([type="color"])::-moz-placeholder,
+textarea::-moz-placeholder {
+  color: #737373 !important;
+  opacity: 1 !important;
+}
+
+input:not([type="color"])::-ms-input-placeholder,
+textarea::-ms-input-placeholder {
+  color: #737373 !important;
+  opacity: 1 !important;
+}
+
+input:not([type="color"])::placeholder,
+textarea::placeholder {
+  color: #737373 !important;
+  opacity: 1 !important;
+}
+
