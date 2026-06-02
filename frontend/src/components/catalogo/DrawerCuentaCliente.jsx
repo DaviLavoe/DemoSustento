@@ -175,7 +175,7 @@ export default function DrawerCuentaCliente({
                             required
                             value={editNombre}
                             onChange={(e) => setEditNombre(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-white border border-[#e5e5e5] rounded-xl text-xs text-[#1a1a1a] focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                            className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-xl text-base md:text-sm text-[#1a1a1a] focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
@@ -185,7 +185,7 @@ export default function DrawerCuentaCliente({
                             required
                             value={editTelefono}
                             onChange={(e) => setEditTelefono(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-white border border-[#e5e5e5] rounded-xl text-xs text-[#1a1a1a] focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                            className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-xl text-base md:text-sm text-[#1a1a1a] focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                           />
                         </div>
                         <div className="flex flex-col gap-1.5">
@@ -195,7 +195,7 @@ export default function DrawerCuentaCliente({
                             required
                             value={editDireccion}
                             onChange={(e) => setEditDireccion(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-white border border-[#e5e5e5] rounded-xl text-xs text-[#1a1a1a] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-none"
+                            className="w-full px-4 py-3 bg-white border border-[#e5e5e5] rounded-xl text-base md:text-sm text-[#1a1a1a] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-none"
                             placeholder="Calle, Número, Distrito / Ciudad"
                           />
                         </div>
@@ -351,7 +351,7 @@ export default function DrawerCuentaCliente({
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="nombre@ejemplo.com"
-                            className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
                           />
                         </div>
                       </div>
@@ -366,7 +366,7 @@ export default function DrawerCuentaCliente({
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
-                            className="w-full pl-10 pr-12 py-2.5 bg-neutral-50 border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                            className="w-full pl-10 pr-12 py-3 bg-neutral-50 border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
                           />
                           <button
                             type="button"
@@ -401,7 +401,7 @@ export default function DrawerCuentaCliente({
                             value={nombre}
                             onChange={(e) => setNombre(e.target.value)}
                             placeholder="Tu nombre y apellido"
-                            className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
                           />
                         </div>
                       </div>
@@ -416,7 +416,7 @@ export default function DrawerCuentaCliente({
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="nombre@ejemplo.com"
-                            className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
                           />
                         </div>
                       </div>
@@ -432,12 +432,12 @@ export default function DrawerCuentaCliente({
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Mínimo 6 caracteres"
                             minLength={6}
-                            className="w-full pl-10 pr-12 py-2.5 bg-neutral-50 border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                            className="w-full pl-10 pr-12 py-3 bg-neutral-50 border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black focus:outline-none"
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#a1a1aa] hover:text-[#1a1a1a] transition-colors focus:outline-none"
                           >
                             {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                           </button>
@@ -454,7 +454,7 @@ export default function DrawerCuentaCliente({
                             value={telefono}
                             onChange={(e) => setTelefono(e.target.value)}
                             placeholder="Ej. +51 999 999 999"
-                            className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
                           />
                         </div>
                       </div>
@@ -469,7 +469,7 @@ export default function DrawerCuentaCliente({
                             value={direccion}
                             onChange={(e) => setDireccion(e.target.value)}
                             placeholder="Calle, Edificio, Referencia..."
-                            className="w-full pl-10 pr-4 py-2.5 bg-neutral-50 border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5] resize-none"
+                            className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5] resize-none"
                           />
                         </div>
                       </div>

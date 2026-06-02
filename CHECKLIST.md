@@ -41,6 +41,6 @@
 - [x] **Javicho:** Programar trigger de base de datos para reducción de stock automática.
 
 ## Semana 5: Pruebas, Refinamiento y Despliegue
-- [ ] **Davi:** Pulido UI/UX y Mobile First.
+- [x] **Davi:** Pulido UI/UX y Mobile First.
 - [ ] **Angelo:** Manejo de excepciones y refactorización.
 - [ ] **Javicho:** Despliegues en Vercel, Render y pruebas de seguridad en Supabase.

@@ -74,70 +74,159 @@ export default function TablaProductos({
             <p className="text-xs text-[#a1a1aa] max-w-xs mx-auto">Comienza agregando un nuevo artículo a tu inventario utilizando el botón superior.</p>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#fafafa] border-b border-[#e5e5e5]">
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] w-20">Imagen</th>
-                <th onClick={() => onSort('nombre')} className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] cursor-pointer hover:text-[#1a1a1a] transition-colors select-none">
-                  <span className="flex items-center gap-1.5">
-                    Producto
-                    <ArrowUpDown size={12} className="opacity-50" />
-                  </span>
-                </th>
-                <th onClick={() => onSort('categoria')} className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] cursor-pointer hover:text-[#1a1a1a] transition-colors select-none">
-                  <span className="flex items-center gap-1.5">
-                    Categoría
-                    <ArrowUpDown size={12} className="opacity-50" />
-                  </span>
-                </th>
-                <th onClick={() => onSort('precio')} className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] cursor-pointer hover:text-[#1a1a1a] transition-colors select-none text-right">
-                  <span className="flex items-center gap-1.5 justify-end">
-                    Precio
-                    <ArrowUpDown size={12} className="opacity-50" />
-                  </span>
-                </th>
-                <th onClick={() => onSort('stock')} className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] cursor-pointer hover:text-[#1a1a1a] transition-colors select-none text-center">
-                  <span className="flex items-center gap-1.5 justify-center">
-                    Stock
-                    <ArrowUpDown size={12} className="opacity-50" />
-                  </span>
-                </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] text-center w-24">Estado</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] text-right w-24">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#e5e5e5]">
+          <>
+            {/* Vista Tabla para Desktop (md o superior) */}
+            <div className="hidden md:block">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-[#fafafa] border-b border-[#e5e5e5]">
+                    <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] w-20">Imagen</th>
+                    <th onClick={() => onSort('nombre')} className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] cursor-pointer hover:text-[#1a1a1a] transition-colors select-none">
+                      <span className="flex items-center gap-1.5">
+                        Producto
+                        <ArrowUpDown size={12} className="opacity-50" />
+                      </span>
+                    </th>
+                    <th onClick={() => onSort('categoria')} className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] cursor-pointer hover:text-[#1a1a1a] transition-colors select-none">
+                      <span className="flex items-center gap-1.5">
+                        Categoría
+                        <ArrowUpDown size={12} className="opacity-50" />
+                      </span>
+                    </th>
+                    <th onClick={() => onSort('precio')} className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] cursor-pointer hover:text-[#1a1a1a] transition-colors select-none text-right">
+                      <span className="flex items-center gap-1.5 justify-end">
+                        Precio
+                        <ArrowUpDown size={12} className="opacity-50" />
+                      </span>
+                    </th>
+                    <th onClick={() => onSort('stock')} className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] cursor-pointer hover:text-[#1a1a1a] transition-colors select-none text-center">
+                      <span className="flex items-center gap-1.5 justify-center">
+                        Stock
+                        <ArrowUpDown size={12} className="opacity-50" />
+                      </span>
+                    </th>
+                    <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] text-center w-24">Estado</th>
+                    <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-[#666666] text-right w-24">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#e5e5e5]">
+                  {productos.map((producto) => (
+                    <tr key={producto.id} className="hover:bg-[#fafafa]/50 transition-colors group">
+                      {/* Imagen */}
+                      <td className="px-6 py-3.5">
+                        <div className="w-12 h-12 rounded-xl border border-[#e5e5e5] bg-[#fafafa] flex items-center justify-center overflow-hidden">
+                          {producto.imagen_url ? (
+                            <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
+                          ) : (
+                            <ImageIcon size={18} className="text-[#a1a1aa]" />
+                          )}
+                        </div>
+                      </td>
+                      {/* Nombre & Descripción */}
+                      <td className="px-6 py-3.5">
+                        <div className="max-w-[280px]">
+                          <h4 className="text-sm font-semibold text-[#1a1a1a] truncate">{producto.nombre}</h4>
+                          <p className="text-xs text-[#666666] truncate mt-0.5">{producto.descripcion || 'Sin descripción'}</p>
+                        </div>
+                      </td>
+                      {/* Categoría */}
+                      <td className="px-6 py-3.5">
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#fafafa] border border-[#e5e5e5] text-[#666666]">
+                          {producto.categoria || 'Sin Categoría'}
+                        </span>
+                      </td>
+                      {/* Precio */}
+                      <td className="px-6 py-3.5 text-right font-medium text-[#1a1a1a]">
+                        ${parseFloat(producto.precio).toFixed(2)}
+                      </td>
+                      {/* Stock */}
+                      <td className="px-6 py-3.5 text-center">
+                        <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-semibold ${
+                          producto.stock === 0 
+                            ? 'bg-red-50 text-red-700 border border-red-100'
+                            : producto.stock <= 5 
+                            ? 'bg-amber-50 text-amber-700 border border-amber-100'
+                            : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                        }`}>
+                          {producto.stock} uds
+                        </span>
+                      </td>
+                      {/* Estado */}
+                      <td className="px-6 py-3.5 text-center">
+                        <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
+                          producto.activo ? 'text-emerald-600' : 'text-[#666666]'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            producto.activo ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'
+                          }`}></span>
+                          {producto.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      {/* Acciones */}
+                      <td className="px-6 py-3.5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => onEdit(producto)}
+                            className="p-1.5 rounded-lg border border-transparent hover:border-[#e5e5e5] hover:bg-white text-[#666666] hover:text-[#1a1a1a] transition-all"
+                            title="Editar"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                          <button
+                            onClick={() => onDelete(producto)}
+                            className="p-1.5 rounded-lg border border-transparent hover:border-red-100 hover:bg-red-50 text-[#666666] hover:text-red-600 transition-all"
+                            title="Eliminar"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Vista Tarjetas para Móviles (menores a md) */}
+            <div className="block md:hidden divide-y divide-[#e5e5e5]">
               {productos.map((producto) => (
-                <tr key={producto.id} className="hover:bg-[#fafafa]/50 transition-colors group">
-                  {/* Imagen */}
-                  <td className="px-6 py-3.5">
-                    <div className="w-12 h-12 rounded-xl border border-[#e5e5e5] bg-[#fafafa] flex items-center justify-center overflow-hidden">
+                <div key={producto.id} className="p-5 space-y-4 hover:bg-[#fafafa]/50 transition-colors">
+                  <div className="flex items-center gap-4">
+                    {/* Imagen del Producto */}
+                    <div className="w-14 h-14 rounded-xl border border-[#e5e5e5] bg-[#fafafa] flex items-center justify-center overflow-hidden shrink-0">
                       {producto.imagen_url ? (
                         <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
                       ) : (
-                        <ImageIcon size={18} className="text-[#a1a1aa]" />
+                        <ImageIcon size={20} className="text-[#a1a1aa]" />
                       )}
                     </div>
-                  </td>
-                  {/* Nombre & Descripción */}
-                  <td className="px-6 py-3.5">
-                    <div className="max-w-[280px]">
-                      <h4 className="text-sm font-semibold text-[#1a1a1a] truncate">{producto.nombre}</h4>
+                    {/* Información General */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <h4 className="text-sm font-semibold text-[#1a1a1a] truncate">{producto.nombre}</h4>
+                        <span className="font-mono text-sm font-bold text-[#1a1a1a] shrink-0">
+                          ${parseFloat(producto.precio).toFixed(2)}
+                        </span>
+                      </div>
                       <p className="text-xs text-[#666666] truncate mt-0.5">{producto.descripcion || 'Sin descripción'}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#fafafa] border border-[#e5e5e5] text-[#666666]">
+                          {producto.categoria || 'Sin Categoría'}
+                        </span>
+                        <span className={`inline-flex items-center gap-1.5 text-[10px] font-medium ${
+                          producto.activo ? 'text-emerald-600' : 'text-[#666666]'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            producto.activo ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'
+                          }`}></span>
+                          {producto.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </div>
                     </div>
-                  </td>
-                  {/* Categoría */}
-                  <td className="px-6 py-3.5">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#fafafa] border border-[#e5e5e5] text-[#666666]">
-                      {producto.categoria || 'Sin Categoría'}
-                    </span>
-                  </td>
-                  {/* Precio */}
-                  <td className="px-6 py-3.5 text-right font-medium text-[#1a1a1a]">
-                    ${parseFloat(producto.precio).toFixed(2)}
-                  </td>
-                  {/* Stock */}
-                  <td className="px-6 py-3.5 text-center">
+                  </div>
+
+                  {/* Detalles de Stock y Acciones */}
+                  <div className="flex items-center justify-between pt-3 border-t border-[#e5e5e5]/40">
                     <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-semibold ${
                       producto.stock === 0 
                         ? 'bg-red-50 text-red-700 border border-red-100'
@@ -145,43 +234,30 @@ export default function TablaProductos({
                         ? 'bg-amber-50 text-amber-700 border border-amber-100'
                         : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
                     }`}>
-                      {producto.stock} uds
+                      Stock: {producto.stock} uds
                     </span>
-                  </td>
-                  {/* Estado */}
-                  <td className="px-6 py-3.5 text-center">
-                    <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-                      producto.activo ? 'text-emerald-600' : 'text-[#666666]'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        producto.activo ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'
-                      }`}></span>
-                      {producto.activo ? 'Activo' : 'Inactivo'}
-                    </span>
-                  </td>
-                  {/* Acciones */}
-                  <td className="px-6 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                    
+                    <div className="flex items-center gap-3">
                       <button
                         onClick={() => onEdit(producto)}
-                        className="p-1.5 rounded-lg border border-transparent hover:border-[#e5e5e5] hover:bg-white text-[#666666] hover:text-[#1a1a1a] transition-all"
-                        title="Editar"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e5e5e5] bg-white text-xs font-medium text-[#1a1a1a] hover:bg-[#fafafa] active:scale-95 transition-all"
                       >
-                        <Edit2 size={15} />
+                        <Edit2 size={13} />
+                        Editar
                       </button>
                       <button
                         onClick={() => onDelete(producto)}
-                        className="p-1.5 rounded-lg border border-transparent hover:border-red-100 hover:bg-red-50 text-[#666666] hover:text-red-600 transition-all"
-                        title="Eliminar"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-100 bg-red-50 text-xs font-medium text-red-600 hover:bg-red-100 active:scale-95 transition-all"
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={13} />
+                        Eliminar
                       </button>
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>

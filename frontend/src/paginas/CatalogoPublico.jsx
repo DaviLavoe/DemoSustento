@@ -335,14 +335,14 @@ export default function CatalogoPublico() {
           </nav>
 
           {/* 3. Header de la Tienda (Hero) */}
-          <header className="max-w-7xl mx-auto px-6 py-16 sm:py-24 flex flex-col items-start gap-6 border-b border-[#e5e5e5]">
+          <header className="max-w-7xl mx-auto px-6 py-12 sm:py-24 flex flex-col items-start gap-6 border-b border-[#e5e5e5]">
             <span className="px-3.5 py-1 bg-[#1a1a1a]/5 text-[#1a1a1a] text-[10px] font-semibold tracking-widest uppercase rounded-full animate-reveal">
               Catálogo de Exposición
             </span>
-            <h1 className="font-serif text-5xl sm:text-7xl font-bold tracking-tight text-[#1a1a1a] max-w-3xl leading-[1.05] animate-reveal delay-100">
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-[#1a1a1a] max-w-3xl leading-[1.05] animate-reveal delay-100">
               {company?.nombre}
             </h1>
-            <p className="text-neutral-500 text-lg sm:text-xl font-light max-w-2xl leading-relaxed animate-reveal delay-200">
+            <p className="text-neutral-500 text-base sm:text-xl font-light max-w-2xl leading-relaxed animate-reveal delay-200">
               {company?.descripcion}
             </p>
           </header>
@@ -363,7 +363,7 @@ export default function CatalogoPublico() {
             </div>
 
             {/* Selector de Categorías (Scroll Horizontal en móvil) */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none animate-reveal delay-400">
+            <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none animate-reveal delay-400 w-full md:w-auto">
               <Filter size={16} className="text-neutral-400 hidden sm:inline" />
               {categories.map((cat) => (
                 <button
@@ -581,7 +581,7 @@ export default function CatalogoPublico() {
                               value={checkoutNombre}
                               onChange={(e) => setCheckoutNombre(e.target.value)}
                               placeholder="Ej. Juan Pérez"
-                              className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                              className="w-full px-4 py-3 bg-[#fafafa] border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
                             />
                           </div>
 
@@ -594,7 +594,7 @@ export default function CatalogoPublico() {
                               value={checkoutTelefono}
                               onChange={(e) => setCheckoutTelefono(e.target.value)}
                               placeholder="Ej. +51 999 999 999"
-                              className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
+                              className="w-full px-4 py-3 bg-[#fafafa] border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5]"
                             />
                           </div>
 
@@ -609,7 +609,7 @@ export default function CatalogoPublico() {
                               value={checkoutDireccion}
                               onChange={(e) => setCheckoutDireccion(e.target.value)}
                               placeholder="Calle, Edificio, Referencias de entrega..."
-                              className="w-full px-3.5 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-xs text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5] resize-none"
+                              className="w-full px-4 py-3 bg-[#fafafa] border border-transparent rounded-xl text-base md:text-sm text-[#1a1a1a] focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all hover:border-[#e5e5e5] resize-none"
                             />
                           </div>
                         </div>

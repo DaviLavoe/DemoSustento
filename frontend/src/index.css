@@ -75,4 +75,14 @@ body {
   .spline-watermark-hide canvas + div {
     display: none !important;
   }
+
+  /* Ocultar barra de scrollbar manteniendo el funcionamiento de scroll */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    -webkit-overflow-scrolling: touch;
+  }
 }
