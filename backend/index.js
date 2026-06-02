@@ -32,6 +32,21 @@ app.use('/api/auth', authRoutes);
 // Ruta de pedidos y analíticas
 app.use('/api/pedidos', pedidosRoutes);
 
+// Middleware para capturar rutas inexistentes (404)
+app.use((req, res, next) => {
+  res.status(404).json({ success: false, message: 'La ruta solicitada no existe en este servidor API' });
+});
+
+// Middleware de manejo global de excepciones y errores
+app.use((err, req, res, next) => {
+  console.error('Error global no manejado:', err);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Error interno en el servidor API',
+    error: process.env.NODE_ENV === 'development' ? err : undefined
+  });
+});
+
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor backend corriendo exitosamente en http://localhost:${PORT}`);

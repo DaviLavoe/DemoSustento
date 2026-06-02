@@ -68,8 +68,12 @@ const productosController = {
         .select()
         .single();
 
-      if (error) throw error;
-      if (!data) return res.status(404).json({ success: false, message: 'Producto no encontrado o no autorizado para editar' });
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return res.status(404).json({ success: false, message: 'Producto no encontrado o no autorizado para editar' });
+        }
+        throw error;
+      }
 
       res.json({ success: true, data, message: 'Producto actualizado exitosamente' });
     } catch (error) {
@@ -92,8 +96,12 @@ const productosController = {
         .select()
         .single();
 
-      if (error) throw error;
-      if (!data) return res.status(404).json({ success: false, message: 'Producto no encontrado o no autorizado para eliminar' });
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return res.status(404).json({ success: false, message: 'Producto no encontrado o no autorizado para eliminar' });
+        }
+        throw error;
+      }
 
       res.json({ success: true, data, message: 'Producto eliminado exitosamente' });
     } catch (error) {
