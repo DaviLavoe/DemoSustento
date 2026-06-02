@@ -42,5 +42,5 @@
 
 ## Semana 5: Pruebas, Refinamiento y Despliegue
 - [x] **Davi:** Pulido UI/UX y Mobile First.
-- [ ] **Angelo:** Manejo de excepciones y refactorización.
+- [x] **Angelo:** Manejo de excepciones y refactorización. *(¡Completado por el equipo!)*
 - [ ] **Javicho:** Despliegues en Vercel, Render y pruebas de seguridad en Supabase.
