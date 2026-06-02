@@ -7,8 +7,8 @@ const pedidosController = {
       // 1. Obtener datos del cuerpo
       const { nombre_cliente, telefono_cliente, total, productos, empresa_id: bodyEmpresaId } = req.body;
       
-      // 2. Determinar empresa_id (de req.user si está autenticado, o de bodyEmpresaId si es petición pública)
-      const empresa_id = req.user ? req.user.empresa_id : bodyEmpresaId;
+      // 2. Determinar empresa_id (de req.user si tiene empresa asociada, o de bodyEmpresaId en caso de cliente/petición pública)
+      const empresa_id = (req.user && req.user.empresa_id) ? req.user.empresa_id : bodyEmpresaId;
       
       if (!empresa_id) {
         return res.status(400).json({ success: false, message: 'El id de la empresa (empresa_id) es obligatorio' });
