@@ -143,7 +143,7 @@ export default function DrawerCuentaCliente({
                       {cliente.nombre ? cliente.nombre.charAt(0).toUpperCase() : 'C'}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-base text-[#1a1a1a]">{cliente.nombre}</h3>
+                      <h3 className="font-semibold text-base text-neutral-900" style={{ color: '#1a1a1a' }}>{cliente.nombre}</h3>
                       <p className="text-xs text-neutral-500 flex items-center gap-1.5 mt-0.5">
                         <Mail size={12} /> {cliente.email}
                       </p>

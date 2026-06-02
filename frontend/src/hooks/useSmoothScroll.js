@@ -38,5 +38,4 @@ export default function useSmoothScroll(enabled = true) {
     };
   }, [enabled]);
 
-  return lenisRef.current;
 }
