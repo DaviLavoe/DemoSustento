@@ -124,6 +124,10 @@ export default function CatalogoPublico() {
     setCart(prev => {
       const exists = prev.find(item => item.id === product.id);
       if (exists) {
+        // Evitar agregar más de lo disponible en stock
+        if (exists.cantidad >= product.stock) {
+          return prev;
+        }
         return prev.map(item => item.id === product.id ? { ...item, cantidad: item.cantidad + 1 } : item);
       }
       return [...prev, { ...product, cantidad: 1 }];
@@ -139,6 +143,10 @@ export default function CatalogoPublico() {
     setCart(prev => prev.map(item => {
       if (item.id === id) {
         const newQty = item.cantidad + amount;
+        // Evitar que la cantidad en el carrito supere el stock disponible del producto
+        if (amount > 0 && newQty > item.stock) {
+          return item;
+        }
         return newQty > 0 ? { ...item, cantidad: newQty } : item;
       }
       return item;
@@ -441,6 +449,11 @@ export default function CatalogoPublico() {
                         <span className="absolute top-4 left-4 px-2.5 py-1 bg-white/90 backdrop-blur-md text-[10px] font-bold text-[#1a1a1a] rounded-lg border border-[#e5e5e5]/50 shadow-xs uppercase tracking-wider">
                           {product.categoria}
                         </span>
+                        {product.stock <= 0 && (
+                          <span className="absolute top-4 right-4 px-2.5 py-1 bg-red-600/90 text-white text-[10px] font-bold rounded-lg border border-red-500/50 shadow-sm uppercase tracking-wider">
+                            Sin Stock
+                          </span>
+                        )}
                       </div>
 
                       {/* Detalles del Producto */}
@@ -460,12 +473,15 @@ export default function CatalogoPublico() {
                             ${product.precio.toFixed(2)}
                           </span>
                           <button
+                            disabled={product.stock <= 0}
                             onClick={() => addToCart(product)}
-                            className="flex items-center gap-1.5 px-4 py-2.5 text-white active:scale-95 text-xs font-semibold rounded-xl transition-all duration-200 group/btn shadow-md hover:shadow-lg shadow-black/5 filter hover:brightness-95"
-                            style={{ backgroundColor: primaryColor }}
+                            className={`flex items-center gap-1.5 px-4 py-2.5 text-white text-xs font-semibold rounded-xl transition-all duration-200 group/btn shadow-md shadow-black/5 filter hover:brightness-95 ${
+                              product.stock <= 0 ? 'bg-neutral-300 border-neutral-300 cursor-not-allowed opacity-50 active:scale-100' : 'active:scale-95'
+                            }`}
+                            style={product.stock > 0 ? { backgroundColor: primaryColor } : {}}
                           >
-                            <span>Añadir</span>
-                            <ArrowUpRight size={14} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
+                            <span>{product.stock <= 0 ? 'Agotado' : 'Añadir'}</span>
+                            {product.stock > 0 && <ArrowUpRight size={14} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />}
                           </button>
                         </div>
                       </div>
@@ -485,12 +501,17 @@ export default function CatalogoPublico() {
                     className="bg-white rounded-2xl border border-[#e5e5e5] p-5 flex flex-col sm:flex-row items-center gap-6 hover:shadow-md transition-shadow animate-reveal"
                     style={{ animationDelay: `${idx * 100}ms` }}
                   >
-                    <div className="w-full sm:w-32 h-24 rounded-xl overflow-hidden bg-neutral-100 shrink-0">
+                    <div className="w-full sm:w-32 h-24 rounded-xl overflow-hidden bg-neutral-100 shrink-0 relative">
                       <img 
                         src={product.imagen_url || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&q=80&w=600'} 
                         alt={product.nombre} 
                         className="w-full h-full object-cover"
                       />
+                      {product.stock <= 0 && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-red-600 px-1.5 py-0.5 rounded">Agotado</span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0 space-y-1 text-center sm:text-left">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -503,11 +524,14 @@ export default function CatalogoPublico() {
                     <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-4 sm:pt-0">
                       <span className="font-serif text-lg font-bold text-[#1a1a1a]">${product.precio.toFixed(2)}</span>
                       <button
+                        disabled={product.stock <= 0}
                         onClick={() => addToCart(product)}
-                        className="px-4 py-2.5 text-white active:scale-95 text-xs font-semibold rounded-xl transition-all filter hover:brightness-95"
-                        style={{ backgroundColor: primaryColor }}
+                        className={`px-4 py-2.5 text-white text-xs font-semibold rounded-xl transition-all filter hover:brightness-95 ${
+                          product.stock <= 0 ? 'bg-neutral-300 cursor-not-allowed opacity-50 active:scale-100' : 'active:scale-95'
+                        }`}
+                        style={product.stock > 0 ? { backgroundColor: primaryColor } : {}}
                       >
-                        <span>Añadir al Carrito</span>
+                        <span>{product.stock <= 0 ? 'Agotado' : 'Añadir al Carrito'}</span>
                       </button>
                     </div>
                   </div>

@@ -45,6 +45,33 @@ const pedidosController = {
       if (empresaError || !empresa) {
         return res.status(400).json({ success: false, message: 'La empresa especificada no existe' });
       }
+
+      // Validar stock disponible para cada producto en la base de datos
+      const productIds = productos.map(p => p.producto_id);
+      const { data: dbProducts, error: dbProductsError } = await supabase
+        .from('productos')
+        .select('id, nombre, stock')
+        .in('id', productIds);
+        
+      if (dbProductsError) throw dbProductsError;
+      
+      const stockMap = {};
+      dbProducts.forEach(p => {
+        stockMap[p.id] = { nombre: p.nombre, stock: p.stock };
+      });
+      
+      for (const prod of productos) {
+        const dbProd = stockMap[prod.producto_id];
+        if (!dbProd) {
+          return res.status(404).json({ success: false, message: `El producto con ID ${prod.producto_id} no existe` });
+        }
+        if (dbProd.stock < prod.cantidad) {
+          return res.status(400).json({ 
+            success: false, 
+            message: `Stock insuficiente para '${dbProd.nombre}'. Stock disponible: ${dbProd.stock}, solicitado: ${prod.cantidad}` 
+          });
+        }
+      }
       
       // 3. Insertar el pedido principal en la tabla 'pedidos'
       const { data: pedido, error: pedidoError } = await supabase
