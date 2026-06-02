@@ -13,8 +13,11 @@ export default function Reportes() {
   const [data, setData] = useState({
     ventasTotales: 0,
     graficoLineas: [],
-    graficoPastel: []
+    graficoPastel: [],
+    pedidos: []
   });
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [expandedPedidoId, setExpandedPedidoId] = useState(null);
 
   // Colores premium armonizados para los gráficos
   const COLORS = ['#1a1a1a', '#4b5563', '#9ca3af', '#d1d5db', '#f3f4f6'];
@@ -42,7 +45,8 @@ export default function Reportes() {
           setData({
             ventasTotales: resData.data.ventasTotales || 0,
             graficoLineas: resData.data.graficoLineas || [],
-            graficoPastel: resData.data.graficoPastel || []
+            graficoPastel: resData.data.graficoPastel || [],
+            pedidos: resData.data.pedidos || []
           });
         }
       } catch (err) {
@@ -57,6 +61,13 @@ export default function Reportes() {
   }, []);
 
   const totalPedidos = data.graficoLineas.reduce((sum, item) => sum + item.cantidad, 0);
+
+  // Filtrar pedidos del día seleccionado
+  const pedidosDelDia = data.pedidos.filter(p => {
+    if (!p.created_at) return false;
+    const fechaPedido = new Date(p.created_at).toISOString().split('T')[0];
+    return fechaPedido === selectedDate;
+  });
 
   if (loading) {
     return (
@@ -140,7 +151,17 @@ export default function Reportes() {
               <div className="h-full flex items-center justify-center text-xs text-neutral-400">Sin datos de volumen diario.</div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.graficoLineas} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart 
+                  data={data.graficoLineas} 
+                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  onClick={(chartData) => {
+                    if (chartData && chartData.activeLabel) {
+                      setSelectedDate(chartData.activeLabel);
+                      setExpandedPedidoId(null);
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <defs>
                     <linearGradient id="colorCantidad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#1a1a1a" stopOpacity={0.15}/>
@@ -229,6 +250,147 @@ export default function Reportes() {
         </div>
 
       </div>
+
+      {/* Detalle de Ventas del Día Seleccionado */}
+      {selectedDate && (
+        <div className="p-6 bg-white rounded-2xl border border-[#e5e5e5] shadow-xs space-y-4 animate-reveal mt-6">
+          <div className="flex items-center justify-between border-b border-[#f0f0f0] pb-4">
+            <div>
+              <h3 className="font-serif text-lg font-bold text-[#1a1a1a] flex items-center gap-2">
+                <BarChart3 size={18} />
+                <span>Ventas del día: {selectedDate.split('-').reverse().join('/')}</span>
+              </h3>
+              <p className="text-xs text-neutral-400 font-light mt-0.5">
+                Se encontraron {pedidosDelDia.length} {pedidosDelDia.length === 1 ? 'pedido' : 'pedidos'} registrados en esta fecha.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setSelectedDate(null);
+                setExpandedPedidoId(null);
+              }}
+              className="px-3 py-1.5 rounded-xl border border-[#e5e5e5] hover:bg-[#fafafa] text-xs font-semibold text-[#1a1a1a] transition-all flex items-center gap-1 active:scale-95"
+            >
+              <X size={14} />
+              <span>Cerrar Detalle</span>
+            </button>
+          </div>
+
+          {pedidosDelDia.length === 0 ? (
+            <div className="py-12 text-center text-xs text-neutral-400">
+              No se registraron ventas en esta fecha.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {pedidosDelDia.map((pedido) => {
+                const isExpanded = expandedPedidoId === pedido.id;
+                const totalPedido = parseFloat(pedido.total);
+                const fechaFormat = new Date(pedido.created_at).toLocaleTimeString('es-ES', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+
+                let badgeClass = "bg-amber-50 text-amber-700 border-amber-100";
+                if (pedido.estado === 'enviado' || pedido.estado === 'completado') {
+                  badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-100";
+                } else if (pedido.estado === 'cancelado') {
+                  badgeClass = "bg-red-50 text-red-700 border-red-100";
+                }
+
+                return (
+                  <div
+                    key={pedido.id}
+                    className="border border-[#e5e5e5] rounded-xl overflow-hidden transition-all duration-300 shadow-xs bg-white"
+                  >
+                    {/* Fila Encabezado Pedido */}
+                    <div
+                      onClick={() => setExpandedPedidoId(isExpanded ? null : pedido.id)}
+                      className="p-4 bg-[#fafafa]/50 hover:bg-[#fafafa] flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer transition-colors"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <div>
+                          <p className="font-mono text-xs font-bold text-black uppercase">{pedido.id.substring(0, 8)}</p>
+                          <p className="text-[10px] text-neutral-400 font-medium mt-0.5">Hora: {fechaFormat}</p>
+                        </div>
+                        <div className="h-4 w-px bg-neutral-200 hidden sm:block"></div>
+                        <div>
+                          <p className="text-xs font-semibold text-neutral-800">{pedido.nombre_cliente}</p>
+                          <p className="text-[10px] text-neutral-400">{pedido.telefono_cliente || 'Sin teléfono'}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between sm:justify-end gap-4">
+                        <div className="text-right">
+                          <p className="text-[9px] text-neutral-400 font-bold uppercase tracking-wider">Total</p>
+                          <p className="font-mono font-bold text-xs text-black mt-0.5">
+                            ${totalPedido.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider font-mono ${badgeClass}`}>
+                          {pedido.estado}
+                        </span>
+                        <div className="text-neutral-400 transition-transform duration-300">
+                          <svg
+                            className={`w-4 h-4 transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Fila Detalle Productos */}
+                    {isExpanded && (
+                      <div className="border-t border-[#e5e5e5] p-4 bg-white animate-reveal">
+                        <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider mb-2.5">Artículos del Pedido</p>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left border-collapse text-xs">
+                            <thead>
+                              <tr className="border-b border-[#f0f0f0] text-neutral-400 font-medium">
+                                <th className="pb-2 font-medium">Producto</th>
+                                <th className="pb-2 text-center font-medium">Cantidad</th>
+                                <th className="pb-2 text-right font-medium">Precio Unit.</th>
+                                <th className="pb-2 text-right font-medium">Subtotal</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#fafafa]">
+                              {pedido.detalles_pedido && pedido.detalles_pedido.length > 0 ? (
+                                pedido.detalles_pedido.map((item) => {
+                                  const precio = parseFloat(item.precio_unitario);
+                                  const subtotal = precio * item.cantidad;
+                                  return (
+                                    <tr key={item.id} className="text-neutral-600">
+                                      <td className="py-2.5 font-medium text-neutral-800">
+                                        {item.productos ? item.productos.nombre : 'Producto no disponible'}
+                                      </td>
+                                      <td className="py-2.5 text-center font-mono text-neutral-500">{item.cantidad}</td>
+                                      <td className="py-2.5 text-right font-mono text-neutral-500">${precio.toFixed(2)}</td>
+                                      <td className="py-2.5 text-right font-mono font-bold text-neutral-800">${subtotal.toFixed(2)}</td>
+                                    </tr>
+                                  );
+                                })
+                              ) : (
+                                <tr>
+                                  <td colSpan="4" className="py-3 text-center text-neutral-400">
+                                    No hay detalles de productos para este pedido.
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
     </div>
   );

@@ -81,7 +81,8 @@ const pedidosController = {
           nombre_cliente,
           telefono_cliente: telefono_cliente || null,
           total,
-          estado: 'pendiente'
+          estado: 'pendiente',
+          cliente_id: req.user ? req.user.id : null
         }])
         .select()
         .single();
@@ -134,11 +135,29 @@ const pedidosController = {
         return res.status(403).json({ success: false, message: 'Acceso denegado: Solo administradores pueden ver analíticas' });
       }
       
-      // 1. Obtener todos los pedidos de la empresa para calcular total y agrupar por fecha
+      // 1. Obtener todos los pedidos con sus detalles y productos en una sola consulta
       const { data: pedidos, error: pedidosError } = await supabase
         .from('pedidos')
-        .select('id, total, created_at')
-        .eq('empresa_id', empresa_id);
+        .select(`
+          id,
+          nombre_cliente,
+          telefono_cliente,
+          total,
+          estado,
+          created_at,
+          detalles_pedido (
+            id,
+            cantidad,
+            precio_unitario,
+            productos (
+              id,
+              nombre,
+              categoria
+            )
+          )
+        `)
+        .eq('empresa_id', empresa_id)
+        .order('created_at', { ascending: false });
         
       if (pedidosError) throw pedidosError;
       
@@ -158,46 +177,74 @@ const pedidosController = {
         .sort((a, b) => a.fecha.localeCompare(b.fecha));
         
       // Categorías más vendidas (Gráfico de torta/dona)
-      const pedidoIds = pedidos.map(p => p.id);
-      let graficoPastel = [];
+      const categoriasMap = {};
+      pedidos.forEach(p => {
+        if (p.detalles_pedido && Array.isArray(p.detalles_pedido)) {
+          p.detalles_pedido.forEach(d => {
+            const categoria = (d.productos && d.productos.categoria) ? d.productos.categoria : 'Sin categoría';
+            categoriasMap[categoria] = (categoriasMap[categoria] || 0) + d.cantidad;
+          });
+        }
+      });
       
-      if (pedidoIds.length > 0) {
-        // Consultar los detalles de los pedidos e incluir la relación con productos
-        const { data: detalles, error: detallesError } = await supabase
-          .from('detalles_pedido')
-          .select(`
-            cantidad,
-            productos (
-              categoria
-            )
-          `)
-          .in('pedido_id', pedidoIds);
-          
-        if (detallesError) throw detallesError;
-        
-        const categoriasMap = {};
-        detalles.forEach(d => {
-          const categoria = (d.productos && d.productos.categoria) ? d.productos.categoria : 'Sin categoría';
-          categoriasMap[categoria] = (categoriasMap[categoria] || 0) + d.cantidad;
-        });
-        
-        graficoPastel = Object.entries(categoriasMap)
-          .map(([categoria, cantidad]) => ({ categoria, cantidad }))
-          .sort((a, b) => b.cantidad - a.cantidad); // Ordenar de mayor a menor cantidad vendida
-      }
+      const graficoPastel = Object.entries(categoriasMap)
+        .map(([categoria, cantidad]) => ({ categoria, cantidad }))
+        .sort((a, b) => b.cantidad - a.cantidad);
       
       res.json({
         success: true,
         data: {
           ventasTotales,
           graficoLineas,
-          graficoPastel
+          graficoPastel,
+          pedidos
         }
       });
       
     } catch (error) {
       console.error('Error al obtener analíticas:', error.message);
       res.status(500).json({ success: false, message: 'Error al obtener analíticas del servidor', error: error.message });
+    }
+  },
+
+  // GET /api/pedidos/cliente
+  obtenerPedidosCliente: async (req, res) => {
+    try {
+      const clienteId = req.user.id;
+      
+      // Consultar todos los pedidos del cliente autenticado con sus detalles de productos
+      const { data: pedidos, error: pedidosError } = await supabase
+        .from('pedidos')
+        .select(`
+          id,
+          nombre_cliente,
+          telefono_cliente,
+          total,
+          estado,
+          created_at,
+          detalles_pedido (
+            id,
+            cantidad,
+            precio_unitario,
+            productos (
+              id,
+              nombre,
+              imagen_url
+            )
+          )
+        `)
+        .eq('cliente_id', clienteId)
+        .order('created_at', { ascending: false });
+        
+      if (pedidosError) throw pedidosError;
+      
+      res.json({
+        success: true,
+        data: pedidos
+      });
+    } catch (error) {
+      console.error('Error al obtener pedidos del cliente:', error.message);
+      res.status(500).json({ success: false, message: 'Error al obtener el historial de pedidos', error: error.message });
     }
   }
 };

@@ -24,12 +24,14 @@ const optionalAuthMiddleware = async (req, res, next) => {
       .eq('id', user.id)
       .single();
 
-    if (!userError && usuarioData) {
-      req.user = {
-        id: user.id,
-        empresa_id: usuarioData.empresa_id,
-        rol: usuarioData.rol
-      };
+    req.user = {
+      id: user.id,
+      email: user.email,
+      rol: usuarioData ? usuarioData.rol : (user.user_metadata?.rol || 'cliente')
+    };
+
+    if (usuarioData) {
+      req.user.empresa_id = usuarioData.empresa_id;
     }
 
     next();

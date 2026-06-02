@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../config/supabase';
+import { API_BASE_URL } from '../config/api';
 
 export function useClienteAuth() {
   const [cliente, setCliente] = useState(null); // Contiene { id, email, nombre, telefono, direccion }
@@ -13,18 +14,15 @@ export function useClienteAuth() {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const metadata = session.user.user_metadata || {};
-          // Validamos que sea un cliente
-          if (metadata.rol === 'cliente') {
-            const clientData = {
-              id: session.user.id,
-              email: session.user.email,
-              nombre: metadata.nombre || '',
-              telefono: metadata.telefono || '',
-              direccion: metadata.direccion || '',
-            };
-            setCliente(clientData);
-            loadPedidos(session.user.id);
-          }
+          const clientData = {
+            id: session.user.id,
+            email: session.user.email,
+            nombre: metadata.nombre || (metadata.rol === 'admin' ? 'Administrador' : 'Usuario'),
+            telefono: metadata.telefono || '',
+            direccion: metadata.direccion || '',
+          };
+          setCliente(clientData);
+          loadPedidos();
         }
       } catch (err) {
         console.error('Error al comprobar sesión del cliente:', err);
@@ -38,17 +36,15 @@ export function useClienteAuth() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
         const metadata = session.user.user_metadata || {};
-        if (metadata.rol === 'cliente') {
-          const clientData = {
-            id: session.user.id,
-            email: session.user.email,
-            nombre: metadata.nombre || '',
-            telefono: metadata.telefono || '',
-            direccion: metadata.direccion || '',
-          };
-          setCliente(clientData);
-          loadPedidos(session.user.id);
-        }
+        const clientData = {
+          id: session.user.id,
+          email: session.user.email,
+          nombre: metadata.nombre || (metadata.rol === 'admin' ? 'Administrador' : 'Usuario'),
+          telefono: metadata.telefono || '',
+          direccion: metadata.direccion || '',
+        };
+        setCliente(clientData);
+        loadPedidos();
       } else {
         setCliente(null);
         setPedidos([]);
@@ -59,14 +55,35 @@ export function useClienteAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Cargar pedidos guardados en LocalStorage para este cliente específico
-  const loadPedidos = (clienteId) => {
+  // Cargar pedidos de la base de datos de Supabase para este cliente específico
+  const loadPedidos = async () => {
     try {
-      const stored = localStorage.getItem(`pedidos_cliente_${clienteId}`);
-      if (stored) {
-        setPedidos(JSON.parse(stored));
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(`${API_BASE_URL}/api/pedidos/cliente`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      const resData = await response.json();
+      if (response.ok && resData.success) {
+        // Map the backend pedidos structure to match the frontend expectations:
+        // id, fecha, total, estado, productos: [{ nombre, cantidad, precio }]
+        const mappedPedidos = resData.data.map(p => ({
+          id: p.id,
+          fecha: p.created_at,
+          total: parseFloat(p.total),
+          estado: p.estado,
+          productos: p.detalles_pedido.map(d => ({
+            nombre: d.productos ? d.productos.nombre : 'Producto no disponible',
+            cantidad: d.cantidad,
+            precio: parseFloat(d.precio_unitario)
+          }))
+        }));
+        setPedidos(mappedPedidos);
       } else {
-        setPedidos([]);
+        console.error('Error al cargar pedidos del backend:', resData.message);
       }
     } catch (err) {
       console.error('Error al cargar pedidos del cliente:', err);
@@ -121,7 +138,7 @@ export function useClienteAuth() {
       };
       
       setCliente(clientData);
-      loadPedidos(user.id);
+      loadPedidos();
       return data;
     } catch (err) {
       console.error('Error en inicio de sesión de cliente:', err);
@@ -172,25 +189,12 @@ export function useClienteAuth() {
     }
   };
 
-  // Guardar un nuevo pedido en el historial del cliente
-  const registrarPedido = (productos, total) => {
+  // Registrar un nuevo pedido en el historial del cliente (refrescando desde la DB)
+  const registrarPedido = async (productos, total) => {
     if (!cliente) return null;
     try {
-      const nuevoPedido = {
-        id: `PED-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        fecha: new Date().toISOString(),
-        productos: productos.map(p => ({
-          nombre: p.nombre,
-          cantidad: p.cantidad,
-          precio: p.precio,
-        })),
-        total,
-      };
-
-      const nuevosPedidos = [nuevoPedido, ...pedidos];
-      localStorage.setItem(`pedidos_cliente_${cliente.id}`, JSON.stringify(nuevosPedidos));
-      setPedidos(nuevosPedidos);
-      return nuevoPedido;
+      await loadPedidos();
+      return true;
     } catch (err) {
       console.error('Error al registrar pedido localmente:', err);
       return null;
