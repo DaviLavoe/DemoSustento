@@ -3,8 +3,10 @@ const supabase = require('../config/supabaseClient');
 const optionalAuthMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+    console.log('--- [Auth Middleware] Authorization Header:', authHeader);
+    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      // Si no hay token, continuar como petición pública
+      console.log('--- [Auth Middleware] No Bearer token found. Proceeding as public request.');
       return next();
     }
 
@@ -14,8 +16,11 @@ const optionalAuthMiddleware = async (req, res, next) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
     
     if (authError || !user) {
+      console.error('--- [Auth Middleware] Token verification failed:', authError?.message);
       return res.status(401).json({ success: false, message: 'Token inválido o expirado', error: authError?.message });
     }
+
+    console.log('--- [Auth Middleware] User authenticated successfully. ID:', user.id);
 
     // Obtener la empresa del usuario validado
     const { data: usuarioData, error: userError } = await supabase
@@ -34,10 +39,10 @@ const optionalAuthMiddleware = async (req, res, next) => {
       req.user.empresa_id = usuarioData.empresa_id;
     }
 
+    console.log('--- [Auth Middleware] req.user set to:', req.user);
     next();
   } catch (error) {
-    console.error('Error en middleware de autenticación opcional:', error);
-    // En caso de error inesperado, continuamos como petición pública
+    console.error('--- [Auth Middleware] Unexpected error:', error);
     next();
   }
 };

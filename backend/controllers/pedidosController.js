@@ -4,6 +4,15 @@ const pedidosController = {
   // POST /api/pedidos
   crearPedido: async (req, res) => {
     try {
+      // LOG DIAGNÓSTICO TEMPORAL
+      const fs = require('fs');
+      const path = require('path');
+      const logMsg = `[${new Date().toISOString()}] crearPedido Recibido\n` +
+                     `Headers: ${JSON.stringify(req.headers)}\n` +
+                     `req.user: ${JSON.stringify(req.user)}\n` +
+                     `Body: ${JSON.stringify(req.body)}\n\n`;
+      fs.appendFileSync(path.join(__dirname, '../request_logs.txt'), logMsg);
+
       // 1. Obtener datos del cuerpo
       const { nombre_cliente, telefono_cliente, total, productos, empresa_id: bodyEmpresaId } = req.body;
       
