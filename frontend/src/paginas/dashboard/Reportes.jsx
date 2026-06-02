@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../config/supabase';
+import { API_BASE_URL } from '../../config/api';
 import { BarChart3, TrendingUp, ShoppingBag, DollarSign, X } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -26,7 +27,7 @@ export default function Reportes() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) throw new Error('Sesión no encontrada. Vuelve a ingresar.');
 
-        const response = await fetch('http://localhost:3000/api/pedidos/analiticas', {
+        const response = await fetch(`${API_BASE_URL}/api/pedidos/analiticas`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`
           }

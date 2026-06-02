@@ -7,6 +7,7 @@ import Tilt3D from '../components/ui/Tilt3D';
 import { useClienteAuth } from '../hooks/useClienteAuth';
 import DrawerCuentaCliente from '../components/catalogo/DrawerCuentaCliente';
 import { supabase } from '../config/supabase';
+import { API_BASE_URL } from '../config/api';
 
 export default function CatalogoPublico() {
   const { slug } = useParams();
@@ -69,7 +70,7 @@ export default function CatalogoPublico() {
   useEffect(() => {
     async function fetchCatalogData() {
       try {
-        const response = await fetch(`http://localhost:3000/api/catalogo/${slug}`, {
+        const response = await fetch(`${API_BASE_URL}/api/catalogo/${slug}`, {
           signal: AbortSignal.timeout(8000)
         });
 
@@ -185,7 +186,7 @@ export default function CatalogoPublico() {
       }
 
       // 3. Registrar el pedido en el Backend de Angelo
-      const res = await fetch('http://localhost:3000/api/pedidos', {
+      const res = await fetch(`${API_BASE_URL}/api/pedidos`, {
         method: 'POST',
         headers,
         body: JSON.stringify(payload)

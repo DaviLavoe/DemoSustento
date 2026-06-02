@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../config/supabase';
+import { API_BASE_URL } from '../config/api';
 
 export function useProductos() {
   const [productos, setProductos] = useState([]);
@@ -52,7 +53,7 @@ export function useProductos() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No se detectó una sesión activa. Por favor, vuelve a iniciar sesión.');
 
-      const response = await fetch('http://localhost:3000/api/productos', {
+      const response = await fetch(`${API_BASE_URL}/api/productos`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
@@ -170,11 +171,11 @@ export function useProductos() {
         activo: formData.activo
       };
 
-      let url = 'http://localhost:3000/api/productos';
+      let url = `${API_BASE_URL}/api/productos`;
       let method = 'POST';
 
       if (modalMode === 'edit') {
-        url = `http://localhost:3000/api/productos/${currentProducto.id}`;
+        url = `${API_BASE_URL}/api/productos/${currentProducto.id}`;
         method = 'PUT';
       }
 
@@ -210,7 +211,7 @@ export function useProductos() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Sesión expirada');
 
-      const response = await fetch(`http://localhost:3000/api/productos/${productoToDelete.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/productos/${productoToDelete.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`

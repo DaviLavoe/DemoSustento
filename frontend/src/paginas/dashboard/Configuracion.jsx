@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Settings, Phone, Palette, HelpCircle, UploadCloud, Loader2, CheckCircle, Trash2, ShieldAlert } from 'lucide-react';
 import { supabase } from '../../config/supabase';
+import { API_BASE_URL } from '../../config/api';
 
 export default function Configuracion() {
   const context = useOutletContext();
@@ -96,7 +97,7 @@ export default function Configuracion() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('Sesión expirada. Vuelve a iniciar sesión.');
 
-      const response = await fetch('http://localhost:3000/api/auth/empresa', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/empresa`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
