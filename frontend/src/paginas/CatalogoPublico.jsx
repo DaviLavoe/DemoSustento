@@ -51,6 +51,18 @@ export default function CatalogoPublico() {
     }
   }, [clienteAuth.cliente, isCartOpen]);
 
+  // Bloquear scroll de la página principal cuando algún drawer esté abierto
+  useEffect(() => {
+    if (isCartOpen || isAccountOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isCartOpen, isAccountOpen]);
+
   // Activar scroll suave con Lenis una vez que termine la carga de datos
   useSmoothScroll(!loading);
 
@@ -559,7 +571,7 @@ export default function CatalogoPublico() {
                   </div>
 
                   {/* Cuerpo del Drawer: Listado de Productos o Formulario de Checkout */}
-                  <div className="flex-1 overflow-y-auto p-6 scrollbar-none space-y-4">
+                  <div data-lenis-prevent className="flex-1 overflow-y-auto p-6 scrollbar-none space-y-4">
                     {isCheckoutMode ? (
                       /* ================== FLUJO DE CHECKOUT ================== */
                       <form key="checkout-form" onSubmit={handleCheckoutSubmit} className="space-y-5 animate-reveal">

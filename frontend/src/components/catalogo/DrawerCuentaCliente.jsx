@@ -125,7 +125,7 @@ export default function DrawerCuentaCliente({
           </div>
 
           {/* Contenido Principal */}
-          <div className="flex-1 overflow-y-auto p-6 scrollbar-none">
+          <div data-lenis-prevent className="flex-1 overflow-y-auto p-6 scrollbar-none">
             {loading ? (
               <div className="h-full flex items-center justify-center">
                 <svg className="animate-spin h-6 w-6 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -135,7 +135,7 @@ export default function DrawerCuentaCliente({
               </div>
             ) : cliente ? (
               /* ================== VISTA LOGUEADO ================== */
-              <div className="space-y-6">
+              <div className="space-y-6 pb-8">
                 {/* Perfil del Cliente */}
                 <div className="p-5 bg-neutral-50 rounded-2xl border border-neutral-100 space-y-4">
                   <div className="flex items-center gap-3">
