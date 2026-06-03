@@ -1,2 +1,4 @@
 node_modules
 .env
+auth_debug.log
+request_logs.txt
