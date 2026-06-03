@@ -20,7 +20,8 @@ const clientAuthMiddleware = async (req, res, next) => {
     req.user = {
       id: user.id,
       email: user.email,
-      rol: user.user_metadata?.rol || 'cliente'
+      rol: user.user_metadata?.rol || 'cliente',
+      telefono: user.user_metadata?.telefono || null
     };
 
     next();

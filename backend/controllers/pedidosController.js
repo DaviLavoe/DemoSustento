@@ -1,12 +1,12 @@
 const supabase = require('../config/supabaseClient');
+const fs = require('fs');
+const path = require('path');
 
 const pedidosController = {
   // POST /api/pedidos
   crearPedido: async (req, res) => {
     try {
       // LOG DIAGNÓSTICO TEMPORAL
-      const fs = require('fs');
-      const path = require('path');
       const logMsg = `[${new Date().toISOString()}] crearPedido Recibido\n` +
                      `Headers: ${JSON.stringify(req.headers)}\n` +
                      `req.user: ${JSON.stringify(req.user)}\n` +
@@ -83,20 +83,29 @@ const pedidosController = {
       }
       
       // 3. Insertar el pedido principal en la tabla 'pedidos'
+      const logFile = path.join(__dirname, '../auth_debug.log');
+      fs.appendFileSync(logFile, `[${new Date().toISOString()}] [crearPedido] req.user is: ${JSON.stringify(req.user)}\n`);
+      const insertData = {
+        empresa_id,
+        nombre_cliente,
+        telefono_cliente: telefono_cliente || null,
+        total,
+        estado: 'pendiente',
+        cliente_id: req.user ? req.user.id : null
+      };
+      fs.appendFileSync(logFile, `[${new Date().toISOString()}] [crearPedido] inserting into pedidos: ${JSON.stringify(insertData)}\n`);
+
       const { data: pedido, error: pedidoError } = await supabase
         .from('pedidos')
-        .insert([{
-          empresa_id,
-          nombre_cliente,
-          telefono_cliente: telefono_cliente || null,
-          total,
-          estado: 'pendiente',
-          cliente_id: req.user ? req.user.id : null
-        }])
+        .insert([insertData])
         .select()
         .single();
         
-      if (pedidoError) throw pedidoError;
+      if (pedidoError) {
+        fs.appendFileSync(logFile, `[${new Date().toISOString()}] [crearPedido] insert error: ${pedidoError.message}\n`);
+        throw pedidoError;
+      }
+      fs.appendFileSync(logFile, `[${new Date().toISOString()}] [crearPedido] insert success: ${JSON.stringify(pedido)}\n`);
       
       // 4. Preparar la estructura para detalles_pedido
       const detalles = productos.map(p => ({
@@ -221,6 +230,15 @@ const pedidosController = {
     try {
       const clienteId = req.user.id;
       
+      // Vincular retroactivamente pedidos con cliente_id nulo pero con el mismo teléfono
+      if (req.user.telefono) {
+        await supabase
+          .from('pedidos')
+          .update({ cliente_id: clienteId })
+          .is('cliente_id', null)
+          .eq('telefono_cliente', req.user.telefono);
+      }
+
       // Consultar todos los pedidos del cliente autenticado con sus detalles de productos
       const { data: pedidos, error: pedidosError } = await supabase
         .from('pedidos')

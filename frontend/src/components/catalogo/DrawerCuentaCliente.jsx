@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { User, Mail, Phone, MapPin, Lock, History, LogOut, Check, ShoppingBag, Eye, EyeOff } from 'lucide-react';
+import ModalHistorialCompleto from './ModalHistorialCompleto';
 
 export default function DrawerCuentaCliente({
   isOpen,
@@ -10,6 +11,7 @@ export default function DrawerCuentaCliente({
   const { cliente, loading, pedidos, registrar, iniciarSesion, cerrarSesion, actualizarPerfil } = clienteAuth;
   const [activeTab, setActiveTab] = useState('login'); // login | register
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   // Formulario Auth
   const [email, setEmail] = useState('');
@@ -239,9 +241,19 @@ export default function DrawerCuentaCliente({
 
                 {/* Historial de Pedidos */}
                 <div className="space-y-4 pt-2">
-                  <div className="flex items-center gap-2">
-                    <History size={16} className="text-[#1a1a1a]" />
-                    <h3 className="text-sm font-bold text-[#1a1a1a] uppercase tracking-wider">Historial de Pedidos</h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <History size={16} className="text-[#1a1a1a]" />
+                      <h3 className="text-sm font-bold text-[#1a1a1a] uppercase tracking-wider">Historial de Pedidos</h3>
+                    </div>
+                    {pedidos.length > 0 && (
+                      <button 
+                        onClick={() => setIsHistoryModalOpen(true)}
+                        className="text-xs text-black font-semibold hover:underline flex items-center gap-1 active:scale-95 transition-all"
+                      >
+                        Ver en pantalla completa
+                      </button>
+                    )}
                   </div>
 
                   {pedidos.length === 0 ? (
@@ -504,6 +516,17 @@ export default function DrawerCuentaCliente({
 
         </div>
       </div>
+
+      <ModalHistorialCompleto
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        pedidos={pedidos}
+        cliente={cliente}
+        onReorder={(items) => {
+          onReorder(items);
+          setIsHistoryModalOpen(false);
+        }}
+      />
     </div>
   );
 }
