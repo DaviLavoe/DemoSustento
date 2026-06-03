@@ -42,4 +42,5 @@ Este documento detalla el plan de trabajo de 5 semanas para construir la platafo
 ### Semana 5: Pruebas, Refinamiento y Despliegue
 - **Davi (Front):** Pulir el diseño (*UI polish*), asegurar que el catálogo sea 100% *Mobile First*, y realizar pruebas de usabilidad.
 - **Angelo (Back):** Refactorización final, manejo de excepciones global y pruebas de rendimiento del servidor.
-- **Javicho (Data):** Despliegue a producción de ambas partes (Vercel para Front, Render para Back, Supabase para DB). Revisión exhaustiva de reglas de seguridad (RLS) en Supabase.
+- **Javicho (Data):** Despliegue a producción de ambas partes (Vercel para Front, Render para Back, Supabase para DB). Revisión exhaustiva de reglas de seguridad (RLS) en Supabase.}
+op
