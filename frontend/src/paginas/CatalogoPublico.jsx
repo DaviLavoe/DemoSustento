@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShoppingCart, Search, Filter, MessageSquare, ArrowUpRight, Grid, List, User, ArrowLeft, Loader2, Sparkles, Send } from 'lucide-react';
+import { ShoppingCart, Search, Filter, MessageSquare, ArrowUpRight, Grid, List, User, ArrowLeft, Loader2, Sparkles, Send, Heart } from 'lucide-react';
 import useSmoothScroll from '../hooks/useSmoothScroll';
 import PantallaCargaPublica from '../components/ui/PantallaCargaPublica';
 import Tilt3D from '../components/ui/Tilt3D';
 import { useClienteAuth } from '../hooks/useClienteAuth';
 import DrawerCuentaCliente from '../components/catalogo/DrawerCuentaCliente';
+import PortalCliente from '../components/catalogo/PortalCliente';
 import { supabase } from '../config/supabase';
 import { API_BASE_URL } from '../config/api';
 
@@ -30,6 +31,41 @@ export default function CatalogoPublico() {
   // Portal de Clientes
   const clienteAuth = useClienteAuth();
   const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isPortalOpen, setIsPortalOpen] = useState(false);
+  const [wishlist, setWishlist] = useState([]);
+
+  // Cargar wishlist inicial
+  useEffect(() => {
+    if (slug) {
+      const stored = localStorage.getItem(`wishlist_${slug}`);
+      if (stored) {
+        try {
+          setWishlist(JSON.parse(stored));
+        } catch (e) {
+          console.error('Error parsing stored wishlist:', e);
+        }
+      }
+    }
+  }, [slug]);
+
+  // Guardar wishlist al cambiar
+  const saveWishlist = (newWishlist) => {
+    setWishlist(newWishlist);
+    localStorage.setItem(`wishlist_${slug}`, JSON.stringify(newWishlist));
+  };
+
+  const toggleWishlist = (product) => {
+    const exists = wishlist.some(item => item.id === product.id);
+    if (exists) {
+      saveWishlist(wishlist.filter(item => item.id !== product.id));
+    } else {
+      saveWishlist([...wishlist, product]);
+    }
+  };
+
+  const isInWishlist = (id) => wishlist.some(item => item.id === id);
+
+
 
   // Lógica del Checkout
   const [isCheckoutMode, setIsCheckoutMode] = useState(false);
@@ -266,6 +302,7 @@ export default function CatalogoPublico() {
       return updatedCart;
     });
     setIsAccountOpen(false);
+    setIsPortalOpen(false);
     setIsCartOpen(true);
   };
 
@@ -455,6 +492,19 @@ export default function CatalogoPublico() {
                             Sin Stock
                           </span>
                         )}
+                        {/* Botón de favoritos */}
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleWishlist(product);
+                          }}
+                          className="absolute bottom-4 right-4 p-2 rounded-xl bg-white/90 backdrop-blur-md border border-[#e5e5e5]/50 shadow-xs active:scale-90 hover:scale-105 transition-all text-neutral-600 hover:text-red-500 z-10"
+                          style={isInWishlist(product.id) ? { color: '#ef4444' } : {}}
+                          aria-label="Agregar a favoritos"
+                        >
+                          <Heart size={14} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
+                        </button>
                       </div>
 
                       {/* Detalles del Producto */}
@@ -519,6 +569,19 @@ export default function CatalogoPublico() {
                         <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">{product.categoria}</span>
                         <span className="hidden sm:inline text-neutral-300">•</span>
                         <h3 className="font-serif text-lg font-bold text-[#1a1a1a] truncate">{product.nombre}</h3>
+                        {/* Botón de favoritos en list view */}
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleWishlist(product);
+                          }}
+                          className="text-neutral-400 hover:text-red-500 active:scale-90 transition-colors ml-1"
+                          style={isInWishlist(product.id) ? { color: '#ef4444' } : {}}
+                          aria-label="Agregar a favoritos"
+                        >
+                          <Heart size={14} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} />
+                        </button>
                       </div>
                       <p className="text-neutral-500 text-xs font-light line-clamp-2 leading-relaxed">{product.descripcion}</p>
                     </div>
@@ -791,6 +854,35 @@ export default function CatalogoPublico() {
             onClose={() => setIsAccountOpen(false)}
             clienteAuth={clienteAuth}
             onReorder={handleReorder}
+            onOpenPortal={() => {
+              setIsAccountOpen(false);
+              setIsPortalOpen(true);
+            }}
+          />
+
+          {/* 8. Portal de Cliente (Dashboard Completo) */}
+          <PortalCliente
+            isOpen={isPortalOpen}
+            onClose={() => setIsPortalOpen(false)}
+            clienteAuth={clienteAuth}
+            onReorder={handleReorder}
+            wishlist={wishlist}
+            toggleWishlist={toggleWishlist}
+            onAddToCart={addToCart}
+            primaryColor={primaryColor}
+            cart={cart}
+            removeFromCart={removeFromCart}
+            updateQuantity={updateQuantity}
+            checkoutNombre={checkoutNombre}
+            setCheckoutNombre={setCheckoutNombre}
+            checkoutTelefono={checkoutTelefono}
+            setCheckoutTelefono={setCheckoutTelefono}
+            checkoutDireccion={checkoutDireccion}
+            setCheckoutDireccion={setCheckoutDireccion}
+            checkoutSubmitting={checkoutSubmitting}
+            checkoutError={checkoutError}
+            handleCheckoutSubmit={handleCheckoutSubmit}
+            totalCartPrice={totalCartPrice}
           />
 
         </>
