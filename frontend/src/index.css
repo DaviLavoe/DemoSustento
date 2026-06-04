@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Instrument+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Instrument+Sans:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -40,22 +40,22 @@ body {
     background-size: 400% 400%;
   }
 
+  /* Safe Area for Mobile Sticky Footers */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Mask to fade edges of scrollable areas */
+  .mask-fade-edges {
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  }
+
   .delay-100 { animation-delay: 100ms; }
   .delay-200 { animation-delay: 200ms; }
   .delay-300 { animation-delay: 300ms; }
   .delay-400 { animation-delay: 400ms; }
   .delay-500 { animation-delay: 500ms; }
-  .delay-600 { animation-delay: 600ms; }
-  .delay-700 { animation-delay: 700ms; }
-  .delay-800 { animation-delay: 800ms; }
-  .delay-900 { animation-delay: 900ms; }
-  .delay-1000 { animation-delay: 1000ms; }
-
-  .transition-premium {
-    transition-property: all;
-    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
-    transition-duration: 600ms;
-  }
 
   @keyframes reveal {
     to { opacity: 1; transform: translateY(0); }
@@ -92,7 +92,6 @@ input:not([type="color"]), textarea, select {
   color: #1a1a1a !important;
 }
 
-/* Asegurar estilo para navegadores con modo oscuro forzado o autofill */
 input:not([type="color"])::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder {
   color: #737373 !important;
@@ -116,4 +115,3 @@ textarea::placeholder {
   color: #737373 !important;
   opacity: 1 !important;
 }
-

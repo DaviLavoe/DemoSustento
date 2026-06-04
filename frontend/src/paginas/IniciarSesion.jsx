@@ -95,7 +95,7 @@ export default function IniciarSesion() {
 
               <header className="mb-10 text-left animate-fade-in-up">
             <h1 className="font-serif text-4xl font-semibold tracking-tight text-[#1a1a1a] mb-3">Bienvenido</h1>
-            <p className="text-[#666666] text-base">Ingresa a tu cuenta para continuar.</p>
+            <p className="text-gray-800 text-base">Ingresa a tu cuenta para continuar.</p>
           </header>
 
           {error && (
