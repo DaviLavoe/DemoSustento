@@ -88,9 +88,12 @@ export default function ProductCard({
           {/* Capa de gradiente sutil para mejorar la legibilidad de insignias */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-500"></div>
 
-          <span className="absolute top-4 left-4 px-3 py-1.5 bg-white/80 backdrop-blur-md text-[10px] font-bold text-[#1a1a1a] rounded-xl border border-white/50 shadow-sm uppercase tracking-wider transition-transform duration-300 group-hover/card:scale-105">
-            {product.categoria}
-          </span>
+          <div className="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
+            <span className="px-3 py-1.5 bg-white/80 backdrop-blur-md text-[10px] font-bold text-[#1a1a1a] rounded-xl border border-white/50 shadow-sm uppercase tracking-wider transition-transform duration-300 group-hover/card:scale-105">
+              {product.categoria}
+            </span>
+          </div>
+
           {isOutOfStock && (
             <span className="absolute top-4 right-4 px-3 py-1.5 bg-red-600/90 backdrop-blur-md text-white text-[10px] font-bold rounded-xl border border-red-500/50 shadow-md uppercase tracking-wider">
               Sin Stock
@@ -110,30 +113,30 @@ export default function ProductCard({
           </button>
         </div>
 
-        <div className="p-6 flex-1 flex flex-col justify-between gap-5 relative z-10 bg-white">
-          <div className="space-y-2.5">
-            <h3 className="font-serif text-xl font-semibold text-[#1a1a1a] leading-tight group-hover/card:text-[#1a1a1a]/80 transition-colors line-clamp-2">
+        <div className="p-3 sm:p-6 flex-1 flex flex-col justify-between gap-3 sm:gap-5 relative z-10 bg-white">
+          <div className="space-y-1 sm:space-y-2.5">
+            <h3 className="font-serif text-sm sm:text-xl font-semibold text-[#1a1a1a] leading-tight group-hover/card:text-[#1a1a1a]/80 transition-colors line-clamp-2">
               {product.nombre}
             </h3>
-            <p className="text-neutral-500 text-xs font-light line-clamp-2 leading-relaxed">
+            <p className="text-neutral-500 text-[10px] sm:text-xs font-light line-clamp-2 leading-relaxed">
               {product.descripcion}
             </p>
           </div>
 
-          <div className="flex items-center justify-between border-t border-[#e5e5e5]/60 pt-5">
-            <span className="font-serif text-2xl font-bold text-[#1a1a1a] tracking-tight drop-shadow-sm">
+          <div className="flex items-center justify-between border-t border-[#e5e5e5]/60 pt-3 sm:pt-5">
+            <span className="font-serif text-base sm:text-2xl font-bold text-[#1a1a1a] tracking-tight drop-shadow-sm">
               ${product.precio.toFixed(2)}
             </span>
             <button
               disabled={isOutOfStock}
               onClick={() => addToCart(product)}
-              className={`flex items-center gap-1.5 px-4 py-2.5 text-white text-xs font-semibold rounded-xl transition-all duration-300 group/btn shadow-lg shadow-black/5 hover:shadow-xl hover:-translate-y-0.5 filter hover:brightness-110 ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2.5 text-white text-[10px] sm:text-xs font-semibold rounded-lg sm:rounded-xl transition-all duration-300 group/btn shadow-md shadow-black/5 hover:shadow-xl hover:-translate-y-0.5 filter hover:brightness-110 ${
                 isOutOfStock ? 'bg-neutral-300 border-neutral-300 cursor-not-allowed opacity-50 hover:translate-y-0 shadow-none' : 'active:scale-95 active:shadow-sm'
               }`}
               style={!isOutOfStock ? { backgroundColor: primaryColor } : {}}
             >
               <span>{isOutOfStock ? 'Agotado' : 'Añadir'}</span>
-              {!isOutOfStock && <ArrowUpRight size={14} className="group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />}
+              {!isOutOfStock && <ArrowUpRight size={12} className="hidden sm:block group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />}
             </button>
           </div>
         </div>

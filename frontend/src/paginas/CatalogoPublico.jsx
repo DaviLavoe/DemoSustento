@@ -10,6 +10,7 @@ import DrawerCuentaCliente from '../components/catalogo/DrawerCuentaCliente';
 import PortalCliente from '../components/catalogo/PortalCliente';
 
 import CatalogHeader from '../components/catalogo/CatalogHeader';
+import CatalogFooter from '../components/catalogo/CatalogFooter';
 import ProductCard from '../components/catalogo/ProductCard';
 import CartDrawer from '../components/catalogo/CartDrawer';
 
@@ -59,7 +60,7 @@ export default function CatalogoPublico() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [categories, setCategories] = useState([]);
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState('list');
   
   const [wishlist, setWishlist] = useState([]);
 
@@ -251,14 +252,13 @@ export default function CatalogoPublico() {
   const primaryColor = company?.color_primario || '#1a1a1a';
 
   return (
-    <div className="min-h-screen bg-[#fafafa] text-[#1a1a1a] font-sans selection:bg-[#1a1a1a] selection:text-white pb-24 md:pb-0">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0a0a0a] text-[#1a1a1a] dark:text-white font-sans selection:bg-[#1a1a1a] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 md:pb-0 transition-colors duration-300">
       <PantallaCargaPublica nombreTienda="Catálogo" onComplete={() => setAnimationDone(true)} />
 
       {!loading && notFound && (
         <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center animate-reveal">
-          <div className="w-20 h-20 rounded-3xl bg-white border border-[#e5e5e5] flex items-center justify-center text-4xl shadow-xl shadow-black/5">🔍</div>
+          <div className="w-20 h-20 rounded-3xl bg-white dark:bg-neutral-800 border border-[#e5e5e5] dark:border-neutral-700 flex items-center justify-center text-4xl shadow-xl shadow-black/5">🔍</div>
           <div className="space-y-3">
-            <h1 className="font-serif text-4xl font-bold text-[#1a1a1a]">Tienda no encontrada</h1>
             <p className="text-neutral-500 text-base max-w-sm mx-auto leading-relaxed">No existe ninguna tienda con el enlace <span className="font-mono bg-white border border-[#e5e5e5] px-2 py-0.5 rounded-md text-xs shadow-sm">{slug}</span>.</p>
           </div>
         </div>
@@ -283,9 +283,18 @@ export default function CatalogoPublico() {
           />
 
           <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+            
+            {/* --- SECCIÓN PRINCIPAL DE PRODUCTOS --- */}
+            {dataReady && (searchTerm !== '' || selectedCategory !== 'Todas') && (
+              <div className="mb-6 flex items-center justify-between animate-reveal">
+                <h2 className="font-serif text-2xl font-bold text-[#1a1a1a] dark:text-white transition-colors">Resultados de búsqueda</h2>
+                <span className="text-sm font-medium text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-3 py-1 rounded-full transition-colors">{filteredProducts.length} productos</span>
+              </div>
+            )}
+            
             {!dataReady ? (
-              <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" : "space-y-4"}>
-                {[1, 2, 3, 4, 5, 6].map(i => <ProductSkeleton key={i} viewMode={viewMode} />)}
+              <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8" : "space-y-4"}>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <ProductSkeleton key={i} viewMode={viewMode} />)}
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="py-24 text-center animate-reveal">
@@ -293,22 +302,65 @@ export default function CatalogoPublico() {
                 <p className="text-neutral-500 text-lg font-medium">No se encontraron productos.</p>
               </div>
             ) : (
-              <div className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8" : "space-y-4"}>
-                {filteredProducts.map((product, idx) => (
-                  <ProductCard 
-                    key={product.id}
-                    product={product}
-                    viewMode={viewMode}
-                    idx={idx}
-                    primaryColor={primaryColor}
-                    isInWishlist={isInWishlist}
-                    toggleWishlist={toggleWishlist}
-                    addToCart={addToCart}
-                  />
-                ))}
-              </div>
+              <>
+                <div className="animate-reveal delay-300 mb-16">
+                  {searchTerm === '' && selectedCategory === 'Todas' && (
+                    <h2 className="font-serif text-2xl font-bold text-[#1a1a1a] dark:text-white mb-6 border-b border-[#e5e5e5]/60 dark:border-neutral-800 pb-3 transition-colors">
+                      Todos los productos
+                    </h2>
+                  )}
+                  <div className={viewMode === 'grid' ? "grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-8" : "space-y-4"}>
+                    {filteredProducts.map((product, idx) => (
+                      <ProductCard 
+                        key={product.id}
+                        product={product}
+                        viewMode={viewMode}
+                        idx={idx}
+                        primaryColor={primaryColor}
+                        isInWishlist={isInWishlist}
+                        toggleWishlist={toggleWishlist}
+                        addToCart={addToCart}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* --- SECCIÓN PRODUCTOS DESTACADOS (Movida abajo) --- */}
+                {searchTerm === '' && selectedCategory === 'Todas' && filteredProducts.length > 0 && (
+                  <div className="mb-20 animate-reveal delay-500">
+                    <div className="bg-[#fafafa] dark:bg-neutral-900 rounded-[32px] p-6 sm:p-10 border border-[#e5e5e5] dark:border-neutral-800 shadow-inner relative overflow-hidden transition-colors">
+                      {/* Decoración de fondo */}
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-400/5 dark:bg-yellow-400/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+                      
+                      <div className="flex items-center justify-between mb-8 pb-4">
+                        <h2 className="font-serif text-3xl md:text-4xl font-bold text-[#1a1a1a] dark:text-white flex items-center gap-3 transition-colors">
+                          <span className="text-yellow-500">✨</span> Recomendados para ti
+                        </h2>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-8 relative z-10">
+                        {/* Tomamos hasta 4 productos como "destacados" para la demo */}
+                        {filteredProducts.slice(0, 4).map((product, idx) => (
+                          <ProductCard 
+                            key={`destacado-${product.id}`}
+                            product={product}
+                            viewMode="grid"
+                            idx={idx}
+                            primaryColor={primaryColor}
+                            isInWishlist={isInWishlist}
+                            toggleWishlist={toggleWishlist}
+                            addToCart={addToCart}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </main>
+          
+          {/* Pie de Página */}
+          {dataReady && <CatalogFooter company={company} primaryColor={primaryColor} />}
         </div>
       )}
 
