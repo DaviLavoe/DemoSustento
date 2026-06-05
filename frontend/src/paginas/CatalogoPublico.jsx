@@ -463,6 +463,23 @@ export default function CatalogoPublico() {
         onClose={() => setIsPortalOpen(false)}
         clienteAuth={clienteAuth}
         onReorder={(orderProducts) => handleReorder(orderProducts, products)}
+        wishlist={wishlist}
+        toggleWishlist={toggleWishlist}
+        onAddToCart={addToCart}
+        primaryColor={primaryColor}
+        cart={cart}
+        removeFromCart={removeFromCart}
+        updateQuantity={updateQuantity}
+        checkoutNombre={checkoutNombre}
+        setCheckoutNombre={setCheckoutNombre}
+        checkoutTelefono={checkoutTelefono}
+        setCheckoutTelefono={setCheckoutTelefono}
+        checkoutDireccion={checkoutDireccion}
+        setCheckoutDireccion={setCheckoutDireccion}
+        checkoutSubmitting={checkoutSubmitting}
+        checkoutError={checkoutError}
+        handleCheckoutSubmit={handleCheckoutSubmit}
+        totalCartPrice={totalCartPrice}
       />
     </div>
   );

@@ -12,6 +12,15 @@ export function ThemeToggle({ className = "" }) {
     return false;
   });
 
+  // Escuchar cambios de tema globales desde otros toggles
+  useEffect(() => {
+    const handleThemeChange = (e) => {
+      setIsDark(e.detail);
+    };
+    window.addEventListener("theme-change", handleThemeChange);
+    return () => window.removeEventListener("theme-change", handleThemeChange);
+  }, []);
+
   // Efecto para aplicar la clase 'dark' al HTML cuando cambia el estado
   useEffect(() => {
     const root = window.document.documentElement;
@@ -24,6 +33,12 @@ export function ThemeToggle({ className = "" }) {
     }
   }, [isDark]);
 
+  const handleToggleClick = () => {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    window.dispatchEvent(new CustomEvent("theme-change", { detail: nextDark }));
+  };
+
   return (
     <div
       className={`flex w-16 h-8 p-1 rounded-full cursor-pointer transition-all duration-300 ${
@@ -31,7 +46,7 @@ export function ThemeToggle({ className = "" }) {
           ? "bg-zinc-950 border border-zinc-800" 
           : "bg-white border border-zinc-200 shadow-inner"
       } ${className}`}
-      onClick={() => setIsDark(!isDark)}
+      onClick={handleToggleClick}
       role="button"
       tabIndex={0}
       title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
