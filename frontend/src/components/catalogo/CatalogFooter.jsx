@@ -99,9 +99,9 @@ export default function CatalogFooter({ company, primaryColor }) {
           <p className="text-xs text-neutral-500 text-center md:text-left">
             &copy; {currentYear} {company?.nombre || 'Sustento'}. Todos los derechos reservados.
           </p>
-          <div className="flex gap-4">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa" className="h-6 opacity-50 grayscale" />
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/200px-MasterCard_Logo.svg.png" alt="Mastercard" className="h-6 opacity-50 grayscale" />
+          <div className="flex gap-4 items-center">
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgODMiPjxwYXRoIGZpbGw9IiNmZmZmZmYiIGQ9Ik0xMTEuNCA4MS4zbDE2LjctNzkuNmgyNmwtMTYuNyA3OS42aC0yNnpNMjQ1LjUgMi4xYy01LTEuOS0xMi44LTQtMjIuMS00LTI1LjUgMC00My41IDEzLjMtNDMuNyAzMi4zLS4zIDE0IDEyLjggMjEuOCAyMi42IDI2LjUgMTAuMSA0LjggMTMuNSA3LjkgMTMuNSAxMi4yLS4xIDYuNi04LjEgOS42LTE1LjYgOS42LTEwLjQgMC0xNi4xLTEuNi0yNC44LTUuM2wtMy41LTEuNi0zLjggMjIuOGM2LjEgMi44IDE3LjQgNS4yIDI5LjEgNS4zIDI3IDAgNDQuNy0xMy4x NDUtMzMuMS4yLTExLjEtNi42LTE5LjUtMjEuOC0yNi42LTktNC40LTE0LjUtNy40LTE0LjUtMTEuOS4xLTQgNC43LTguMyAxNC44LTguMyA4LjMtLjEgMTQuMyAxLjcgMTkuNSA0bDIuOCAxLjMgMi41LTIzLjJ6TTc1IDgxLjNsLTI1LjEtNTRjLTMtNi45LTguNC0xMC44LTE1LjUtMTIuM0wyLjIgMTEgMS43IDE0LjdsMTcuOCA0YzguNCAyIDEwLjIgMy44IDEyLjIgMTEuNWwxOS41IDUxSDk0LjFMNzUgODEuM3pNMTU3LjYgODEuM2gyNC40bDE1LjMtNzkuNmgtMjAuNmMtNS44IDAtMTAuMyAyLjctMTIuOCA3LjlsLTMwIDcxLjdoMjUuOGw1LTEzLjhoMzEuNmwzIDEzLjh6bTExLTMyLThsMTIuNy0zNCAzLjcgMzRIMTY4LjZ6Ii8+PC9zdmc+" alt="Visa" className="h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAwIDYwMCI+PGNpcmNsZSBmaWxsPSIjRUIwMDFCIiBjeD0iMzAwIiBjeT0iMzAwIiByPSIzMDAiLz48Y2lyY2xlIGZpbGw9IiNGNzlFMUIiIGN4PSI3MDAiIGN5PSIzMDAiIHI9IjMwMCIvPjxwYXRoIGZpbGw9IiNGRjVGMDAiIGQ9Ik01MDAgMTQ4LjZjLTg0IDAtMTU2LjQgNDYuOC0xOTMuMyAxMTUuNkMzNDMuNiAzMzMgNDE2IDM3OS44IDUwMCAzNzkuOHMxNTYuNC00Ni44IDE5My4zLTExNS42QzY1Ni40IDE5NS40 NTg0IDE0OC42IDUwMCAxNDguNnoiLz48L3N2Zz4=" alt="Mastercard" className="h-6 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
           </div>
         </div>
 
