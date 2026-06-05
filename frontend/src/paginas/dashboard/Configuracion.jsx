@@ -187,7 +187,7 @@ export default function Configuracion() {
                     onChange={(e) => setColorPrimario(e.target.value)}
                     placeholder="#1A1A1A"
                     maxLength="7"
-                    className="flex-1 px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10 focus:border-black dark:focus:border-white transition-all hover:border-[#e5e5e5] dark:hover:border-zinc-800"
+                    className="flex-1 px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10 focus:border-black dark:focus:border-white transition-all hover:border-[#e5e5e5] dark:hover:border-zinc-800"
                   />
                 </div>
               </div>
@@ -201,7 +201,7 @@ export default function Configuracion() {
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                   placeholder="Ej. Mi Tienda Express"
-                  className="px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10 focus:border-black dark:focus:border-white transition-all hover:border-[#e5e5e5] dark:hover:border-zinc-800"
+                  className="px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10 focus:border-black dark:focus:border-white transition-all hover:border-[#e5e5e5] dark:hover:border-zinc-800"
                 />
               </div>
 
@@ -212,7 +212,7 @@ export default function Configuracion() {
               <label className="text-xs font-semibold uppercase tracking-wider text-[#666666] dark:text-neutral-400">Logotipo de la Marca</label>
               
               {logoUrl ? (
-                <div className="flex items-center gap-4 p-4 bg-[#fafafa] dark:bg-zinc-950 border border-[#e5e5e5] dark:border-zinc-850 rounded-2xl max-w-md">
+                <div className="flex items-center gap-4 p-4 bg-[#fafafa] dark:bg-zinc-950 border border-[#e5e5e5] dark:border-zinc-800 rounded-2xl max-w-md">
                   <img 
                     src={logoUrl} 
                     alt="Logo Empresa" 
@@ -269,7 +269,7 @@ export default function Configuracion() {
                 value={telefonoWhatsapp}
                 onChange={(e) => setTelefonoWhatsapp(e.target.value)}
                 placeholder="Ej. +51987654321"
-                className="px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10 focus:border-black dark:focus:border-white transition-all hover:border-[#e5e5e5] dark:hover:border-zinc-800"
+                className="px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10 focus:border-black dark:focus:border-white transition-all hover:border-[#e5e5e5] dark:hover:border-zinc-800"
               />
               <p className="text-[10px] text-neutral-400 dark:text-neutral-500 leading-normal">
                 Ingresa el número con el formato internacional (ej. `+51987654321`). Aquí es donde tus clientes enviarán la confirmación y el detalle de su carrito de compras de manera automatizada.

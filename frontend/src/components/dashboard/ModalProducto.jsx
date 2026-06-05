@@ -46,7 +46,7 @@ export default function ModalProducto({
           </h3>
           <button 
             onClick={onClose} 
-            className="p-1.5 rounded-lg hover:bg-white dark:hover:bg-zinc-900 border border-transparent hover:border-[#e5e5e5] dark:hover:border-zinc-850 text-[#666666] dark:text-neutral-400 hover:text-[#1a1a1a] dark:hover:text-white transition-all"
+            className="p-1.5 rounded-lg hover:bg-white dark:hover:bg-zinc-900 border border-transparent hover:border-[#e5e5e5] dark:hover:border-zinc-800 text-[#666666] dark:text-neutral-400 hover:text-[#1a1a1a] dark:hover:text-white transition-all"
           >
             <X size={18} />
           </button>
@@ -65,7 +65,7 @@ export default function ModalProducto({
                 value={formData.nombre}
                 onChange={(e) => setFormData({...formData, nombre: e.target.value})}
                 placeholder="Ej. Silla Ergonómica Pro"
-                className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
+                className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
               />
             </div>
 
@@ -78,7 +78,7 @@ export default function ModalProducto({
                   value={formData.categoria}
                   onChange={(e) => setFormData({...formData, categoria: e.target.value})}
                   placeholder="Ej. Oficina"
-                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
+                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
                 />
               </div>
               
@@ -107,7 +107,7 @@ export default function ModalProducto({
                   value={formData.precio}
                   onChange={(e) => setFormData({...formData, precio: e.target.value})}
                   placeholder="0.00"
-                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
+                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
                 />
               </div>
 
@@ -120,7 +120,7 @@ export default function ModalProducto({
                   value={formData.stock}
                   onChange={(e) => setFormData({...formData, stock: e.target.value})}
                   placeholder="0"
-                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
+                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
                 />
               </div>
             </div>
@@ -132,8 +132,8 @@ export default function ModalProducto({
                 rows="3"
                 value={formData.descripcion}
                 onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
-                placeholder="Describe los detalles de tu producto..."
-                className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800 resize-none"
+                placeholder="Describe los detalles de tu product..."
+                className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800 resize-none"
               ></textarea>
             </div>
 
@@ -144,7 +144,7 @@ export default function ModalProducto({
               </label>
               
               {getPreviewUrl() ? (
-                <div className="relative group rounded-xl overflow-hidden border border-[#e5e5e5] dark:border-zinc-800 bg-[#fafafa] dark:bg-zinc-950 flex items-center justify-center h-48 transition-all">
+                <div className="relative group rounded-xl overflow-hidden border border-[#e5e5e5] dark:border-zinc-800 bg-white flex items-center justify-center h-48 transition-all duration-300">
                   <img
                     src={getPreviewUrl()}
                     alt="Vista previa"

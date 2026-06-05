@@ -12,7 +12,7 @@ export default function CardMetrica({ titulo, valor, Icono, loading, alert }) {
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center border shrink-0 ${
         alert 
           ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/30 text-amber-600 dark:text-amber-500 animate-pulse' 
-          : 'bg-[#fafafa] dark:bg-zinc-950 border-[#e5e5e5] dark:border-zinc-850 text-[#1a1a1a] dark:text-white'
+          : 'bg-[#fafafa] dark:bg-zinc-950 border-[#e5e5e5] dark:border-zinc-800 text-[#1a1a1a] dark:text-white'
       }`}>
         <Icono size={20} />
       </div>

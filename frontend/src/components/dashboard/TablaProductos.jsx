@@ -33,14 +33,14 @@ export default function TablaProductos({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar por nombre, descripción o categoría..."
-              className="w-full pl-10 pr-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
             />
           </div>
           {/* Filtro Categoría */}
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 focus:border-[#1a1a1a] transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800 cursor-pointer"
+            className="px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl text-sm text-[#1a1a1a] dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 focus:border-[#1a1a1a] transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800 cursor-pointer"
           >
             <option value="">Todas las Categorías</option>
             {categoriasUnicas.map(cat => (
@@ -111,12 +111,20 @@ export default function TablaProductos({
                 </thead>
                 <tbody className="divide-y divide-[#e5e5e5] dark:divide-zinc-800">
                   {productos.map((producto) => (
-                    <tr key={producto.id} className="hover:bg-[#fafafa]/50 dark:hover:bg-zinc-850/50 transition-colors group">
+                    <tr key={producto.id} className="hover:bg-[#fafafa]/50 dark:hover:bg-zinc-800/50 transition-colors group">
                       {/* Imagen */}
                       <td className="px-6 py-3.5">
-                        <div className="w-12 h-12 rounded-xl border border-[#e5e5e5] dark:border-zinc-800 bg-[#fafafa] dark:bg-zinc-950 flex items-center justify-center overflow-hidden">
+                        <div className={`w-12 h-12 rounded-xl border border-[#e5e5e5] dark:border-zinc-800/80 flex items-center justify-center overflow-hidden shadow-sm transition-all duration-300 ease-out ${
+                          producto.imagen_url 
+                            ? 'bg-white' 
+                            : 'bg-[#fafafa] dark:bg-zinc-950'
+                        }`}>
                           {producto.imagen_url ? (
-                            <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
+                            <img 
+                              src={producto.imagen_url} 
+                              alt={producto.nombre} 
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out" 
+                            />
                           ) : (
                             <ImageIcon size={18} className="text-[#a1a1aa]" />
                           )}
@@ -167,7 +175,7 @@ export default function TablaProductos({
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => onEdit(producto)}
-                            className="p-1.5 rounded-lg border border-transparent hover:border-[#e5e5e5] dark:hover:border-zinc-800 hover:bg-white dark:hover:bg-zinc-850 text-[#666666] dark:text-neutral-400 hover:text-[#1a1a1a] dark:hover:text-white transition-all"
+                            className="p-1.5 rounded-lg border border-transparent hover:border-[#e5e5e5] dark:hover:border-zinc-800 hover:bg-white dark:hover:bg-zinc-800 text-[#666666] dark:text-neutral-400 hover:text-[#1a1a1a] dark:hover:text-white transition-all"
                             title="Editar"
                           >
                             <Edit2 size={15} />
@@ -190,12 +198,20 @@ export default function TablaProductos({
             {/* Vista Tarjetas para Móviles (menores a md) */}
             <div className="block md:hidden divide-y divide-[#e5e5e5] dark:divide-zinc-800">
               {productos.map((producto) => (
-                <div key={producto.id} className="p-5 space-y-4 hover:bg-[#fafafa]/50 dark:hover:bg-zinc-850/50 transition-colors">
+                <div key={producto.id} className="p-5 space-y-4 hover:bg-[#fafafa]/50 dark:hover:bg-zinc-800/50 transition-colors group">
                   <div className="flex items-center gap-4">
                     {/* Imagen del Producto */}
-                    <div className="w-14 h-14 rounded-xl border border-[#e5e5e5] dark:border-zinc-800 bg-[#fafafa] dark:bg-zinc-950 flex items-center justify-center overflow-hidden shrink-0">
+                    <div className={`w-14 h-14 rounded-xl border border-[#e5e5e5] dark:border-zinc-800/80 flex items-center justify-center overflow-hidden shrink-0 shadow-sm transition-all duration-300 ease-out ${
+                      producto.imagen_url 
+                        ? 'bg-white' 
+                        : 'bg-[#fafafa] dark:bg-zinc-950'
+                    }`}>
                       {producto.imagen_url ? (
-                        <img src={producto.imagen_url} alt={producto.nombre} className="w-full h-full object-cover" />
+                        <img 
+                          src={producto.imagen_url} 
+                          alt={producto.nombre} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out" 
+                        />
                       ) : (
                         <ImageIcon size={20} className="text-[#a1a1aa]" />
                       )}
@@ -240,7 +256,7 @@ export default function TablaProductos({
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => onEdit(producto)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e5e5e5] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-[#1a1a1a] dark:text-white hover:bg-[#fafafa] dark:hover:bg-zinc-850 active:scale-95 transition-all"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e5e5e5] dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-[#1a1a1a] dark:text-white hover:bg-[#fafafa] dark:hover:bg-zinc-800 active:scale-95 transition-all"
                       >
                         <Edit2 size={13} />
                         Editar

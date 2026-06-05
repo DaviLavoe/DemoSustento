@@ -494,14 +494,14 @@ export default function Reportes() {
                     {/* Fila Encabezado Pedido */}
                     <div
                       onClick={() => setExpandedPedidoId(isExpanded ? null : pedido.id)}
-                      className="p-4 bg-[#fafafa]/50 hover:bg-[#fafafa] dark:bg-zinc-900/50 dark:hover:bg-zinc-850/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer transition-colors"
+                      className="p-4 bg-[#fafafa]/50 hover:bg-[#fafafa] dark:bg-zinc-900/50 dark:hover:bg-zinc-800/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer transition-colors"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                         <div>
                           <p className="font-mono text-xs font-bold text-black dark:text-white uppercase">{pedido.id.substring(0, 8)}</p>
                           <p className="text-[10px] text-neutral-400 dark:text-neutral-500 font-medium mt-0.5">Hora: {fechaFormat}</p>
                         </div>
-                        <div className="h-4 w-px bg-neutral-200 dark:bg-zinc-850 hidden sm:block"></div>
+                        <div className="h-4 w-px bg-neutral-200 dark:bg-zinc-800 hidden sm:block"></div>
                         <div>
                           <p className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">{pedido.nombre_cliente}</p>
                           <p className="text-[10px] text-neutral-400 dark:text-neutral-500">{pedido.telefono_cliente || 'Sin teléfono'}</p>
@@ -545,7 +545,7 @@ export default function Reportes() {
                                 <th className="pb-2 text-right font-medium">Subtotal</th>
                               </tr>
                             </thead>
-                            <tbody className="divide-y divide-[#fafafa] dark:divide-zinc-850/50">
+                            <tbody className="divide-y divide-[#fafafa] dark:divide-zinc-800/50">
                               {pedido.detalles_pedido && pedido.detalles_pedido.length > 0 ? (
                                 pedido.detalles_pedido.map((item) => {
                                   const precio = parseFloat(item.precio_unitario);
