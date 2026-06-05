@@ -17,10 +17,10 @@ export default function ProductCard({
   if (viewMode === 'list') {
     return (
       <div 
-        className="bg-white rounded-2xl border border-[#e5e5e5] p-5 flex flex-col sm:flex-row items-center gap-6 hover:shadow-xl hover:border-[#d4d4d4] transition-all duration-300 animate-reveal group/card"
+        className="bg-white rounded-2xl border border-[#e5e5e5] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 hover:shadow-xl hover:border-[#d4d4d4] transition-all duration-300 animate-reveal group/card"
         style={{ animationDelay: `${idx * 100}ms` }}
       >
-        <div className="w-full sm:w-32 h-24 rounded-xl overflow-hidden bg-neutral-100 shrink-0 relative shadow-inner">
+        <div className="w-full sm:w-32 h-48 sm:h-24 rounded-xl overflow-hidden bg-neutral-100 shrink-0 relative shadow-inner">
           <img 
             src={imageUrl} 
             alt={product.nombre} 
@@ -33,32 +33,43 @@ export default function ProductCard({
             </div>
           )}
         </div>
-        <div className="flex-1 min-w-0 space-y-1.5 text-center sm:text-left">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest bg-[#fafafa] px-2 py-0.5 rounded-md border border-[#e5e5e5]/50">{product.categoria}</span>
-            <span className="hidden sm:inline text-neutral-300">•</span>
-            <h3 className="font-serif text-lg font-bold text-[#1a1a1a] truncate group-hover/card:text-[#1a1a1a]/80 transition-colors">{product.nombre}</h3>
+        
+        <div className="flex-1 min-w-0 flex flex-col gap-1.5 sm:gap-2">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <span className="inline-block text-[10px] font-bold text-neutral-500 uppercase tracking-widest bg-[#fafafa] px-2 py-0.5 rounded-md border border-[#e5e5e5]/50 mb-1">
+                {product.categoria}
+              </span>
+              <h3 className="text-base sm:text-lg font-bold text-neutral-900 leading-snug group-hover/card:text-neutral-700 transition-colors">
+                {product.nombre}
+              </h3>
+            </div>
             <button 
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 toggleWishlist(product);
               }}
-              className="text-neutral-400 hover:text-red-500 active:scale-90 transition-colors ml-1"
+              className="text-neutral-400 hover:text-red-500 active:scale-90 transition-colors shrink-0 p-1 -mr-1 -mt-1"
               style={isInWishlist(product.id) ? { color: '#ef4444' } : {}}
               aria-label="Agregar a favoritos"
             >
-              <Heart size={16} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} className="drop-shadow-sm" />
+              <Heart size={18} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} className="drop-shadow-sm" />
             </button>
           </div>
-          <p className="text-neutral-500 text-xs font-light line-clamp-2 leading-relaxed">{product.descripcion}</p>
+          <p className="text-neutral-500 text-xs font-light line-clamp-2 leading-relaxed">
+            {product.descripcion}
+          </p>
         </div>
-        <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-4 sm:pt-0 border-[#e5e5e5]/50">
-          <span className="font-serif text-xl font-bold text-[#1a1a1a] drop-shadow-sm">${product.precio.toFixed(2)}</span>
+
+        <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-[#e5e5e5]/50 mt-1 sm:mt-0">
+          <span className="font-serif text-lg sm:text-xl font-bold text-neutral-900 drop-shadow-sm">
+            ${product.precio.toFixed(2)}
+          </span>
           <button
             disabled={isOutOfStock}
             onClick={() => addToCart(product)}
-            className={`flex items-center justify-center gap-1.5 px-4 py-2.5 text-white text-xs font-semibold rounded-xl transition-all duration-300 group/btn shadow-lg shadow-black/5 hover:shadow-xl hover:shadow-${primaryColor}/20 hover:-translate-y-0.5 filter hover:brightness-110 ${
+            className={`flex items-center justify-center gap-1.5 px-4 py-2 sm:py-2.5 text-white text-xs font-semibold rounded-xl transition-all duration-300 group/btn shadow-lg shadow-black/5 hover:shadow-xl hover:-translate-y-0.5 filter hover:brightness-110 ${
               isOutOfStock ? 'bg-neutral-300 border-neutral-300 cursor-not-allowed opacity-50 hover:translate-y-0 shadow-none' : 'active:scale-95 active:shadow-sm'
             }`}
             style={!isOutOfStock ? { backgroundColor: primaryColor } : {}}
