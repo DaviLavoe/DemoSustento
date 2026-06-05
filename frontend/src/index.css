@@ -12,6 +12,59 @@
   --color-ink-muted: #666666;
   --color-border: #e5e5e5;
   --color-accent: #111111;
+
+  --animate-scan: scan 4s linear infinite;
+
+  @keyframes scan {
+    0% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(50%);
+    }
+  }
+}
+
+:root {
+  --radar-accent: #1a1a1a;
+  --radar-accent-rgb: 26, 26, 26;
+  --radar-grid: rgba(0, 0, 0, 0.18);
+  --radar-laser: rgba(26, 26, 26, 0.03);
+  --radar-crosshair: rgba(26, 26, 26, 0.25);
+  --radar-grid-red: rgba(239, 68, 68, 0.08);
+  --chart-stroke-default: #737373;
+  --chart-grid-stroke: #f3f4f6;
+  
+  --pie-color-0: #1a1a1a;
+  --pie-color-1: #4b5563;
+  --pie-color-2: #9ca3af;
+  --pie-color-3: #d1d5db;
+  --pie-color-4: #e5e7eb;
+
+  --tooltip-bg: #ffffff;
+  --tooltip-border: #e5e5e5;
+  --tooltip-text: #1a1a1a;
+}
+
+html.dark {
+  --radar-accent: #ffffff;
+  --radar-accent-rgb: 255, 255, 255;
+  --radar-grid: rgba(255, 255, 255, 0.12);
+  --radar-laser: rgba(255, 255, 255, 0.04);
+  --radar-crosshair: rgba(255, 255, 255, 0.3);
+  --radar-grid-red: rgba(239, 68, 68, 0.25);
+  --chart-stroke-default: #52525b;
+  --chart-grid-stroke: #27272a;
+
+  --pie-color-0: #ffffff;
+  --pie-color-1: #a1a1aa;
+  --pie-color-2: #71717a;
+  --pie-color-3: #3f3f46;
+  --pie-color-4: #27272a;
+
+  --tooltip-bg: #18181b;
+  --tooltip-border: #27272a;
+  --tooltip-text: #ffffff;
 }
 
 body {
@@ -91,4 +144,30 @@ html.dark body {
     scrollbar-width: none;  /* Firefox */
     -webkit-overflow-scrolling: touch;
   }
+}
+
+/* Quitar contornos e outlines en gráficos de Recharts */
+.recharts-wrapper,
+.recharts-wrapper *,
+.recharts-surface,
+.recharts-surface *,
+svg,
+svg *,
+g,
+rect,
+path {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus,
+.recharts-surface:focus,
+svg:focus,
+g:focus,
+rect:focus,
+path:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }

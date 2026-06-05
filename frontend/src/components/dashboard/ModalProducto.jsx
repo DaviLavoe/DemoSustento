@@ -37,16 +37,16 @@ export default function ModalProducto({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-xs"></div>
       
-      <div className="relative w-full max-w-lg bg-white rounded-2xl border border-[#e5e5e5] shadow-2xl overflow-hidden animate-reveal z-10 flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-2xl border border-[#e5e5e5] dark:border-zinc-800 shadow-2xl overflow-hidden animate-reveal z-10 flex flex-col max-h-[90vh]">
         
         {/* Header del Modal */}
-        <div className="p-6 border-b border-[#e5e5e5] flex items-center justify-between bg-[#fafafa]">
-          <h3 className="font-serif text-xl font-bold text-[#1a1a1a]">
+        <div className="p-6 border-b border-[#e5e5e5] dark:border-zinc-800 flex items-center justify-between bg-[#fafafa] dark:bg-zinc-950">
+          <h3 className="font-serif text-xl font-bold text-[#1a1a1a] dark:text-white">
             {mode === 'edit' ? 'Editar Producto' : 'Nuevo Producto'}
           </h3>
           <button 
             onClick={onClose} 
-            className="p-1.5 rounded-lg hover:bg-white border border-transparent hover:border-[#e5e5e5] text-[#666666] hover:text-[#1a1a1a] transition-all"
+            className="p-1.5 rounded-lg hover:bg-white dark:hover:bg-zinc-900 border border-transparent hover:border-[#e5e5e5] dark:hover:border-zinc-850 text-[#666666] dark:text-neutral-400 hover:text-[#1a1a1a] dark:hover:text-white transition-all"
           >
             <X size={18} />
           </button>
@@ -58,27 +58,27 @@ export default function ModalProducto({
             
             {/* Nombre */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#666666]">Nombre del Producto *</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-[#666666] dark:text-neutral-400">Nombre del Producto *</label>
               <input
                 type="text"
                 required
                 value={formData.nombre}
                 onChange={(e) => setFormData({...formData, nombre: e.target.value})}
                 placeholder="Ej. Silla Ergonómica Pro"
-                className="w-full px-4 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-sm text-[#1a1a1a] placeholder-[#a1a1aa] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 focus:border-[#1a1a1a] transition-all duration-200 hover:border-[#e5e5e5]"
+                className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
               />
             </div>
 
             {/* Categoría & Activo */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#666666]">Categoría</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-[#666666] dark:text-neutral-400">Categoría</label>
                 <input
                   type="text"
                   value={formData.categoria}
                   onChange={(e) => setFormData({...formData, categoria: e.target.value})}
                   placeholder="Ej. Oficina"
-                  className="w-full px-4 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-sm text-[#1a1a1a] placeholder-[#a1a1aa] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 focus:border-[#1a1a1a] transition-all duration-200 hover:border-[#e5e5e5]"
+                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
                 />
               </div>
               
@@ -88,9 +88,9 @@ export default function ModalProducto({
                     type="checkbox"
                     checked={formData.activo}
                     onChange={(e) => setFormData({...formData, activo: e.target.checked})}
-                    className="w-4 h-4 rounded text-black border-[#e5e5e5] focus:ring-black accent-[#1a1a1a] cursor-pointer"
+                    className="w-4 h-4 rounded text-black border-[#e5e5e5] dark:border-zinc-800 focus:ring-black dark:focus:ring-white accent-[#1a1a1a] dark:accent-white cursor-pointer"
                   />
-                  <span className="text-sm font-medium text-[#1a1a1a]">Producto Activo / Visible</span>
+                  <span className="text-sm font-medium text-[#1a1a1a] dark:text-neutral-200">Producto Activo / Visible</span>
                 </label>
               </div>
             </div>
@@ -98,7 +98,7 @@ export default function ModalProducto({
             {/* Precio & Stock */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#666666]">Precio (USD) *</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-[#666666] dark:text-neutral-400">Precio (USD) *</label>
                 <input
                   type="number"
                   step="0.01"
@@ -107,12 +107,12 @@ export default function ModalProducto({
                   value={formData.precio}
                   onChange={(e) => setFormData({...formData, precio: e.target.value})}
                   placeholder="0.00"
-                  className="w-full px-4 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-sm text-[#1a1a1a] placeholder-[#a1a1aa] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 focus:border-[#1a1a1a] transition-all duration-200 hover:border-[#e5e5e5]"
+                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#666666]">Stock Inicial</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-[#666666] dark:text-neutral-400">Stock Inicial</label>
                 <input
                   type="number"
                   min="0"
@@ -120,31 +120,31 @@ export default function ModalProducto({
                   value={formData.stock}
                   onChange={(e) => setFormData({...formData, stock: e.target.value})}
                   placeholder="0"
-                  className="w-full px-4 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-sm text-[#1a1a1a] placeholder-[#a1a1aa] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 focus:border-[#1a1a1a] transition-all duration-200 hover:border-[#e5e5e5]"
+                  className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800"
                 />
               </div>
             </div>
 
             {/* Descripción */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#666666]">Descripción</label>
+              <label className="text-xs font-semibold uppercase tracking-wider text-[#666666] dark:text-neutral-400">Descripción</label>
               <textarea
                 rows="3"
                 value={formData.descripcion}
                 onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
                 placeholder="Describe los detalles de tu producto..."
-                className="w-full px-4 py-2.5 bg-[#fafafa] border border-transparent rounded-xl text-sm text-[#1a1a1a] placeholder-[#a1a1aa] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 focus:border-[#1a1a1a] transition-all duration-200 hover:border-[#e5e5e5] resize-none"
+                className="w-full px-4 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-850 rounded-xl text-sm text-[#1a1a1a] dark:text-white placeholder-[#a1a1aa] focus:bg-white dark:focus:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#1a1a1a]/10 dark:focus:ring-white/10 focus:border-[#1a1a1a] dark:focus:border-white transition-all duration-200 hover:border-[#e5e5e5] dark:hover:border-zinc-800 resize-none"
               ></textarea>
             </div>
 
             {/* Imagen del Producto (Supabase Storage) */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-[#666666]">
+              <label className="text-xs font-semibold uppercase tracking-wider text-[#666666] dark:text-neutral-400">
                 Imagen del Producto
               </label>
               
               {getPreviewUrl() ? (
-                <div className="relative group rounded-xl overflow-hidden border border-[#e5e5e5] bg-[#fafafa] flex items-center justify-center h-48 transition-all">
+                <div className="relative group rounded-xl overflow-hidden border border-[#e5e5e5] dark:border-zinc-800 bg-[#fafafa] dark:bg-zinc-950 flex items-center justify-center h-48 transition-all">
                   <img
                     src={getPreviewUrl()}
                     alt="Vista previa"
@@ -170,9 +170,9 @@ export default function ModalProducto({
                   </div>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center border border-dashed border-[#e5e5e5] hover:border-zinc-400 bg-[#fafafa] hover:bg-[#fafafa]/50 rounded-xl p-6 cursor-pointer group transition-all h-48">
-                  <UploadCloud className="text-zinc-400 group-hover:text-zinc-600 mb-2 transition-colors" size={32} />
-                  <span className="text-xs font-medium text-zinc-600 group-hover:text-zinc-800">
+                <label className="flex flex-col items-center justify-center border border-dashed border-[#e5e5e5] dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 bg-[#fafafa] dark:bg-zinc-950 hover:bg-[#fafafa]/50 dark:hover:bg-zinc-900/40 rounded-xl p-6 cursor-pointer group transition-all h-48">
+                  <UploadCloud className="text-zinc-400 group-hover:text-zinc-600 dark:group-hover:text-neutral-200 mb-2 transition-colors" size={32} />
+                  <span className="text-xs font-medium text-zinc-600 dark:text-neutral-300 group-hover:text-zinc-800 dark:group-hover:text-neutral-100">
                     Haz clic para subir una imagen
                   </span>
                   <span className="text-[10px] text-zinc-400 mt-1">
@@ -191,18 +191,18 @@ export default function ModalProducto({
           </div>
 
           {/* Botones de Acción */}
-          <div className="pt-4 border-t border-[#e5e5e5] flex gap-3 justify-end bg-white">
+          <div className="pt-4 border-t border-[#e5e5e5] dark:border-zinc-800 flex gap-3 justify-end bg-white dark:bg-zinc-900">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 bg-white border border-[#e5e5e5] text-[#1a1a1a] rounded-xl text-sm font-medium hover:bg-[#fafafa] active:scale-[0.98] transition-all duration-200"
+              className="px-5 py-2.5 bg-white dark:bg-zinc-900 border border-[#e5e5e5] dark:border-zinc-800 text-[#1a1a1a] dark:text-white rounded-xl text-sm font-medium hover:bg-[#fafafa] dark:hover:bg-zinc-800 active:scale-[0.98] transition-all duration-200"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2.5 bg-[#1a1a1a] text-white rounded-xl text-sm font-medium hover:bg-black active:scale-[0.98] transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50"
+              className="px-5 py-2.5 bg-[#1a1a1a] dark:bg-white text-white dark:text-zinc-950 rounded-xl text-sm font-medium hover:bg-black dark:hover:bg-neutral-100 active:scale-[0.98] transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50"
             >
               {submitting && <Loader2 className="animate-spin" size={16} />}
               {mode === 'edit' ? 'Guardar Cambios' : 'Registrar Producto'}
