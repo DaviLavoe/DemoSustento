@@ -49,6 +49,35 @@ function ProductSkeleton({ viewMode }) {
 export default function CatalogoPublico() {
   const { slug } = useParams();
   
+  // Referencia directa al DOM para máximo rendimiento (evita re-renderizados que causan lag)
+  const glowRef = React.useRef(null);
+
+  useEffect(() => {
+    let animationFrameId;
+    
+    const handleMouseMove = (e) => {
+      // Usamos requestAnimationFrame y translate3d para fluidez a 60fps (Aceleración por Hardware)
+      if (glowRef.current) {
+        animationFrameId = requestAnimationFrame(() => {
+          if (glowRef.current) {
+            glowRef.current.style.transform = `translate3d(${e.clientX - 300}px, ${e.clientY - 300}px, 0)`;
+          }
+        });
+      }
+    };
+    
+    // Centrar inicialmente si estamos en PC
+    if (typeof window !== 'undefined' && glowRef.current) {
+      glowRef.current.style.transform = `translate3d(${window.innerWidth / 2 - 300}px, ${window.innerHeight / 2 - 300}px, 0)`;
+    }
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
   const [animationDone, setAnimationDone] = useState(false);
   const [dataReady, setDataReady] = useState(false);
   const loading = !animationDone || !dataReady;
@@ -252,7 +281,19 @@ export default function CatalogoPublico() {
   const primaryColor = company?.color_primario || '#1a1a1a';
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0a0a0a] text-[#1a1a1a] dark:text-white font-sans selection:bg-[#1a1a1a] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 md:pb-0 transition-colors duration-300">
+    <div className="min-h-screen bg-[#fafafa] dark:bg-[#0a0a0a] text-[#1a1a1a] dark:text-white font-sans selection:bg-[#1a1a1a] dark:selection:bg-white selection:text-white dark:selection:text-black pb-24 md:pb-0 transition-colors duration-300 relative">
+      
+      {/* Resplandor Global que sigue al cursor en TODA la página (Acelerado por GPU) */}
+      <div 
+        ref={glowRef}
+        className="fixed pointer-events-none z-0 w-[600px] h-[600px] rounded-full blur-[120px] opacity-40 dark:opacity-20 will-change-transform"
+        style={{ 
+          backgroundColor: primaryColor !== '#1a1a1a' ? primaryColor : '#e5e5e5',
+          left: 0,
+          top: 0
+        }}
+      ></div>
+
       <PantallaCargaPublica nombreTienda="Catálogo" onComplete={() => setAnimationDone(true)} />
 
       {!loading && notFound && (

@@ -87,17 +87,17 @@ export default function CatalogHeader({
       <header className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-28 flex flex-col items-center text-center gap-6 border-b border-[#e5e5e5]/50 dark:border-neutral-800 relative overflow-hidden transition-colors">
         {/* Elemento decorativo de fondo principal */}
         <div 
-          className="absolute inset-0 -z-10 opacity-[0.03] pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }}
+          className="absolute inset-0 -z-10 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(currentColor 1px, transparent 1px)', backgroundSize: '32px 32px' }}
         ></div>
-        
-        {/* Resplandor decorativo */}
+
+        {/* Resplandor central estático */}
         <div 
-          className="absolute top-1/2 left-1/2 -z-10 w-full max-w-3xl h-full opacity-20 blur-[100px] pointer-events-none -translate-x-1/2 -translate-y-1/2 rounded-full"
+          className="absolute top-1/2 left-1/2 -z-10 w-full max-w-xl h-full opacity-30 dark:opacity-20 blur-[100px] pointer-events-none -translate-x-1/2 -translate-y-1/2 rounded-full"
           style={{ backgroundColor: primaryColor || '#e5e5e5' }}
         ></div>
 
-        <span 
+        <span
           className="px-5 py-2 bg-white dark:bg-neutral-900 text-[#1a1a1a] dark:text-white text-[10px] font-bold tracking-widest uppercase rounded-full animate-reveal border shadow-sm flex items-center gap-2 transition-colors"
           style={{ borderColor: primaryColor ? `${primaryColor}40` : '#e5e5e5' }}
         >
