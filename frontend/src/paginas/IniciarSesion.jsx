@@ -19,14 +19,12 @@ export default function IniciarSesion() {
     setIsLoading(true);
 
     try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (signInError) throw signInError;
-
-      console.log('Login exitoso', data);
       navigate('/dashboard');
     } catch (err) {
       console.error('Error al iniciar sesión:', err);
