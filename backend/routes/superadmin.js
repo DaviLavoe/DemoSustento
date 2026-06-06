@@ -212,4 +212,106 @@ router.get('/estadisticas', async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────
+// GESTIÓN DE USUARIOS SUPER-ADMIN
+// ─────────────────────────────────────────────
+
+// GET /api/superadmin/usuarios
+// Lista todos los superadmins en el sistema
+router.get('/usuarios', async (req, res) => {
+  try {
+    const { data: dbUsers, error: dbError } = await supabase
+      .from('usuarios')
+      .select('id, nombre, rol, created_at')
+      .eq('rol', 'superadmin')
+      .order('created_at', { ascending: false });
+
+    if (dbError) throw dbError;
+
+    // Obtener los detalles desde auth para mapear el email
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+    if (authError) throw authError;
+
+    const usersWithEmail = dbUsers.map(user => {
+      const authUser = authData.users.find(u => u.id === user.id);
+      return {
+        ...user,
+        email: authUser ? authUser.email : 'N/A'
+      };
+    });
+
+    res.json({ success: true, usuarios: usersWithEmail });
+  } catch (err) {
+    console.error('Error en GET /api/superadmin/usuarios:', err);
+    res.status(500).json({ success: false, message: 'Error al obtener usuarios', error: err.message });
+  }
+});
+
+// POST /api/superadmin/usuarios
+// Crea un nuevo usuario super-admin
+router.post('/usuarios', async (req, res) => {
+  try {
+    const { email, password, nombre, rol } = req.body;
+
+    if (!email || !password || !nombre || !rol) {
+      return res.status(400).json({ success: false, message: 'Todos los campos son obligatorios' });
+    }
+
+    if (rol !== 'superadmin') {
+      return res.status(400).json({ success: false, message: 'Rol no permitido para esta sección' });
+    }
+
+    // 1. Crear el usuario en auth.users
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name: nombre }
+    });
+
+    if (authError) throw authError;
+
+    // 2. Insertar en public.usuarios
+    const { error: dbError } = await supabase
+      .from('usuarios')
+      .insert({
+        id: authData.user.id,
+        nombre,
+        rol,
+        empresa_id: null
+      });
+
+    if (dbError) {
+      // Revertir creación en auth si falla la base de datos
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      throw dbError;
+    }
+
+    res.status(201).json({ success: true, message: 'Super-administrador creado con éxito' });
+  } catch (err) {
+    console.error('Error en POST /api/superadmin/usuarios:', err);
+    res.status(500).json({ success: false, message: 'Error al crear el usuario', error: err.message });
+  }
+});
+
+// DELETE /api/superadmin/usuarios/:id
+// Elimina un usuario super-admin
+router.delete('/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Borrar de auth.users (cascadea o borramos manualmente)
+    const { error: authError } = await supabase.auth.admin.deleteUser(id);
+    if (authError) throw authError;
+
+    // Borrado explícito
+    await supabase.from('usuarios').delete().eq('id', id);
+
+    res.json({ success: true, message: 'Super-administrador eliminado correctamente' });
+  } catch (err) {
+    console.error('Error en DELETE /api/superadmin/usuarios/:id:', err);
+    res.status(500).json({ success: false, message: 'Error al eliminar el usuario', error: err.message });
+  }
+});
+
 module.exports = router;

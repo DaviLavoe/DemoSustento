@@ -13,6 +13,8 @@ import LoginSuperAdmin from './paginas/superadmin/LoginSuperAdmin';
 import SuperAdminLayout from './paginas/superadmin/SuperAdminLayout';
 import GestionEmpresas from './paginas/superadmin/GestionEmpresas';
 import EstadisticasGlobales from './paginas/superadmin/EstadisticasGlobales';
+import GestionUsuariosSuperAdmin from './paginas/superadmin/GestionUsuariosSuperAdmin';
+import GestionTrabajadores from './paginas/dashboard/GestionTrabajadores';
 
 function App() {
   return (
@@ -37,6 +39,7 @@ function App() {
           <Route index element={<Navigate to="empresas" replace />} />
           <Route path="empresas" element={<GestionEmpresas />} />
           <Route path="estadisticas" element={<EstadisticasGlobales />} />
+          <Route path="usuarios" element={<GestionUsuariosSuperAdmin />} />
         </Route>
 
         {/* ── Dashboard de Empresa (sesión regular) ── */}
@@ -49,10 +52,11 @@ function App() {
           <Route path="inventario" element={<Inventario />} />
           <Route path="reportes" element={<Reportes />} />
           <Route path="configuracion" element={<Configuracion />} />
+          <Route path="usuarios" element={<GestionTrabajadores />} />
         </Route>
 
         {/* Redirección por defecto */}
-        <Route path="*" element={<Navigate to="/iniciar-sesion" replace />} />
+        <Route path="*" element={<Navigate to="/superadmin/login" replace />} />
       </Routes>
     </Router>
   );

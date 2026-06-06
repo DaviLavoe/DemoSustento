@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid, Building2, BarChart3, LogOut, Menu, X,
-  Shield, ChevronRight, Zap
+  Shield, ChevronRight, Zap, Users
 } from 'lucide-react';
 import { supabaseAdmin } from '../../config/supabaseAdmin';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
@@ -11,6 +11,7 @@ import ClickSpark from '../../components/ClickSpark';
 const navItems = [
   { name: 'Empresas', path: '/superadmin/empresas', icon: Building2, desc: 'Gestión de tenants' },
   { name: 'Estadísticas', path: '/superadmin/estadisticas', icon: BarChart3, desc: 'Métricas globales' },
+  { name: 'Usuarios', path: '/superadmin/usuarios', icon: Users, desc: 'Cuentas de super-admin' },
 ];
 
 export default function SuperAdminLayout() {

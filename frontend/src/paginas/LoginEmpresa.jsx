@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Store, AlertTriangle, Loader2 } from 'lucide-react';
 import { supabase } from '../config/supabase';
-import Spline from '@splinetool/react-spline';
 import ClickSpark from '../components/ClickSpark';
+import LoginTechStore from './empresas/LoginTechStore';
+import LoginModaElegante from './empresas/LoginModaElegante';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -81,21 +82,62 @@ export default function LoginEmpresa() {
     );
   }
 
+  // Enrutar dinámicamente según el slug
+  if (slug === 'tech-store-lima') {
+    return (
+      <LoginTechStore
+        empresa={empresa}
+        email={email}
+        setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+        showPassword={showPassword}
+        setShowPassword={setShowPassword}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        error={error}
+      />
+    );
+  }
+
+  if (slug === 'moda-elegante') {
+    return (
+      <LoginModaElegante
+        empresa={empresa}
+        email={email}
+        setEmail={setEmail}
+        password={password}
+        setPassword={setPassword}
+        showPassword={showPassword}
+        setShowPassword={setShowPassword}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        error={error}
+      />
+    );
+  }
+
+  // Generic Fallback Login (para otras empresas que se registren en el futuro)
   return (
     <div className="min-h-screen w-full flex bg-[#0a0a0a] selection:bg-white/20 selection:text-white">
       <ClickSpark sparkColor={accentColor} sparkSize={10} sparkRadius={20} sparkCount={8} duration={400}>
         <div className="w-full min-h-screen flex">
 
-          {/* ── Panel izquierdo: Robot 3D + branding oscuro ───────────────── */}
+          {/* ── Panel izquierdo: Abstracto geométrico + branding oscuro (NO ROBOT) ── */}
           <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12 bg-black">
+            
+            {/* Esfera brillante abstracta con color de la empresa */}
+            <div 
+              className="absolute w-96 h-96 rounded-full blur-[120px] opacity-20 pointer-events-none"
+              style={{ 
+                backgroundColor: accentColor,
+                top: '30%',
+                left: '25%',
+              }}
+            />
 
-            {/* Robot 3D de Spline — ocupa todo el panel */}
-            <div className="absolute inset-0 z-0 scale-[1.2] translate-x-12 -translate-y-4 spline-watermark-hide">
-              <Spline scene="https://prod.spline.design/LjmP8z5grXutLGK3/scene.splinecode" />
-            </div>
-
-            {/* Gradiente inferior para que el texto sea legible */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none z-0" />
+            {/* Gradiente inferior para legibilidad */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent pointer-events-none z-0" />
 
             {/* Logo de la empresa — arriba */}
             <div className="relative z-10 flex items-center gap-3">
@@ -136,7 +178,7 @@ export default function LoginEmpresa() {
             </div>
           </div>
 
-          {/* ── Panel derecho: Formulario oscuro ─────────────────────────── */}
+          {/* ── Panel derecho: Formulario oscuro ── */}
           <div className="w-full lg:w-1/2 relative bg-[#0d0d0d] border-l border-white/5 flex items-center justify-center p-8">
             {/* Gradiente sutil de fondo */}
             <div
@@ -233,7 +275,7 @@ export default function LoginEmpresa() {
                   </div>
                 </div>
 
-                {/* Botón submit — usa el color de la empresa como acento */}
+                {/* Botón submit */}
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -253,10 +295,10 @@ export default function LoginEmpresa() {
 
               {/* Footer */}
               <p className="text-center text-neutral-700 text-xs mt-10">
-                ¿Eres el administrador del sistema?{' '}
-                <a href="/superadmin/login" className="text-neutral-500 hover:text-neutral-300 underline underline-offset-4 transition-colors">
-                  Panel Super-Admin
-                </a>
+                ¿No tienes cuenta?{' '}
+                <Link to="/registro" className="text-neutral-550 hover:text-neutral-300 underline underline-offset-4 transition-colors">
+                  Solicitar acceso
+                </Link>
               </p>
             </div>
           </div>
@@ -276,3 +318,4 @@ function isColorDark(hex) {
   const b = parseInt(h.substring(4, 6), 16);
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
 }
+

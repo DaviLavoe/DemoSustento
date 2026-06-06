@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../config/supabase';
 import { API_BASE_URL } from '../config/api';
-import { Package, Settings, BarChart3 } from 'lucide-react';
+import { Package, Settings, BarChart3, Users } from 'lucide-react';
 
 export function useDashboard() {
   const [user, setUser] = useState(null);
@@ -32,6 +32,9 @@ export function useDashboard() {
           if (data.success && data.empresa) {
             setEmpresa(data.empresa);
           }
+          if (data.success && data.user) {
+            setUser((prev) => ({ ...prev, ...data.user }));
+          }
         }
       } catch (err) {
         console.error('useDashboard: error al cargar empresa:', err);
@@ -43,9 +46,14 @@ export function useDashboard() {
 
   const handleCerrarSesion = async () => {
     try {
+      const slug = empresa?.slug;
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate('/iniciar-sesion');
+      if (slug) {
+        navigate(`/login/${slug}`);
+      } else {
+        navigate('/iniciar-sesion');
+      }
     } catch (err) {
       console.error('Error al cerrar sesión:', err);
     }
@@ -62,6 +70,11 @@ export function useDashboard() {
       path: '/dashboard/reportes',
       icon: BarChart3,
     },
+    ...(user?.rol === 'admin' ? [{
+      name: 'Trabajadores',
+      path: '/dashboard/usuarios',
+      icon: Users,
+    }] : []),
     {
       name: 'Configuración',
       path: '/dashboard/configuracion',
@@ -81,6 +94,7 @@ export function useDashboard() {
     '/dashboard/inventario': empresa?.nombre || 'Inventario',
     '/dashboard/reportes': 'Reportes y Analíticas',
     '/dashboard/configuracion': 'Configuración',
+    '/dashboard/usuarios': 'Trabajadores',
   };
 
   const activePageTitle = () => pageTitles[location.pathname] || 'Dashboard';
