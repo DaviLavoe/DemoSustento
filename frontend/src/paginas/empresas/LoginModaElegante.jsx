@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react';
 import ClickSpark from '../../components/ClickSpark';
-import { Link } from 'react-router-dom';
 
 export default function LoginModaElegante({
   empresa,
@@ -189,17 +188,13 @@ export default function LoginModaElegante({
                   </button>
                 </form>
 
-                {/* Enlace de Registro */}
+                {/* Enlace de contacto */}
                 <div className="mt-12 text-center border-t border-neutral-100 pt-6">
                   <p className="text-xs text-neutral-600 font-light">
-                    ¿No tienes cuenta?{' '}
-                    <Link 
-                      to="/registro" 
-                      className="font-semibold hover:opacity-80 underline underline-offset-4 transition-all"
-                      style={{ color: accentColor, decorationColor: `${accentColor}40` }}
-                    >
-                      Registrar marca
-                    </Link>
+                    ¿No tienes acceso?{' '}
+                    <span className="font-semibold" style={{ color: accentColor }}>
+                      Comunícate con el administrador.
+                    </span>
                   </p>
                 </div>
               </div>

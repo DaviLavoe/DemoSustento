@@ -40,7 +40,7 @@ export default function DashboardLayout() {
             
             {/* Header del Sidebar */}
             <div className="p-6 border-b border-[#e5e5e5] dark:border-zinc-800 flex items-center justify-between lg:justify-center relative">
-              <Link to="/dashboard" className="flex items-center justify-center group">
+              <Link to={empresaSlug ? `/login/${empresaSlug}/dashboard` : '#'} className="flex items-center justify-center group">
                 {empresa?.logo_url ? (
                   <img 
                     src={empresa.logo_url} 

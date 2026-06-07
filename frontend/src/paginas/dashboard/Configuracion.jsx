@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Settings, Phone, Palette, HelpCircle, UploadCloud, Loader2, CheckCircle, Trash2, ShieldAlert } from 'lucide-react';
-import { supabase } from '../../config/supabase';
+import { useEmpresaSupabase } from '../../context/EmpresaSupabaseContext';
 import { API_BASE_URL } from '../../config/api';
 
 export default function Configuracion() {
+  // Cliente Supabase aislado de la empresa activa
+  const supabase = useEmpresaSupabase();
   const context = useOutletContext();
   const empresa = context?.empresa;
   const setEmpresa = context?.setEmpresa || (() => {});

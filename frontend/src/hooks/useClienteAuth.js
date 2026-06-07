@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../config/supabase';
+import { useParams } from 'react-router-dom';
+import { getSupabaseForSlug } from '../config/supabaseEmpresa';
 import { API_BASE_URL } from '../config/api';
 
 export function useClienteAuth() {
+  const { slug } = useParams();
+  const supabase = getSupabaseForSlug(slug);
   const [cliente, setCliente] = useState(null); // Contiene { id, email, nombre, telefono, direccion }
   const [loading, setLoading] = useState(true);
   const [pedidos, setPedidos] = useState([]);

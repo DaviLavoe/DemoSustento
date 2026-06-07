@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight, Store, AlertTriangle, Loader2 } from 'lucide-react';
-import { supabase } from '../config/supabase';
+import { getSupabaseForSlug } from '../config/supabaseEmpresa';
 import ClickSpark from '../components/ClickSpark';
 import LoginTechStore from './empresas/LoginTechStore';
 import LoginModaElegante from './empresas/LoginModaElegante';
@@ -11,6 +11,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 export default function LoginEmpresa() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const supabase = getSupabaseForSlug(slug);
 
   const [empresa, setEmpresa] = useState(null);
   const [loadingEmpresa, setLoadingEmpresa] = useState(true);
@@ -40,9 +41,40 @@ export default function LoginEmpresa() {
     setError(null);
     setIsLoading(true);
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      // 1. Iniciar sesión en Supabase
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
-      navigate('/dashboard');
+
+      // 2. Validar que el usuario pertenece a ESTA empresa (slug)
+      try {
+        const res = await fetch(`${API_URL}/api/auth/me`, {
+          headers: { Authorization: `Bearer ${signInData.session.access_token}` },
+        });
+        const data = await res.json();
+
+        if (!data.success || !data.empresa) {
+          // El usuario no tiene empresa asignada (podría ser superadmin, etc.)
+          await supabase.auth.signOut();
+          setError('Esta cuenta no tiene acceso a ninguna empresa.');
+          return;
+        }
+
+        if (data.empresa.slug !== slug) {
+          // La cuenta pertenece a otra empresa
+          await supabase.auth.signOut();
+          setError(`Esta cuenta no tiene acceso a "${empresa?.nombre || slug}". Verifica que estás usando el login correcto.`);
+          return;
+        }
+      } catch (meErr) {
+        // Si falla la validación, cerrar sesión por seguridad
+        await supabase.auth.signOut();
+        setError('Error al verificar tu cuenta. Inténtalo de nuevo.');
+        return;
+      }
+
+      // Guardar slug en sessionStorage para que RutaProtegida pueda redirigir correctamente
+      sessionStorage.setItem('lastEmpresaSlug', slug);
+      navigate(`/login/${slug}/dashboard`);
     } catch (err) {
       setError(
         err.message === 'Invalid login credentials'
@@ -75,8 +107,8 @@ export default function LoginEmpresa() {
         <p className="text-neutral-500 text-sm">
           No existe ninguna empresa con el identificador <strong className="text-neutral-300">"{slug}"</strong>.
         </p>
-        <a href="/iniciar-sesion" className="text-sm text-neutral-500 hover:text-neutral-300 underline underline-offset-4 transition-colors">
-          Ir al login general
+        <a href="/superadmin/login" className="text-sm text-neutral-500 hover:text-neutral-300 underline underline-offset-4 transition-colors">
+          Ir al panel de administración
         </a>
       </div>
     );

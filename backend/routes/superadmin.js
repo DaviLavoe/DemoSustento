@@ -314,4 +314,159 @@ router.delete('/usuarios/:id', async (req, res) => {
   }
 });
 
+// PUT /api/superadmin/usuarios/:id
+// Edita un usuario super-admin
+router.put('/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, password, nombre } = req.body;
+
+    if (!nombre) {
+      return res.status(400).json({ success: false, message: 'El nombre es obligatorio' });
+    }
+
+    // 1. Actualizar datos en Auth
+    const authUpdates = {
+      user_metadata: { name: nombre }
+    };
+    if (email) {
+      authUpdates.email = email;
+      authUpdates.email_confirm = true;
+    }
+    if (password) {
+      authUpdates.password = password;
+    }
+
+    const { error: authError } = await supabase.auth.admin.updateUserById(id, authUpdates);
+    if (authError) throw authError;
+
+    // 2. Actualizar en public.usuarios
+    const { error: dbError } = await supabase
+      .from('usuarios')
+      .update({ nombre })
+      .eq('id', id);
+
+    if (dbError) throw dbError;
+
+    res.json({ success: true, message: 'Super-administrador actualizado con éxito' });
+  } catch (err) {
+    console.error('Error en PUT /api/superadmin/usuarios/:id:', err);
+    res.status(500).json({ success: false, message: 'Error al actualizar el usuario', error: err.message });
+  }
+});
+
+
+// ─────────────────────────────────────────────
+// GESTIÓN DE USUARIOS DE EMPRESA (desde SuperAdmin)
+// ─────────────────────────────────────────────
+
+// GET /api/superadmin/empresas/:empresaId/usuarios
+// Lista todos los usuarios de una empresa específica
+router.get('/empresas/:empresaId/usuarios', async (req, res) => {
+  try {
+    const { empresaId } = req.params;
+
+    const { data: dbUsers, error: dbError } = await supabase
+      .from('usuarios')
+      .select('id, nombre, rol, created_at')
+      .eq('empresa_id', empresaId)
+      .order('created_at', { ascending: false });
+
+    if (dbError) throw dbError;
+
+    // Mapear emails desde auth
+    const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+    if (authError) throw authError;
+
+    const usersWithEmail = dbUsers.map(user => {
+      const authUser = authData.users.find(u => u.id === user.id);
+      return { ...user, email: authUser ? authUser.email : 'N/A' };
+    });
+
+    res.json({ success: true, usuarios: usersWithEmail });
+  } catch (err) {
+    console.error('Error en GET /api/superadmin/empresas/:empresaId/usuarios:', err);
+    res.status(500).json({ success: false, message: 'Error al obtener los usuarios de la empresa', error: err.message });
+  }
+});
+
+// POST /api/superadmin/empresas/:empresaId/usuarios
+// Crea un usuario (admin o vendedor) para una empresa específica
+router.post('/empresas/:empresaId/usuarios', async (req, res) => {
+  try {
+    const { empresaId } = req.params;
+    const { email, password, nombre, rol } = req.body;
+
+    if (!email || !password || !nombre || !rol) {
+      return res.status(400).json({ success: false, message: 'Todos los campos son obligatorios' });
+    }
+
+    if (rol !== 'admin' && rol !== 'vendedor') {
+      return res.status(400).json({ success: false, message: 'Rol inválido. Debe ser "admin" o "vendedor"' });
+    }
+
+    // Verificar que la empresa existe
+    const { data: empresa, error: empresaError } = await supabase
+      .from('empresas')
+      .select('id, nombre')
+      .eq('id', empresaId)
+      .single();
+
+    if (empresaError || !empresa) {
+      return res.status(404).json({ success: false, message: 'Empresa no encontrada' });
+    }
+
+    // 1. Crear en auth.users
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name: nombre }
+    });
+
+    if (authError) throw authError;
+
+    // 2. Insertar en public.usuarios con empresa_id
+    const { error: dbError } = await supabase
+      .from('usuarios')
+      .insert({
+        id: authData.user.id,
+        nombre,
+        rol,
+        empresa_id: empresaId
+      });
+
+    if (dbError) {
+      // Revertir
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      throw dbError;
+    }
+
+    res.status(201).json({ success: true, message: `Usuario "${nombre}" creado para ${empresa.nombre}` });
+  } catch (err) {
+    console.error('Error en POST /api/superadmin/empresas/:empresaId/usuarios:', err);
+    res.status(500).json({ success: false, message: 'Error al crear el usuario de empresa', error: err.message });
+  }
+});
+
+// DELETE /api/superadmin/empresas/:empresaId/usuarios/:userId
+// Elimina un usuario de empresa (solo superadmin puede hacer esto)
+router.delete('/empresas/:empresaId/usuarios/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Borrar de auth (cascadeará a public.usuarios si hay FK cascade, o borrar manualmente)
+    const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+    if (authError) throw authError;
+
+    await supabase.from('usuarios').delete().eq('id', userId);
+
+    res.json({ success: true, message: 'Usuario de empresa eliminado correctamente' });
+  } catch (err) {
+    console.error('Error en DELETE /api/superadmin/empresas/:empresaId/usuarios/:userId:', err);
+    res.status(500).json({ success: false, message: 'Error al eliminar el usuario', error: err.message });
+  }
+});
+
 module.exports = router;
+

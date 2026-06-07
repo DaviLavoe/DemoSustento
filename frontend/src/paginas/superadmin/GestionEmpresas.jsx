@@ -3,7 +3,7 @@ import { supabaseAdmin } from '../../config/supabaseAdmin';
 import {
   Building2, Plus, Search, ExternalLink, Edit2, Trash2,
   X, Check, AlertTriangle, Package, ShoppingCart, Users,
-  Loader2, Globe, Phone, LogIn
+  Loader2, Globe, Phone, LogIn, UserPlus
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -167,7 +167,220 @@ function EmpresaModal({ empresa, onClose, onSaved }) {
   );
 }
 
-// ─── Componente Modal de Confirmación de Eliminación ────────────────────────
+// ─── Modal para crear usuario de empresa ──────────────────────────────────────
+function UsuarioEmpresaModal({ empresa, onClose }) {
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState({ nombre: '', email: '', password: '', rol: 'admin' });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+
+  const fetchUsuarios = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/superadmin/empresas/${empresa.id}/usuarios`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) setUsuarios(data.usuarios);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [empresa.id]);
+
+  useEffect(() => { fetchUsuarios(); }, [fetchUsuarios]);
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/api/superadmin/empresas/${empresa.id}/usuarios`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message);
+      setSuccess(data.message);
+      setForm({ nombre: '', email: '', password: '', rol: 'admin' });
+      fetchUsuarios();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (userId) => {
+    setDeleting(userId);
+    try {
+      const token = await getToken();
+      await fetch(`${API_URL}/api/superadmin/empresas/${empresa.id}/usuarios/${userId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchUsuarios();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setDeleting(null);
+    }
+  };
+
+  const rolColors = {
+    admin: { bg: 'bg-violet-500/15', text: 'text-violet-400', border: 'border-violet-500/30', label: 'Admin' },
+    vendedor: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/30', label: 'Vendedor' },
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-xl bg-[#0d0d14] border border-white/10 rounded-2xl shadow-2xl shadow-violet-900/20 overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="p-6 border-b border-white/5 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
+              <Users size={15} className="text-violet-400" />
+            </div>
+            <div>
+              <h2 className="text-white font-semibold text-base">Usuarios de Empresa</h2>
+              <p className="text-neutral-500 text-xs mt-0.5">{empresa.nombre}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-white transition-all">
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="overflow-y-auto flex-1">
+          {/* Formulario crear usuario */}
+          <form onSubmit={handleCreate} className="p-6 border-b border-white/5 space-y-3">
+            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <UserPlus size={12} /> Crear Nueva Cuenta
+            </p>
+
+            {error && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+                <AlertTriangle size={14} className="text-red-400 mt-0.5 shrink-0" />
+                <p className="text-red-300 text-sm">{error}</p>
+              </div>
+            )}
+            {success && (
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                <Check size={14} className="text-emerald-400 mt-0.5 shrink-0" />
+                <p className="text-emerald-300 text-sm">{success}</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">Nombre *</label>
+                <input
+                  type="text" required value={form.nombre}
+                  onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                  placeholder="Ej: Juan Pérez"
+                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-neutral-600 text-sm focus:outline-none focus:border-violet-500/50 transition-all"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">Rol *</label>
+                <select
+                  value={form.rol}
+                  onChange={(e) => setForm({ ...form, rol: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-violet-500/50 transition-all appearance-none"
+                >
+                  <option value="admin">Admin</option>
+                  <option value="vendedor">Vendedor</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">Correo *</label>
+              <input
+                type="email" required value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="usuario@empresa.com"
+                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-neutral-600 text-sm focus:outline-none focus:border-violet-500/50 transition-all"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">Contraseña *</label>
+              <input
+                type="password" required value={form.password} minLength={6}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                placeholder="Mínimo 6 caracteres"
+                className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-neutral-600 text-sm focus:outline-none focus:border-violet-500/50 transition-all"
+              />
+            </div>
+            <button
+              type="submit" disabled={saving}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:from-violet-500 hover:to-indigo-500 disabled:opacity-50 transition-all shadow-lg shadow-violet-900/30"
+            >
+              {saving ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
+              Crear Usuario
+            </button>
+          </form>
+
+          {/* Lista de usuarios existentes */}
+          <div className="p-6 space-y-3">
+            <p className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3">Cuentas Actuales ({usuarios.length})</p>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 size={22} className="animate-spin text-violet-400" />
+              </div>
+            ) : usuarios.length === 0 ? (
+              <div className="text-center py-8">
+                <Users size={32} className="text-neutral-700 mx-auto mb-2" />
+                <p className="text-neutral-500 text-sm">Sin usuarios registrados</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {usuarios.map((u) => {
+                  const rc = rolColors[u.rol] || rolColors.vendedor;
+                  return (
+                    <div key={u.id} className="flex items-center justify-between p-3 rounded-xl bg-white/3 border border-white/5 group">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-violet-600/10 border border-violet-500/20 flex items-center justify-center text-violet-400 font-bold text-xs shrink-0">
+                          {u.nombre.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-white text-sm font-medium truncate">{u.nombre}</p>
+                          <p className="text-neutral-500 text-xs truncate">{u.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase border ${rc.bg} ${rc.text} ${rc.border}`}>
+                          {rc.label}
+                        </span>
+                        <button
+                          onClick={() => handleDelete(u.id)}
+                          disabled={deleting === u.id}
+                          className="p-1.5 rounded-lg hover:bg-red-500/10 text-neutral-600 hover:text-red-400 transition-all"
+                          title="Eliminar usuario"
+                        >
+                          {deleting === u.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ConfirmDeleteModal({ empresa, onClose, onConfirm, deleting }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -208,6 +421,7 @@ export default function GestionEmpresas() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
+  const [gestionUsuariosEmpresa, setGestionUsuariosEmpresa] = useState(null); // empresa seleccionada para gestionar usuarios
 
   const fetchEmpresas = useCallback(async () => {
     setLoading(true);
@@ -364,7 +578,7 @@ export default function GestionEmpresas() {
                   <span className="text-neutral-500 text-xs md:hidden">clientes</span>
                 </div>
 
-                {/* Acciones */}
+                  {/* Acciones */}
                 <div className="md:col-span-2 flex items-center gap-2 md:justify-end">
                   {/* Ver catálogo público */}
                   <a
@@ -386,6 +600,14 @@ export default function GestionEmpresas() {
                   >
                     <LogIn size={14} />
                   </a>
+                  {/* Gestionar usuarios de esta empresa */}
+                  <button
+                    onClick={() => setGestionUsuariosEmpresa(empresa)}
+                    title={`Gestionar usuarios de ${empresa.nombre}`}
+                    className="p-2 rounded-lg hover:bg-white/8 text-neutral-500 hover:text-blue-400 transition-all"
+                  >
+                    <Users size={14} />
+                  </button>
                   {/* Editar empresa */}
                   <button
                     onClick={() => setModalEmpresa(empresa)}
@@ -423,6 +645,12 @@ export default function GestionEmpresas() {
           onClose={() => setDeleteTarget(null)}
           onConfirm={handleDelete}
           deleting={deleting}
+        />
+      )}
+      {gestionUsuariosEmpresa && (
+        <UsuarioEmpresaModal
+          empresa={gestionUsuariosEmpresa}
+          onClose={() => setGestionUsuariosEmpresa(null)}
         />
       )}
     </div>

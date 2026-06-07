@@ -1,7 +1,6 @@
 import { Eye, EyeOff, ArrowRight, Cpu, AlertTriangle, Loader2 } from 'lucide-react';
 import Spline from '@splinetool/react-spline';
 import ClickSpark from '../../components/ClickSpark';
-import { Link } from 'react-router-dom';
 
 export default function LoginTechStore({
   empresa,
@@ -188,10 +187,10 @@ export default function LoginTechStore({
 
               {/* Footer */}
               <p className="text-center text-neutral-700 text-xs mt-10">
-                ¿No tienes cuenta?{' '}
-                <Link to="/registro" className="text-neutral-500 hover:text-neutral-300 underline underline-offset-4 transition-colors">
-                  Solicitar acceso
-                </Link>
+                ¿No tienes acceso?{' '}
+                <span className="text-neutral-500">
+                  Comunícate con el administrador del sistema.
+                </span>
               </p>
 
               {/* Separador de seguridad */}

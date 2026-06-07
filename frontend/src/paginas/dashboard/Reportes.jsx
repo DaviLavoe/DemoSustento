@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '../../config/supabase';
+import { useEmpresaSupabase } from '../../context/EmpresaSupabaseContext';
 import { API_BASE_URL } from '../../config/api';
 import { BarChart3, TrendingUp, ShoppingBag, DollarSign, X } from 'lucide-react';
 import { 
@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 
 export default function Reportes() {
+  const supabase = useEmpresaSupabase();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [data, setData] = useState({

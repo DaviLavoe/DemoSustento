@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../config/supabase';
+import { useEmpresaSupabase } from '../context/EmpresaSupabaseContext';
 import { API_BASE_URL } from '../config/api';
 
 export function useProductos() {
+  // Cliente Supabase aislado de la empresa activa (via EmpresaSupabaseContext)
+  const supabase = useEmpresaSupabase();
+
   const [productos, setProductos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);

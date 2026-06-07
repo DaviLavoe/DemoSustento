@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabaseAdmin } from '../../config/supabaseAdmin';
 import {
-  Shield, Plus, Search, Trash2, X, Check, AlertTriangle, Loader2
+  Shield, Plus, Search, Trash2, X, Check, AlertTriangle, Loader2, Edit2
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
@@ -11,11 +11,11 @@ async function getToken() {
   return session?.access_token;
 }
 
-// ─── Componente Modal para Crear Super-Administrador ───────────────────────────
-function UsuarioModal({ onClose, onSaved }) {
+// ─── Componente Modal para Crear/Editar Super-Administrador ─────────────────────
+function UsuarioModal({ onClose, onSaved, usuarioEditar = null }) {
   const [form, setForm] = useState({
-    nombre: '',
-    email: '',
+    nombre: usuarioEditar?.nombre || '',
+    email: usuarioEditar?.email || '',
     password: '',
     rol: 'superadmin',
   });
@@ -28,10 +28,21 @@ function UsuarioModal({ onClose, onSaved }) {
     setError(null);
     try {
       const token = await getToken();
-      const res = await fetch(`${API_URL}/api/superadmin/usuarios`, {
-        method: 'POST',
+      const isEdit = !!usuarioEditar;
+      const method = isEdit ? 'PUT' : 'POST';
+      const url = isEdit
+        ? `${API_URL}/api/superadmin/usuarios/${usuarioEditar.id}`
+        : `${API_URL}/api/superadmin/usuarios`;
+
+      const payload = { ...form };
+      if (isEdit && !payload.password) {
+        delete payload.password; // No enviar contraseña si está vacía en edición
+      }
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
@@ -53,7 +64,9 @@ function UsuarioModal({ onClose, onSaved }) {
             <div className="w-8 h-8 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
               <Shield size={15} className="text-violet-400" />
             </div>
-            <h2 className="text-white font-semibold text-base">Nuevo Super-Admin</h2>
+            <h2 className="text-white font-semibold text-base">
+              {usuarioEditar ? 'Editar Super-Admin' : 'Nuevo Super-Admin'}
+            </h2>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-white transition-all">
             <X size={16} />
@@ -93,13 +106,15 @@ function UsuarioModal({ onClose, onSaved }) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Contraseña Temporal *</label>
+            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+              {usuarioEditar ? 'Nueva Contraseña (Opcional)' : 'Contraseña Temporal *'}
+            </label>
             <input
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
-              placeholder="Mínimo 6 caracteres"
+              required={!usuarioEditar}
+              placeholder={usuarioEditar ? 'Dejar en blanco para conservar la actual' : 'Mínimo 6 caracteres'}
               minLength={6}
               className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all"
             />
@@ -113,7 +128,7 @@ function UsuarioModal({ onClose, onSaved }) {
             <button type="submit" disabled={saving}
               className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:from-violet-500 hover:to-indigo-500 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-violet-900/30">
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-              Crear Usuario
+              {usuarioEditar ? 'Guardar Cambios' : 'Crear Usuario'}
             </button>
           </div>
         </form>
@@ -159,10 +174,11 @@ export default function GestionUsuariosSuperAdmin() {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalUsuario, setModalUsuario] = useState(null); // null | {} (nuevo) | usuario (editar)
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   const fetchUsuarios = useCallback(async () => {
     setLoading(true);
@@ -183,7 +199,18 @@ export default function GestionUsuariosSuperAdmin() {
   }, []);
 
   useEffect(() => {
-    fetchUsuarios();
+    const fetchSessionAndData = async () => {
+      try {
+        const { data: { session } } = await supabaseAdmin.auth.getSession();
+        if (session?.user) {
+          setCurrentUserId(session.user.id);
+        }
+      } catch (err) {
+        console.error('Error fetching session:', err);
+      }
+      await fetchUsuarios();
+    };
+    fetchSessionAndData();
   }, [fetchUsuarios]);
 
   const handleDelete = async () => {
@@ -225,7 +252,7 @@ export default function GestionUsuariosSuperAdmin() {
           </p>
         </div>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setModalUsuario({})}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm font-semibold hover:from-violet-500 hover:to-indigo-500 transition-all shadow-lg shadow-violet-900/30 whitespace-nowrap"
         >
           <Plus size={16} />
@@ -288,7 +315,14 @@ export default function GestionUsuariosSuperAdmin() {
                     {usuario.nombre.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-white font-semibold text-sm truncate">{usuario.nombre}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-white font-semibold text-sm truncate">{usuario.nombre}</p>
+                      {usuario.id === currentUserId && (
+                        <span className="px-1.5 py-0.5 rounded bg-violet-500/20 border border-violet-500/30 text-violet-400 text-[9px] font-bold uppercase tracking-wider">
+                          Tú
+                        </span>
+                      )}
+                    </div>
                     <span className="text-violet-400 text-[10px] font-mono uppercase">Rol: Super-Admin</span>
                   </div>
                 </div>
@@ -304,14 +338,34 @@ export default function GestionUsuariosSuperAdmin() {
                 </div>
 
                 {/* Acciones */}
-                <div className="md:col-span-1 flex items-center justify-end">
+                <div className="md:col-span-1 flex items-center justify-end gap-1">
+                  {/* Editar usuario */}
                   <button
-                    onClick={() => setDeleteTarget(usuario)}
-                    title="Eliminar usuario"
-                    className="p-2 rounded-lg hover:bg-white/8 text-neutral-500 hover:text-red-400 transition-all"
+                    onClick={() => setModalUsuario(usuario)}
+                    title="Editar usuario"
+                    className="p-2 rounded-lg hover:bg-white/8 text-neutral-500 hover:text-violet-400 transition-all"
                   >
-                    <Trash2 size={14} />
+                    <Edit2 size={14} />
                   </button>
+
+                  {/* Eliminar usuario */}
+                  {usuario.id === currentUserId ? (
+                    <button
+                      disabled
+                      title="No puedes eliminar tu propia cuenta"
+                      className="p-2 rounded-lg text-neutral-700 cursor-not-allowed opacity-40"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setDeleteTarget(usuario)}
+                      title="Eliminar usuario"
+                      className="p-2 rounded-lg hover:bg-white/8 text-neutral-500 hover:text-red-400 transition-all"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -320,10 +374,11 @@ export default function GestionUsuariosSuperAdmin() {
       )}
 
       {/* Modales */}
-      {isModalOpen && (
+      {modalUsuario && (
         <UsuarioModal
-          onClose={() => setIsModalOpen(false)}
-          onSaved={() => { setIsModalOpen(false); fetchUsuarios(); }}
+          usuarioEditar={modalUsuario.id ? modalUsuario : null}
+          onClose={() => setModalUsuario(null)}
+          onSaved={() => { setModalUsuario(null); fetchUsuarios(); }}
         />
       )}
       {deleteTarget && (
@@ -337,3 +392,4 @@ export default function GestionUsuariosSuperAdmin() {
     </div>
   );
 }
+

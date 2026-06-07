@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import useSmoothScroll from '../hooks/useSmoothScroll';
 import { useCart } from '../hooks/useCart';
-import { supabase } from '../config/supabase';
+import { getSupabaseForSlug } from '../config/supabaseEmpresa';
 import { API_BASE_URL } from '../config/api';
 
 import PantallaCargaPublica from '../components/ui/PantallaCargaPublica';
@@ -48,6 +48,7 @@ function ProductSkeleton({ viewMode }) {
 
 export default function CatalogoPublico() {
   const { slug } = useParams();
+  const supabase = getSupabaseForSlug(slug);
   
   // Referencia directa al DOM para máximo rendimiento (evita re-renderizados que causan lag)
   const glowRef = React.useRef(null);

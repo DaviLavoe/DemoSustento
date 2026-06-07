@@ -1,16 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../../config/supabase';
+import { useEmpresaSupabase } from '../../context/EmpresaSupabaseContext';
 import { useOutletContext } from 'react-router-dom';
 import {
   Users, Plus, Search, Trash2, X, Check, AlertTriangle, Loader2, UserCheck, Shield
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-async function getToken() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.access_token;
-}
 
 // ─── Modal Crear Colaborador ─────────────────────────────────────────────────
 function ColaboradorModal({ onClose, onSaved }) {
@@ -169,6 +164,12 @@ function ConfirmDeleteModal({ usuario, onClose, onConfirm, deleting }) {
 
 // ─── Página de Colaboradores ──────────────────────────────────────────────────
 export default function GestionTrabajadores() {
+  const supabase = useEmpresaSupabase();
+  const getToken = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token;
+  };
+
   const context = useOutletContext();
   const empresa = context?.empresa;
 

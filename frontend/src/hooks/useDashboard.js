@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '../config/supabase';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { getSupabaseForSlug } from '../config/supabaseEmpresa';
 import { API_BASE_URL } from '../config/api';
 import { Package, Settings, BarChart3, Users } from 'lucide-react';
 
@@ -10,16 +10,19 @@ export function useDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  // El slug siempre está disponible en la URL: /login/:slug/dashboard/*
+  const { slug } = useParams();
+
+  // Cliente Supabase aislado específico para esta empresa
+  const supabase = getSupabaseForSlug(slug);
 
   useEffect(() => {
     async function cargarDatosUsuario() {
-      // supabase.auth funciona bien aunque el REST API no acepte la key
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
 
       setUser(session.user);
 
-      // Llamar al backend para obtener la empresa (el backend tiene acceso correcto a Supabase)
       try {
         const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: {
@@ -42,59 +45,57 @@ export function useDashboard() {
     }
 
     cargarDatosUsuario();
-  }, []);
+  }, [slug]);
 
   const handleCerrarSesion = async () => {
     try {
-      const slug = empresa?.slug;
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-      if (slug) {
-        navigate(`/login/${slug}`);
-      } else {
-        navigate('/iniciar-sesion');
-      }
+      // El slug siempre está en la URL — no dependemos de estado asíncrono
+      await supabase.auth.signOut();
+      navigate(`/login/${slug}`);
     } catch (err) {
       console.error('Error al cerrar sesión:', err);
     }
   };
 
+  // Las rutas de navegación usan el slug de la URL
+  const basePath = `/login/${slug}/dashboard`;
+
   const navItems = [
     {
       name: 'Inventario',
-      path: '/dashboard/inventario',
+      path: `${basePath}/inventario`,
       icon: Package,
     },
     {
       name: 'Reportes',
-      path: '/dashboard/reportes',
+      path: `${basePath}/reportes`,
       icon: BarChart3,
     },
     ...(user?.rol === 'admin' ? [{
       name: 'Trabajadores',
-      path: '/dashboard/usuarios',
+      path: `${basePath}/usuarios`,
       icon: Users,
     }] : []),
     {
       name: 'Configuración',
-      path: '/dashboard/configuracion',
+      path: `${basePath}/configuracion`,
       icon: Settings,
     }
   ];
 
   const isActive = (path) => {
-    if (path === '/dashboard/inventario' && location.pathname === '/dashboard') {
+    if (path === `${basePath}/inventario` && location.pathname === basePath) {
       return true;
     }
     return location.pathname === path;
   };
 
   const pageTitles = {
-    '/dashboard': empresa?.nombre || 'Inventario',
-    '/dashboard/inventario': empresa?.nombre || 'Inventario',
-    '/dashboard/reportes': 'Reportes y Analíticas',
-    '/dashboard/configuracion': 'Configuración',
-    '/dashboard/usuarios': 'Trabajadores',
+    [basePath]: empresa?.nombre || 'Inventario',
+    [`${basePath}/inventario`]: empresa?.nombre || 'Inventario',
+    [`${basePath}/reportes`]: 'Reportes y Analíticas',
+    [`${basePath}/configuracion`]: 'Configuración',
+    [`${basePath}/usuarios`]: 'Trabajadores',
   };
 
   const activePageTitle = () => pageTitles[location.pathname] || 'Dashboard';
@@ -117,6 +118,6 @@ export function useDashboard() {
     navItems,
     isActive,
     activePageTitle,
-    empresaSlug: empresa?.slug || null
+    empresaSlug: slug || empresa?.slug || null
   };
 }
