@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight, Shield, Zap, AlertTriangle, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, Globe, Zap, AlertTriangle, Loader2, Shield } from 'lucide-react';
 import { supabaseAdmin } from '../../config/supabaseAdmin';
 import ClickSpark from '../../components/ClickSpark';
 
@@ -88,10 +88,10 @@ export default function LoginSuperAdmin() {
             {/* Logo en la parte superior */}
             <div className="relative z-10 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-violet-900/50">
-                <Shield size={18} className="text-white" />
+                <Globe size={18} className="text-white" />
               </div>
               <div>
-                <span className="text-white font-bold text-lg tracking-tight">FlowStore</span>
+                <span className="text-white font-bold text-lg tracking-tight">GlobalInventory</span>
                 <p className="text-violet-400 text-[10px] font-semibold uppercase tracking-widest leading-none">Admin Panel</p>
               </div>
             </div>
@@ -100,7 +100,7 @@ export default function LoginSuperAdmin() {
             <div className="relative z-10">
               {/* Ícono grande central */}
               <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-600/30 to-indigo-700/20 border border-violet-500/20 flex items-center justify-center mb-8 shadow-2xl shadow-violet-900/30">
-                <Shield size={38} className="text-violet-400" />
+                <Globe size={38} className="text-violet-400" />
               </div>
 
               <h2 className="text-5xl font-bold text-white leading-[1.1] mb-4">
@@ -116,9 +116,9 @@ export default function LoginSuperAdmin() {
               {/* Features */}
               <div className="mt-10 space-y-3">
                 {[
-                  'Gestión de todas las empresas',
+                  'Gestión de todas las empresas registradas',
                   'Estadísticas globales en tiempo real',
-                  'Control total del ecosistema',
+                  'Control total del ecosistema de inventarios',
                 ].map((feat) => (
                   <div key={feat} className="flex items-center gap-3">
                     <div className="w-5 h-5 rounded-full bg-violet-500/20 border border-violet-500/30 flex items-center justify-center shrink-0">
@@ -133,7 +133,7 @@ export default function LoginSuperAdmin() {
             {/* Footer del panel izquierdo */}
             <div className="relative z-10">
               <p className="text-neutral-600 text-xs">
-                © 2025 FlowStore · Panel de Super-Administración
+                © 2025 GlobalInventory · Panel de Super-Administración
               </p>
             </div>
           </div>
@@ -145,10 +145,10 @@ export default function LoginSuperAdmin() {
               {/* Logo móvil */}
               <div className="lg:hidden flex items-center gap-3 mb-10">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center">
-                  <Shield size={16} className="text-white" />
+                  <Globe size={16} className="text-white" />
                 </div>
                 <div>
-                  <span className="text-white font-bold text-base">FlowStore</span>
+                  <span className="text-white font-bold text-base">GlobalInventory</span>
                   <p className="text-violet-400 text-[9px] font-semibold uppercase tracking-widest leading-none">Admin Panel</p>
                 </div>
               </div>
@@ -183,7 +183,7 @@ export default function LoginSuperAdmin() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@flowstore.com"
+                    placeholder="admin@globalinventory.com"
                     className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-white placeholder-neutral-600 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all"
                   />
                 </div>
@@ -221,15 +221,22 @@ export default function LoginSuperAdmin() {
                   {isLoading ? (
                     <><Loader2 size={16} className="animate-spin" /> Verificando...</>
                   ) : (
-                    <><Shield size={15} /> Acceder al Panel <ArrowRight size={14} className="ml-1" /></>
+                    <><Globe size={15} /> Acceder al Panel <ArrowRight size={14} className="ml-1" /></>
                   )}
                 </button>
               </form>
 
+              {/* Separador */}
+              <div className="flex items-center gap-3 mt-8">
+                <div className="flex-1 h-px bg-white/5" />
+                <span className="text-[10px] text-neutral-700 uppercase tracking-wider">o accede como empresa</span>
+                <div className="flex-1 h-px bg-white/5" />
+              </div>
+
               {/* Footer */}
-              <p className="text-center text-neutral-600 text-xs mt-10">
+              <p className="text-center text-neutral-600 text-xs mt-5">
                 ¿Eres admin de una empresa?{' '}
-                <a href="/iniciar-sesion" className="text-neutral-500 hover:text-neutral-300 transition-colors underline underline-offset-4">
+                <a href="/login/tech-store-lima" className="text-neutral-500 hover:text-neutral-300 transition-colors underline underline-offset-4">
                   Ir al login de empresas
                 </a>
               </p>

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutGrid, Building2, BarChart3, LogOut, Menu, X,
-  Shield, ChevronRight, Zap, Users
+  Shield, ChevronRight, Zap, Users, Globe
 } from 'lucide-react';
 import { supabaseAdmin } from '../../config/supabaseAdmin';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
@@ -50,12 +50,12 @@ export default function SuperAdminLayout() {
             <div>
               <div className="p-6 border-b border-white/5 flex items-center justify-between lg:justify-start relative">
                 <Link to="/superadmin" className="flex items-center gap-3 group">
-                  {/* Logo Super-Admin: ícono de escudo con gradiente */}
+                  {/* Logo Super-Admin: globo con gradiente */}
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-violet-900/40 group-hover:scale-105 transition-transform">
-                    <Shield size={18} className="text-white" />
+                    <Globe size={18} className="text-white" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-white font-bold text-sm leading-tight tracking-tight">FlowStore</span>
+                    <span className="text-white font-bold text-sm leading-tight tracking-tight">GlobalInventory</span>
                     <span className="text-violet-400 text-[10px] font-medium uppercase tracking-widest leading-tight">Admin Panel</span>
                   </div>
                 </Link>
