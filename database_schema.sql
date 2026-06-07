@@ -19,7 +19,7 @@ CREATE TABLE public.empresas (
 -- Se relaciona con auth.users de Supabase. Cada usuario pertenece a una empresa.
 CREATE TABLE public.usuarios (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    empresa_id UUID NOT NULL REFERENCES public.empresas(id) ON DELETE CASCADE,
+    empresa_id UUID REFERENCES public.empresas(id) ON DELETE CASCADE,
     nombre VARCHAR(255) NOT NULL,
     rol VARCHAR(50) DEFAULT 'admin', -- Puede ser 'admin' o 'vendedor'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
