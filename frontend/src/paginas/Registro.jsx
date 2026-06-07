@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, ArrowRight, User, Building, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, ArrowRight, User, Building, Mail, Lock, Globe } from 'lucide-react';
 import { supabase } from '../config/supabase';
 import Spline from '@splinetool/react-spline';
 import ClickSpark from '../components/ClickSpark';
@@ -73,10 +73,10 @@ export default function Registro() {
 
             {/* Marca / Logo */}
             <div className="relative z-10 flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border border-white/20">
-                <span className="text-white font-serif font-bold text-2xl leading-none italic">S</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-violet-900/30">
+                <Globe size={18} className="text-white" />
               </div>
-              <span className="text-white text-xl font-medium tracking-widest uppercase shadow-black drop-shadow-md">Sustento</span>
+              <span className="text-white text-xl font-semibold tracking-tight uppercase shadow-black drop-shadow-md">Global Inventory</span>
             </div>
 
             {/* Mensaje Hero */}

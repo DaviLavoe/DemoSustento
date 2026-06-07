@@ -14,7 +14,7 @@ export default function RutaSuperAdmin({ children }) {
   const { session, isLoading, rol } = useSuperAdminSession();
 
   if (isLoading) {
-    return <PantallaCarga />;
+    return <PantallaCarga isSuperAdmin={true} />;
   }
 
   if (!session || (rol !== null && rol !== 'superadmin')) {
@@ -22,7 +22,7 @@ export default function RutaSuperAdmin({ children }) {
   }
 
   if (rol === null) {
-    return <PantallaCarga />;
+    return <PantallaCarga isSuperAdmin={true} />;
   }
 
   return children;

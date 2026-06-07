@@ -19,8 +19,8 @@ export default function DashboardLayout() {
   } = useDashboard();
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Usuario';
-  const brandLetter = empresa?.nombre ? empresa.nombre.charAt(0).toUpperCase() : 'S';
-  const brandName = empresa?.nombre || 'Sustento';
+  const brandLetter = empresa?.nombre ? empresa.nombre.charAt(0).toUpperCase() : 'G';
+  const brandName = empresa?.nombre || 'Global Inventory';
 
   return (
     <div className="min-h-screen w-full flex bg-[#fafafa] dark:bg-neutral-950 selection:bg-[#1a1a1a] dark:selection:bg-white selection:text-white dark:selection:text-neutral-950">

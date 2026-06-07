@@ -105,7 +105,7 @@ export function useDashboard() {
     const title = pageTitles[location.pathname] || 'Dashboard';
     document.title = empresa
       ? `${title} · ${empresa.nombre}`
-      : `${title} · Sustento`;
+      : `${title} · Global Inventory`;
   }, [location.pathname, empresa]);
 
   return {

@@ -1,9 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
-export default function PantallaCargaPublica({ onComplete, nombreTienda = "Sustento" }) {
+export default function PantallaCargaPublica({ onComplete, nombreTienda = "Sustento", logoUrl }) {
   const [progress, setProgress] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
   const [isRendered, setIsRendered] = useState(true);
+
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     // Incremento progresivo del contador con velocidad variable para simular carga
@@ -21,7 +26,7 @@ export default function PantallaCargaPublica({ onComplete, nombreTienda = "Suste
           setIsExiting(true); // Iniciar transición de salida
           setTimeout(() => {
             setIsRendered(false);
-            if (onComplete) onComplete();
+            if (onCompleteRef.current) onCompleteRef.current();
           }, 800); // Duración de la animación de salida
         }, 400); // Pausa al llegar a 100%
       }
@@ -29,21 +34,16 @@ export default function PantallaCargaPublica({ onComplete, nombreTienda = "Suste
     }, intervalTime);
 
     return () => clearInterval(timer);
-  }, [onComplete]);
+  }, []);
 
   if (!isRendered) return null;
 
+  const brandLetter = nombreTienda && nombreTienda !== 'Sustento' && nombreTienda !== 'Catálogo' && nombreTienda !== 'Cargando...'
+    ? nombreTienda.charAt(0).toUpperCase()
+    : 'G';
+
   return (
     <div className="fixed inset-0 z-50 pointer-events-none overflow-hidden">
-      {/* Panel Trasero (Gris/Claro para efecto de capas) */}
-      <div 
-        className={`absolute inset-0 bg-neutral-100 transition-transform duration-700 cubic-bezier(0.85, 0, 0.15, 1)`}
-        style={{ 
-          transform: isExiting ? 'translateY(-100%)' : 'translateY(0%)',
-          transitionDelay: '100ms'
-        }}
-      />
-
       {/* Panel Principal (Negro o Gris muy Oscuro) */}
       <div 
         className={`absolute inset-0 bg-neutral-950 flex flex-col justify-between p-10 sm:p-16 transition-transform duration-700 cubic-bezier(0.85, 0, 0.15, 1)`}
@@ -54,11 +54,17 @@ export default function PantallaCargaPublica({ onComplete, nombreTienda = "Suste
       >
         {/* Cabecera del Loader */}
         <div className="flex items-center gap-3 animate-pulse">
-          <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center border border-white/20">
-            <span className="text-white font-serif italic text-lg font-bold">S</span>
-          </div>
+          {logoUrl ? (
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center border border-white/20 p-0.5 overflow-hidden shrink-0">
+              <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
+            </div>
+          ) : (
+            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center border border-white/20 shrink-0">
+              <span className="text-white font-serif italic text-lg font-bold">{brandLetter}</span>
+            </div>
+          )}
           <span className="text-white/60 text-xs font-semibold tracking-widest uppercase">
-            Catálogo Digital
+            Catálogo Oficial
           </span>
         </div>
 

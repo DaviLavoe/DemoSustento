@@ -15,7 +15,7 @@ export default function RutaProtegida({ children }) {
   const { slug } = useParams();
 
   if (isLoading) {
-    return <PantallaCarga />;
+    return <PantallaCarga slug={slug} />;
   }
 
   if (!session) {

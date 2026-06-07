@@ -295,7 +295,11 @@ export default function CatalogoPublico() {
         }}
       ></div>
 
-      <PantallaCargaPublica nombreTienda="Catálogo" onComplete={() => setAnimationDone(true)} />
+      <PantallaCargaPublica 
+        nombreTienda={company?.nombre || "Catálogo"} 
+        logoUrl={company?.logo_url} 
+        onComplete={() => setAnimationDone(true)} 
+      />
 
       {!loading && notFound && (
         <div className="min-h-screen flex flex-col items-center justify-center gap-6 px-6 text-center animate-reveal">

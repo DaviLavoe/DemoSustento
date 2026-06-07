@@ -18,11 +18,11 @@ export default function CatalogFooter({ company, primaryColor }) {
                 <img src={company.logo_url} alt="Logo" className="w-8 h-8 object-contain filter brightness-0 invert opacity-90" />
               ) : (
                 <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-serif font-bold italic">{company?.nombre?.charAt(0) || 'S'}</span>
+                  <span className="text-white font-serif font-bold italic">{company?.nombre?.charAt(0) || 'G'}</span>
                 </div>
               )}
               <span className="font-serif text-xl font-bold tracking-widest uppercase text-white">
-                {company?.nombre || 'Sustento'}
+                {company?.nombre || 'Global Inventory'}
               </span>
             </div>
             <p className="text-sm text-neutral-400 leading-relaxed">
@@ -97,7 +97,7 @@ export default function CatalogFooter({ company, primaryColor }) {
         {/* Línea inferior */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-neutral-500 text-center md:text-left">
-            &copy; {currentYear} {company?.nombre || 'Sustento'}. Todos los derechos reservados.
+            &copy; {currentYear} {company?.nombre || 'Global Inventory'}. Todos los derechos reservados.
           </p>
           <div className="flex gap-4 items-center">
             <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTYgODMiPjxwYXRoIGZpbGw9IiNmZmZmZmYiIGQ9Ik0xMTEuNCA4MS4zbDE2LjctNzkuNmgyNmwtMTYuNyA3OS42aC0yNnpNMjQ1LjUgMi4xYy01LTEuOS0xMi44LTQtMjIuMS00LTI1LjUgMC00My41IDEzLjMtNDMuNyAzMi4zLS4zIDE0IDEyLjggMjEuOCAyMi42IDI2LjUgMTAuMSA0LjggMTMuNSA3LjkgMTMuNSAxMi4yLS4xIDYuNi04LjEgOS42LTE1LjYgOS42LTEwLjQgMC0xNi4xLTEuNi0yNC44LTUuM2wtMy41LTEuNi0zLjggMjIuOGM2LjEgMi44IDE3LjQgNS4yIDI5LjEgNS4zIDI3IDAgNDQuNy0xMy4x NDUtMzMuMS4yLTExLjEtNi42LTE5LjUtMjEuOC0yNi42LTktNC40LTE0LjUtNy40LTE0LjUtMTEuOS4xLTQgNC43LTguMyAxNC44LTguMyA4LjMtLjEgMTQuMyAxLjcgMTkuNSA0bDIuOCAxLjMgMi41LTIzLjJ6TTc1IDgxLjNsLTI1LjEtNTRjLTMtNi45LTguNC0xMC44LTE1LjUtMTIuM0wyLjIgMTEgMS43IDE0LjdsMTcuOCA0YzguNCAyIDEwLjIgMy44IDEyLjIgMTEuNWwxOS41IDUxSDk0LjFMNzUgODEuM3pNMTU3LjYgODEuM2gyNC40bDE1LjMtNzkuNmgtMjAuNmMtNS44IDAtMTAuMyAyLjctMTIuOCA3LjlsLTMwIDcxLjdoMjUuOGw1LTEzLjhoMzEuNmwzIDEzLjh6bTExLTMyLThsMTIuNy0zNCAzLjcgMzRIMTY4LjZ6Ii8+PC9zdmc+" alt="Visa" className="h-4 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300" />
