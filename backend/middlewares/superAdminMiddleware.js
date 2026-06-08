@@ -14,6 +14,10 @@ const superAdminMiddleware = async (req, res, next) => {
 
     const token = authHeader.split(' ')[1];
 
+    if (!token || token === 'undefined' || token === 'null') {
+      return res.status(401).json({ success: false, message: 'Token JWT nulo o indefinido proporcionado por el cliente' });
+    }
+
     // Verificar token con Supabase
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
