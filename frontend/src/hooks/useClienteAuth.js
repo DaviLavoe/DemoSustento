@@ -1,62 +1,116 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getSupabaseForSlug } from '../config/supabaseEmpresa';
+import { getSupabaseClienteForSlug } from '../config/supabaseEmpresa';
 import { API_BASE_URL } from '../config/api';
 
 export function useClienteAuth() {
   const { slug } = useParams();
-  const supabase = getSupabaseForSlug(slug);
+  const supabase = getSupabaseClienteForSlug(slug);
   const [cliente, setCliente] = useState(null); // Contiene { id, email, nombre, telefono, direccion }
   const [loading, setLoading] = useState(true);
   const [pedidos, setPedidos] = useState([]);
+  const [tarjetas, setTarjetas] = useState([]);
 
   // Cargar sesión inicial y suscribirse a cambios de auth
   useEffect(() => {
-    async function checkSession() {
+    setLoading(true);
+    let active = true;
+
+    // Verificar sesión inicial
+    async function checkInitialSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          const metadata = session.user.user_metadata || {};
-          const clientData = {
-            id: session.user.id,
-            email: session.user.email,
-            nombre: metadata.nombre || (metadata.rol === 'admin' ? 'Administrador' : 'Usuario'),
-            telefono: metadata.telefono || '',
-            direccion: metadata.direccion || '',
-          };
-          setCliente(clientData);
-          loadPedidos();
+          const response = await fetch(`${API_BASE_URL}/api/auth/cliente/validar-sesion`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            body: JSON.stringify({ slug })
+          });
+          const resData = await response.json();
+          if (active) {
+            if (response.ok && resData.success) {
+              setCliente(resData.cliente);
+              loadPedidos();
+              cargarTarjetas(session.access_token);
+              setLoading(false);
+            } else {
+              console.warn('Fallo validación de sesión inicial de cliente:', resData.message);
+              setCliente(null);
+              setLoading(false);
+              await supabase.auth.signOut();
+            }
+          }
+        } else {
+          if (active) {
+            setCliente(null);
+            setLoading(false);
+          }
         }
       } catch (err) {
-        console.error('Error al comprobar sesión del cliente:', err);
-      } finally {
-        setLoading(false);
+        console.error('Error al comprobar sesión inicial:', err);
+        if (active) {
+          setCliente(null);
+          setLoading(false);
+        }
       }
     }
 
-    checkSession();
+    checkInitialSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Evitar procesar eventos redundantes durante la carga inicial
+      if (event === 'INITIAL_SESSION') return;
+      
       if (session?.user) {
-        const metadata = session.user.user_metadata || {};
-        const clientData = {
-          id: session.user.id,
-          email: session.user.email,
-          nombre: metadata.nombre || (metadata.rol === 'admin' ? 'Administrador' : 'Usuario'),
-          telefono: metadata.telefono || '',
-          direccion: metadata.direccion || '',
-        };
-        setCliente(clientData);
-        loadPedidos();
+        setLoading(true);
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/auth/cliente/validar-sesion`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.access_token}`
+            },
+            body: JSON.stringify({ slug })
+          });
+          const resData = await response.json();
+          if (active) {
+            if (response.ok && resData.success) {
+              setCliente(resData.cliente);
+              loadPedidos();
+              cargarTarjetas(session.access_token);
+              setLoading(false);
+            } else {
+              console.warn('Fallo validación de onAuthStateChange de cliente:', resData.message);
+              setCliente(null);
+              setLoading(false);
+              await supabase.auth.signOut();
+            }
+          }
+        } catch (err) {
+          console.error('Error al validar sesión en onAuthStateChange:', err);
+          if (active) {
+            setCliente(null);
+            setLoading(false);
+          }
+        }
       } else {
-        setCliente(null);
-        setPedidos([]);
+        if (active) {
+          setCliente(null);
+          setPedidos([]);
+          setTarjetas([]);
+          setLoading(false);
+        }
       }
-      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [slug]);
 
   // Cargar pedidos de la base de datos de Supabase para este cliente específico
   const loadPedidos = async () => {
@@ -71,8 +125,6 @@ export function useClienteAuth() {
       });
       const resData = await response.json();
       if (response.ok && resData.success) {
-        // Map the backend pedidos structure to match the frontend expectations:
-        // id, fecha, total, estado, productos: [{ nombre, cantidad, precio }]
         const mappedPedidos = resData.data.map(p => ({
           id: p.id,
           fecha: p.created_at,
@@ -94,7 +146,85 @@ export function useClienteAuth() {
     }
   };
 
-  // Registrar cliente con metadatos personalizados en Supabase Auth
+  // Cargar tarjetas de la base de datos para este cliente
+  const cargarTarjetas = async (providedToken = null) => {
+    try {
+      let token = providedToken;
+      if (!token) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        token = session.access_token;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/tarjetas`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const resData = await response.json();
+      if (response.ok && resData.success) {
+        setTarjetas(resData.data);
+      } else {
+        console.error('Error al cargar tarjetas:', resData.message);
+      }
+    } catch (err) {
+      console.error('Error al cargar tarjetas del cliente:', err);
+    }
+  };
+
+  // Agregar tarjeta
+  const agregarTarjeta = async ({ bank, number, holder, expiry, type }) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
+
+      const response = await fetch(`${API_BASE_URL}/api/tarjetas`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ bank, number, holder, expiry, type })
+      });
+      const resData = await response.json();
+      if (response.ok && resData.success) {
+        setTarjetas(prev => [...prev, resData.data]);
+        return resData.data;
+      } else {
+        throw new Error(resData.message || 'Error al guardar tarjeta');
+      }
+    } catch (err) {
+      console.error('Error al agregar tarjeta:', err);
+      throw err;
+    }
+  };
+
+  // Eliminar tarjeta
+  const eliminarTarjeta = async (id) => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
+
+      const response = await fetch(`${API_BASE_URL}/api/tarjetas/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+      const resData = await response.json();
+      if (response.ok && resData.success) {
+        setTarjetas(prev => prev.filter(t => t.id !== id));
+        return true;
+      } else {
+        throw new Error(resData.message || 'Error al eliminar tarjeta');
+      }
+    } catch (err) {
+      console.error('Error al eliminar tarjeta:', err);
+      throw err;
+    }
+  };
+
+  // Registrar cliente con metadatos personalizados en Supabase Auth y sincronizar a public.clientes
   const registrar = async ({ email, password, nombre, telefono, direccion }) => {
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -111,6 +241,29 @@ export function useClienteAuth() {
       });
 
       if (error) throw error;
+
+      // Sincronizar con public.clientes usando el endpoint del backend
+      if (data?.user) {
+        const syncResponse = await fetch(`${API_BASE_URL}/api/auth/cliente/registrar-perfil`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId: data.user.id,
+            email,
+            nombre,
+            telefono,
+            direccion,
+            slug
+          })
+        });
+        const syncData = await syncResponse.json();
+        if (!syncResponse.ok || !syncData.success) {
+          console.error('Error al registrar perfil de cliente en base de datos:', syncData.message);
+        }
+      }
+
       return data;
     } catch (err) {
       console.error('Error en registro de cliente:', err);
@@ -128,20 +281,26 @@ export function useClienteAuth() {
 
       if (error) throw error;
 
-      const user = data?.user;
-      const metadata = user?.user_metadata || {};
+      const session = data?.session;
       
-      // Si por alguna razón un admin inicia sesión, permitimos pero asignamos rol cliente temporal
-      const clientData = {
-        id: user.id,
-        email: user.email,
-        nombre: metadata.nombre || 'Administrador',
-        telefono: metadata.telefono || '',
-        direccion: metadata.direccion || '',
-      };
+      // Validar sesión contra el backend
+      const response = await fetch(`${API_BASE_URL}/api/auth/cliente/validar-sesion`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ slug })
+      });
+      const resData = await response.json();
+      if (!response.ok || !resData.success) {
+        await supabase.auth.signOut();
+        throw new Error(resData.message || 'No se pudo validar tu cuenta en esta empresa.');
+      }
       
-      setCliente(clientData);
+      setCliente(resData.cliente);
       loadPedidos();
+      cargarTarjetas(session.access_token);
       return data;
     } catch (err) {
       console.error('Error en inicio de sesión de cliente:', err);
@@ -156,6 +315,7 @@ export function useClienteAuth() {
       if (error) throw error;
       setCliente(null);
       setPedidos([]);
+      setTarjetas([]);
     } catch (err) {
       console.error('Error al cerrar sesión del cliente:', err);
       throw err;
@@ -166,6 +326,9 @@ export function useClienteAuth() {
   const actualizarPerfil = async ({ nombre, telefono, direccion }) => {
     if (!cliente) return;
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
+
       const { data, error } = await supabase.auth.updateUser({
         data: {
           nombre,
@@ -175,6 +338,20 @@ export function useClienteAuth() {
       });
 
       if (error) throw error;
+
+      // Actualizar en public.clientes vía backend
+      const response = await fetch(`${API_BASE_URL}/api/auth/cliente/actualizar-perfil`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ nombre, telefono, direccion, slug })
+      });
+      const resData = await response.json();
+      if (!response.ok || !resData.success) {
+        console.error('Error al sincronizar actualización de perfil:', resData.message);
+      }
 
       const updatedMetadata = data.user.user_metadata || {};
       const updatedClient = {
@@ -208,10 +385,14 @@ export function useClienteAuth() {
     cliente,
     loading,
     pedidos,
+    tarjetas,
     registrar,
     iniciarSesion,
     cerrarSesion,
     actualizarPerfil,
     registrarPedido,
+    agregarTarjeta,
+    eliminarTarjeta,
+    cargarTarjetas
   };
 }

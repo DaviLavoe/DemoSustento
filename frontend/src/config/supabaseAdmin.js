@@ -19,6 +19,7 @@ export const supabaseAdmin = createClient(
       storageKey: 'sb_superadmin_session',
       autoRefreshToken: true,
       persistSession: true,
+      broadcast: false,
     }
   }
 );

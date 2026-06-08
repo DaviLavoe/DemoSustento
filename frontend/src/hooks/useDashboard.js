@@ -18,19 +18,54 @@ export function useDashboard() {
 
   useEffect(() => {
     async function cargarDatosUsuario() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
+      // Obtener sesión actual y refrescar si está expirada
+      let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError || !refreshData.session) {
+          await supabase.auth.signOut();
+          navigate(`/login/${slug}`);
+          return;
+        }
+        session = refreshData.session;
+      }
 
       setUser(session.user);
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        let response = await fetch(`${API_BASE_URL}/api/auth/me`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`
           }
         });
 
-        if (response.ok) {
+        if (!response.ok) {
+          if (response.status === 401) {
+            // Intentar refresco silencioso y reintentar
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+            if (!refreshError && refreshData?.session) {
+              const retryResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                headers: {
+                  'Authorization': `Bearer ${refreshData.session.access_token}`
+                }
+              });
+              if (retryResponse.ok) {
+                const data = await retryResponse.json();
+                if (data.success && data.empresa) {
+                  setEmpresa(data.empresa);
+                }
+                if (data.success && data.user) {
+                  setUser((prev) => ({ ...prev, ...data.user }));
+                }
+                return;
+              }
+            }
+            await supabase.auth.signOut();
+            navigate(`/login/${slug}`);
+            return;
+          }
+        } else {
           const data = await response.json();
           if (data.success && data.empresa) {
             setEmpresa(data.empresa);

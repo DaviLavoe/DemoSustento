@@ -18,6 +18,7 @@ const superAdminMiddleware = async (req, res, next) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
+      console.error('Error de autenticación de superadmin (backend):', authError || 'Usuario no encontrado');
       return res.status(401).json({ success: false, message: 'Token inválido o expirado', error: authError?.message });
     }
 

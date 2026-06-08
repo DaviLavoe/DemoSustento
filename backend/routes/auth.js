@@ -220,4 +220,221 @@ router.delete('/usuarios/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────
+// CONTROL Y VALIDACIÓN DE SESIONES DE CLIENTES (CATÁLOGOS)
+// ─────────────────────────────────────────────
+
+const clientAuthMiddleware = require('../middlewares/clientAuthMiddleware');
+
+// POST /api/auth/cliente/validar-sesion
+// Valida que el cliente pertenezca a la empresa del slug actual.
+// Si no tiene perfil en public.clientes para esta empresa, lo crea automáticamente (Multi-tenant seguro).
+router.post('/cliente/validar-sesion', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, message: 'No se proporcionó token' });
+    }
+    const token = authHeader.split(' ')[1];
+    const { slug } = req.body;
+    if (!slug) {
+      return res.status(400).json({ success: false, message: 'Slug de empresa es requerido' });
+    }
+
+    // 1. Obtener usuario de Supabase Auth
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !user) {
+      return res.status(401).json({ success: false, message: 'Token inválido o expirado' });
+    }
+
+    // 2. Obtener empresa por slug
+    const { data: empresa, error: empresaError } = await supabase
+      .from('empresas')
+      .select('id, nombre')
+      .eq('slug', slug)
+      .single();
+
+    if (empresaError || !empresa) {
+      return res.status(404).json({ success: false, message: 'Empresa no encontrada' });
+    }
+
+    const email = user.email;
+    const userId = user.id;
+
+    // 3. Verificar si el usuario es trabajador/admin de OTRA empresa
+    const { data: usuarioDb } = await supabase
+      .from('usuarios')
+      .select('empresa_id, rol')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (usuarioDb) {
+      return res.status(403).json({
+        success: false,
+        code: 'ADMIN_NOT_ALLOWED',
+        message: 'Las cuentas del personal administrativo no pueden utilizarse como cuentas de clientes en el catálogo. Por favor, crea una cuenta de cliente.'
+      });
+    }
+
+    // 4. Verificar si existe en public.clientes para esta empresa
+    const { data: clienteDb } = await supabase
+      .from('clientes')
+      .select('*')
+      .eq('empresa_id', empresa.id)
+      .eq('email', email)
+      .maybeSingle();
+
+    let clienteFinal = null;
+
+    if (!clienteDb) {
+      // Registrar automáticamente en public.clientes
+      const { data: nuevoCliente, error: insertError } = await supabase
+        .from('clientes')
+        .insert({
+          id: userId,
+          empresa_id: empresa.id,
+          nombre: user.user_metadata?.nombre || 'Cliente',
+          email: email,
+          telefono: user.user_metadata?.telefono || '',
+          direccion: user.user_metadata?.direccion || ''
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        if (insertError.code === '23505') {
+          // Si por concurrencia ya se insertó, lo leemos
+          const { data: recheckCliente } = await supabase
+            .from('clientes')
+            .select('*')
+            .eq('empresa_id', empresa.id)
+            .eq('email', email)
+            .single();
+          clienteFinal = recheckCliente;
+        } else {
+          throw insertError;
+        }
+      } else {
+        clienteFinal = nuevoCliente;
+      }
+    } else {
+      clienteFinal = clienteDb;
+      // Mantener sincronizado el id si por alguna razón difiere
+      if (clienteFinal.id !== userId) {
+        await supabase
+          .from('clientes')
+          .update({ id: userId })
+          .eq('empresa_id', empresa.id)
+          .eq('email', email);
+        clienteFinal.id = userId;
+      }
+    }
+
+    res.json({
+      success: true,
+      cliente: {
+        id: userId,
+        email: clienteFinal.email,
+        nombre: clienteFinal.nombre,
+        telefono: clienteFinal.telefono,
+        direccion: clienteFinal.direccion
+      }
+    });
+
+  } catch (err) {
+    console.error('Error en /api/auth/cliente/validar-sesion:', err);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+});
+
+// POST /api/auth/cliente/registrar-perfil
+// Registra de forma explícita al cliente en public.clientes después del registro inicial
+router.post('/cliente/registrar-perfil', async (req, res) => {
+  try {
+    const { userId, email, nombre, telefono, direccion, slug } = req.body;
+
+    if (!userId || !email || !nombre || !slug) {
+      return res.status(400).json({ success: false, message: 'Faltan datos obligatorios' });
+    }
+
+    // 1. Obtener empresa por slug
+    const { data: empresa, error: empresaError } = await supabase
+      .from('empresas')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    if (empresaError || !empresa) {
+      return res.status(404).json({ success: false, message: 'Empresa no encontrada' });
+    }
+
+    // 2. Insertar en public.clientes
+    const { data: nuevoCliente, error: insertError } = await supabase
+      .from('clientes')
+      .insert({
+        id: userId,
+        empresa_id: empresa.id,
+        nombre,
+        email,
+        telefono: telefono || '',
+        direccion: direccion || ''
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      if (insertError.code === '23505') {
+        return res.json({ success: true, message: 'El cliente ya estaba registrado para esta empresa' });
+      }
+      throw insertError;
+    }
+
+    res.status(201).json({ success: true, data: nuevoCliente });
+  } catch (err) {
+    console.error('Error en /api/auth/cliente/registrar-perfil:', err);
+    res.status(500).json({ success: false, message: 'Error al registrar perfil en la base de datos', error: err.message });
+  }
+});
+
+// PUT /api/auth/cliente/actualizar-perfil
+// Actualiza el perfil del cliente en public.clientes
+router.put('/cliente/actualizar-perfil', clientAuthMiddleware, async (req, res) => {
+  try {
+    const { nombre, telefono, direccion, slug } = req.body;
+    if (!slug) {
+      return res.status(400).json({ success: false, message: 'Slug de empresa es requerido' });
+    }
+    
+    // Obtener empresa por slug
+    const { data: empresa, error: empresaError } = await supabase
+      .from('empresas')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    if (empresaError || !empresa) {
+      return res.status(404).json({ success: false, message: 'Empresa no encontrada' });
+    }
+
+    const { data: updatedCliente, error: updateError } = await supabase
+      .from('clientes')
+      .update({
+        nombre,
+        telefono: telefono || '',
+        direccion: direccion || ''
+      })
+      .eq('empresa_id', empresa.id)
+      .eq('email', req.user.email)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    res.json({ success: true, data: updatedCliente });
+  } catch (err) {
+    console.error('Error en PUT /api/auth/cliente/actualizar-perfil:', err);
+    res.status(500).json({ success: false, message: 'Error al actualizar perfil en la base de datos', error: err.message });
+  }
+});
+
 module.exports = router;

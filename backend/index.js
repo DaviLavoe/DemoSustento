@@ -23,6 +23,7 @@ const catalogoRoutes = require('./routes/catalogo');
 const authRoutes = require('./routes/auth');
 const pedidosRoutes = require('./routes/pedidos');
 const superadminRoutes = require('./routes/superadmin');
+const tarjetasRoutes = require('./routes/tarjetas');
 
 // Rutas del API
 app.use('/api/productos', productosRoutes);
@@ -34,6 +35,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/pedidos', pedidosRoutes);
 // Ruta del panel Super-Admin (acceso exclusivo con rol 'superadmin')
 app.use('/api/superadmin', superadminRoutes);
+// Ruta para gestión de tarjetas de clientes
+app.use('/api/tarjetas', tarjetasRoutes);
 
 // Middleware para capturar rutas inexistentes (404)
 app.use((req, res, next) => {

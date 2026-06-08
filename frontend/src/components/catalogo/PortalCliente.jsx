@@ -29,7 +29,16 @@ export default function PortalCliente({
   handleCheckoutSubmit,
   totalCartPrice = 0
 }) {
-  const { cliente, loading, pedidos, cerrarSesion, actualizarPerfil } = clienteAuth;
+  const { 
+    cliente, 
+    loading, 
+    pedidos, 
+    cerrarSesion, 
+    actualizarPerfil, 
+    tarjetas = [], 
+    agregarTarjeta, 
+    eliminarTarjeta 
+  } = clienteAuth;
   const [activeTab, setActiveTab] = useState('inicio'); // inicio | pedidos | wishlist | perfil | tarjetas | credito
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
@@ -52,15 +61,24 @@ export default function PortalCliente({
   };
 
   // Estados de Tarjetas
-  const [cards, setCards] = useState([
-    { id: 1, type: 'visa', number: '•••• •••• •••• 4242', holder: cliente?.nombre || 'Cliente', expiry: '12/28', bank: 'Tech Bank' },
-    { id: 2, type: 'mastercard', number: '•••• •••• •••• 8888', holder: cliente?.nombre || 'Cliente', expiry: '06/30', bank: 'Global Premium' }
-  ]);
   const [newCardNumber, setNewCardNumber] = useState('');
   const [newCardHolder, setNewCardHolder] = useState('');
   const [newCardExpiry, setNewCardExpiry] = useState('');
   const [showAddCard, setShowAddCard] = useState(false);
   const [tiltStyle, setTiltStyle] = useState({});
+  const [selectedCard, setSelectedCard] = useState(null);
+
+  // Sincronizar tarjeta seleccionada por defecto
+  useEffect(() => {
+    if (tarjetas && tarjetas.length > 0) {
+      const exists = tarjetas.find(t => t.id === selectedCard?.id);
+      if (!exists) {
+        setSelectedCard(tarjetas[0]);
+      }
+    } else {
+      setSelectedCard(null);
+    }
+  }, [tarjetas]);
 
   // Reset/Sincronizar campos de perfil cuando el cliente cambia
   useEffect(() => {
@@ -127,26 +145,38 @@ export default function PortalCliente({
   });
 
   // Manejo de Tarjetas (Agregar/Eliminar)
-  const handleAddCard = (e) => {
+  const handleAddCard = async (e) => {
     e.preventDefault();
     if (!newCardNumber || !newCardHolder || !newCardExpiry) return;
-    const newCard = {
-      id: Date.now(),
-      type: newCardNumber.startsWith('5') ? 'mastercard' : 'visa',
-      number: `•••• •••• •••• ${newCardNumber.slice(-4)}`,
-      holder: newCardHolder,
-      expiry: newCardExpiry,
-      bank: 'Tarjeta Guardada'
-    };
-    setCards([...cards, newCard]);
-    setNewCardNumber('');
-    setNewCardHolder('');
-    setNewCardExpiry('');
-    setShowAddCard(false);
+    
+    const type = newCardNumber.startsWith('5') ? 'mastercard' : 'visa';
+    const bank = type === 'visa' ? 'Visa Electrón' : 'Mastercard Platinum';
+    const number = `•••• •••• •••• ${newCardNumber.slice(-4)}`;
+
+    try {
+      await agregarTarjeta({
+        bank,
+        number,
+        holder: newCardHolder,
+        expiry: newCardExpiry,
+        type
+      });
+      setNewCardNumber('');
+      setNewCardHolder('');
+      setNewCardExpiry('');
+      setShowAddCard(false);
+    } catch (err) {
+      alert('Error al guardar la tarjeta: ' + err.message);
+    }
   };
 
-  const handleDeleteCard = (id) => {
-    setCards(cards.filter(c => c.id !== id));
+  const handleDeleteCard = async (id) => {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta tarjeta de pago?')) return;
+    try {
+      await eliminarTarjeta(id);
+    } catch (err) {
+      alert('Error al eliminar la tarjeta: ' + err.message);
+    }
   };
 
   // Efecto 3D Tilt para la Tarjeta de Crédito Principal
@@ -954,7 +984,10 @@ export default function PortalCliente({
                     {/* Fila 2: Número de Tarjeta */}
                     <div className="my-4 relative z-10">
                       <p className="font-mono text-lg md:text-xl tracking-[0.2em] font-semibold text-white/95">
-                        {newCardNumber ? newCardNumber.replace(/(\d{4})/g, '$1 ').trim() || '•••• •••• •••• 4242' : '•••• •••• •••• 4242'}
+                        {showAddCard 
+                          ? (newCardNumber ? newCardNumber.replace(/(\d{4})/g, '$1 ').trim() : '•••• •••• •••• ••••')
+                          : (selectedCard ? selectedCard.number : '•••• •••• •••• ••••')
+                        }
                       </p>
                     </div>
 
@@ -963,13 +996,19 @@ export default function PortalCliente({
                       <div className="min-w-0 flex-1 pr-4">
                         <p className="text-[8px] text-white/50 uppercase tracking-widest">Titular</p>
                         <p className="font-mono text-xs font-bold tracking-wider truncate uppercase mt-0.5">
-                          {newCardHolder || cliente.nombre || 'Nombre Apellido'}
+                          {showAddCard
+                            ? (newCardHolder || cliente.nombre || 'TU NOMBRE')
+                            : (selectedCard ? selectedCard.holder : (cliente.nombre || 'TU NOMBRE'))
+                          }
                         </p>
                       </div>
                       <div className="shrink-0 text-right">
                         <p className="text-[8px] text-white/50 uppercase tracking-widest">Vence</p>
                         <p className="font-mono text-xs font-bold tracking-wider mt-0.5">
-                          {newCardExpiry || '12/28'}
+                          {showAddCard
+                            ? (newCardExpiry || 'MM/AA')
+                            : (selectedCard ? selectedCard.expiry : 'MM/AA')
+                          }
                         </p>
                       </div>
                     </div>
@@ -985,26 +1024,43 @@ export default function PortalCliente({
                   <div className="space-y-3">
                     <p className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">Mis Tarjetas Guardadas</p>
                     
-                    {cards.map((card) => (
-                      <div key={card.id} className="p-4 border border-neutral-200 dark:border-neutral-800 rounded-2xl flex items-center justify-between gap-4 bg-[#fafafa] dark:bg-neutral-900/50">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shrink-0 shadow-sm font-bold font-mono text-xs italic">
-                            {card.type === 'visa' ? 'V' : 'MC'}
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-neutral-800 dark:text-white">{card.bank}</p>
-                            <p className="font-mono text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">{card.number} (Vence {card.expiry})</p>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => handleDeleteCard(card.id)}
-                          className="p-2 rounded-xl text-neutral-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-95 transition-all"
-                          aria-label="Eliminar tarjeta"
-                        >
-                          <Trash size={15} />
-                        </button>
+                    {tarjetas.length === 0 ? (
+                      <div className="text-center py-8 bg-neutral-50 dark:bg-neutral-900/20 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-2xl text-xs text-neutral-400 dark:text-neutral-500 font-light">
+                        No tienes tarjetas de pago vinculadas. Agrega una nueva para comenzar.
                       </div>
-                    ))}
+                    ) : (
+                      tarjetas.map((card) => (
+                        <div 
+                          key={card.id} 
+                          onClick={() => setSelectedCard(card)}
+                          className={`p-4 border rounded-2xl flex items-center justify-between gap-4 cursor-pointer transition-all ${
+                            selectedCard?.id === card.id 
+                              ? 'border-black dark:border-white bg-neutral-100/30 dark:bg-neutral-800/30 ring-1 ring-black dark:ring-white shadow-xs' 
+                              : 'border-neutral-200 dark:border-neutral-800 bg-[#fafafa] dark:bg-neutral-900/50 hover:bg-neutral-100/50 dark:hover:bg-neutral-800/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shrink-0 shadow-sm font-bold font-mono text-xs italic">
+                              {card.type === 'visa' ? 'V' : 'MC'}
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-neutral-800 dark:text-white">{card.bank}</p>
+                              <p className="font-mono text-[11px] text-neutral-500 dark:text-neutral-400 mt-0.5">{card.number} (Vence {card.expiry})</p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCard(card.id);
+                            }}
+                            className="p-2 rounded-xl text-neutral-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 active:scale-95 transition-all"
+                            aria-label="Eliminar tarjeta"
+                          >
+                            <Trash size={15} />
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
 
                   {/* Formulario Agregar Tarjeta */}

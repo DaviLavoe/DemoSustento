@@ -12,6 +12,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
  * - (nuevas empresas se crean automáticamente al primer uso)
  */
 const clientCache = new Map();
+const clientClienteCache = new Map();
 
 /**
  * Retorna (o crea) el cliente Supabase aislado para la empresa identificada
@@ -39,10 +40,45 @@ export function getSupabaseForSlug(slug) {
         storageKey: `sb_empresa_${slug}`,
         autoRefreshToken: true,
         persistSession: true,
+        broadcast: false,
       }
     }
   );
 
   clientCache.set(slug, client);
+  return client;
+}
+
+/**
+ * Retorna (o crea) el cliente Supabase aislado para el CLIENTE final de la empresa.
+ * Usa un storageKey distinto ('sb_cliente_') para evitar interferir con la sesión
+ * del administrador/vendedor de la misma empresa.
+ *
+ * @param {string} slug  - El slug de la empresa (ej: "tech-store-lima")
+ * @returns {import('@supabase/supabase-js').SupabaseClient}
+ */
+export function getSupabaseClienteForSlug(slug) {
+  if (!slug) {
+    throw new Error('getSupabaseClienteForSlug: se requiere un slug de empresa');
+  }
+
+  if (clientClienteCache.has(slug)) {
+    return clientClienteCache.get(slug);
+  }
+
+  const client = createClient(
+    supabaseUrl || 'https://ejemplo.supabase.co',
+    supabaseAnonKey || 'public-anon-key',
+    {
+      auth: {
+        storageKey: `sb_cliente_${slug}`,
+        autoRefreshToken: true,
+        persistSession: true,
+        broadcast: false,
+      }
+    }
+  );
+
+  clientClienteCache.set(slug, client);
   return client;
 }

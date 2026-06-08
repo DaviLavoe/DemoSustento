@@ -53,21 +53,50 @@ export function useProductos() {
     }, 10000);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No se detectó una sesión activa. Por favor, vuelve a iniciar sesión.');
+      // Obtener sesión actual y refrescar si está expirada
+      let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError || !refreshData.session) {
+          await supabase.auth.signOut();
+          throw new Error('Tu sesión ha expirado o es inválida. Por favor, vuelve a iniciar sesión.');
+        }
+        session = refreshData.session;
+      }
 
-      const response = await fetch(`${API_BASE_URL}/api/productos`, {
+      let response = await fetch(`${API_BASE_URL}/api/productos`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         },
         signal
       });
 
-      const resData = await response.json();
       if (!response.ok) {
+        if (response.status === 401) {
+          // Intentar refresco silencioso y reintentar
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          if (!refreshError && refreshData?.session) {
+            const retryResponse = await fetch(`${API_BASE_URL}/api/productos`, {
+              headers: {
+                'Authorization': `Bearer ${refreshData.session.access_token}`
+              },
+              signal
+            });
+            if (retryResponse.ok) {
+              const resData = await retryResponse.json();
+              setProductos(resData.data || []);
+              return;
+            }
+          }
+          await supabase.auth.signOut();
+          throw new Error('Tu sesión ha expirado (401). Por favor, vuelve a iniciar sesión.');
+        }
+        const resData = await response.json();
         throw new Error(resData.message || 'Error al obtener productos del servidor');
       }
 
+      const resData = await response.json();
       setProductos(resData.data || []);
     } catch (err) {
       if (err.name === 'AbortError') {
@@ -137,11 +166,20 @@ export function useProductos() {
     setError(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Sesión expirada');
+      // Obtener sesión actual y refrescar si está expirada
+      let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError || !refreshData.session) {
+          await supabase.auth.signOut();
+          throw new Error('Tu sesión ha expirado o es inválida. Por favor, vuelve a iniciar sesión.');
+        }
+        session = refreshData.session;
+      }
 
       let finalImageUrl = formData.imagen_url;
-
+      
       // Subir archivo a Supabase Storage si se ha seleccionado uno nuevo
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
@@ -182,7 +220,7 @@ export function useProductos() {
         method = 'PUT';
       }
 
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -191,8 +229,30 @@ export function useProductos() {
         body: JSON.stringify(payload)
       });
 
-      const resData = await response.json();
       if (!response.ok) {
+        if (response.status === 401) {
+          // Intentar refresco silencioso y reintentar
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          if (!refreshError && refreshData?.session) {
+            const retryResponse = await fetch(url, {
+              method,
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${refreshData.session.access_token}`
+              },
+              body: JSON.stringify(payload)
+            });
+            if (retryResponse.ok) {
+              setIsModalOpen(false);
+              triggerNotification(modalMode === 'edit' ? 'Producto actualizado con éxito' : 'Producto creado con éxito');
+              fetchProductos();
+              return;
+            }
+          }
+          await supabase.auth.signOut();
+          throw new Error('Tu sesión ha expirado (401). Por favor, vuelve a iniciar sesión.');
+        }
+        const resData = await response.json();
         throw new Error(resData.message || 'Error al guardar el producto');
       }
 
@@ -211,18 +271,49 @@ export function useProductos() {
   const handleDelete = async () => {
     setSubmitting(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('Sesión expirada');
+      // Obtener sesión actual y refrescar si está expirada
+      let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError || !refreshData.session) {
+          await supabase.auth.signOut();
+          throw new Error('Tu sesión ha expirado o es inválida. Por favor, vuelve a iniciar sesión.');
+        }
+        session = refreshData.session;
+      }
 
-      const response = await fetch(`${API_BASE_URL}/api/productos/${productoToDelete.id}`, {
+      const url = `${API_BASE_URL}/api/productos/${productoToDelete.id}`;
+      let response = await fetch(url, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
       });
 
-      const resData = await response.json();
       if (!response.ok) {
+        if (response.status === 401) {
+          // Intentar refresco silencioso y reintentar
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          if (!refreshError && refreshData?.session) {
+            const retryResponse = await fetch(url, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${refreshData.session.access_token}`
+              }
+            });
+            if (retryResponse.ok) {
+              setIsDeleteOpen(false);
+              setProductoToDelete(null);
+              triggerNotification('Producto eliminado correctamente');
+              fetchProductos();
+              return;
+            }
+          }
+          await supabase.auth.signOut();
+          throw new Error('Tu sesión ha expirado (401). Por favor, vuelve a iniciar sesión.');
+        }
+        const resData = await response.json();
         throw new Error(resData.message || 'Error al eliminar el producto');
       }
 
