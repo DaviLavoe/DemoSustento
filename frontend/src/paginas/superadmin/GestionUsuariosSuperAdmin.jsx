@@ -57,18 +57,18 @@ function UsuarioModal({ onClose, onSaved, usuarioEditar = null }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-[#0d0d14] border border-white/10 rounded-2xl shadow-2xl shadow-violet-900/20 overflow-hidden">
+      <div className="relative w-full max-w-md bg-white dark:bg-[#0d0d14] border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl shadow-violet-900/20 overflow-hidden">
         {/* Header modal */}
-        <div className="p-6 border-b border-white/5 flex items-center justify-between">
+        <div className="p-6 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center">
-              <Shield size={15} className="text-violet-400" />
+            <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-600/20 border border-violet-200 dark:border-violet-500/30 flex items-center justify-center">
+              <Shield size={15} className="text-violet-600 dark:text-violet-400" />
             </div>
-            <h2 className="text-white font-semibold text-base">
+            <h2 className="text-slate-900 dark:text-white font-semibold text-base">
               {usuarioEditar ? 'Editar Super-Admin' : 'Nuevo Super-Admin'}
             </h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/5 text-neutral-400 hover:text-white transition-all">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-400 dark:text-neutral-400 hover:text-slate-800 dark:hover:text-white transition-all">
             <X size={16} />
           </button>
         </div>
@@ -82,31 +82,31 @@ function UsuarioModal({ onClose, onSaved, usuarioEditar = null }) {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Nombre Completo *</label>
+            <label className="text-xs font-medium text-slate-500 dark:text-neutral-400 uppercase tracking-wider">Nombre Completo *</label>
             <input
               type="text"
               value={form.nombre}
               onChange={(e) => setForm({ ...form, nombre: e.target.value })}
               required
               placeholder="Ej: Javier Aurelio Paredes Pozo"
-              className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-250 dark:border-white/10 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-neutral-550 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white dark:focus:bg-white/8 transition-all"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">Correo Electrónico *</label>
+            <label className="text-xs font-medium text-slate-500 dark:text-neutral-400 uppercase tracking-wider">Correo Electrónico *</label>
             <input
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
               placeholder="javier@ejemplo.com"
-              className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-250 dark:border-white/10 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-neutral-550 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white dark:focus:bg-white/8 transition-all"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+            <label className="text-xs font-medium text-slate-500 dark:text-neutral-400 uppercase tracking-wider">
               {usuarioEditar ? 'Nueva Contraseña (Opcional)' : 'Contraseña Temporal *'}
             </label>
             <input
@@ -116,13 +116,13 @@ function UsuarioModal({ onClose, onSaved, usuarioEditar = null }) {
               required={!usuarioEditar}
               placeholder={usuarioEditar ? 'Dejar en blanco para conservar la actual' : 'Mínimo 6 caracteres'}
               minLength={6}
-              className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/8 transition-all"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-250 dark:border-white/10 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-neutral-550 text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white dark:focus:bg-white/8 transition-all"
             />
           </div>
 
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-neutral-300 text-sm font-medium hover:bg-white/5 transition-all">
+              className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-neutral-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
               Cancelar
             </button>
             <button type="submit" disabled={saving}
@@ -142,19 +142,19 @@ function ConfirmDeleteModal({ usuario, onClose, onConfirm, deleting }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-sm bg-[#0d0d14] border border-red-500/20 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-sm bg-white dark:bg-[#0d0d14] border border-red-200 dark:border-red-500/20 rounded-2xl shadow-2xl overflow-hidden">
         <div className="p-6 text-center space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto">
             <AlertTriangle size={24} className="text-red-400" />
           </div>
           <div>
-            <h2 className="text-white font-bold text-lg">Eliminar Super-Admin</h2>
-            <p className="text-neutral-400 text-sm mt-1">
-              Estás a punto de revocar los accesos de <span className="text-white font-semibold">"{usuario.nombre}"</span>. Esta acción no se puede deshacer y el usuario perderá el acceso de forma inmediata.
+            <h2 className="text-slate-900 dark:text-white font-bold text-lg">Eliminar Super-Admin</h2>
+            <p className="text-slate-650 dark:text-neutral-400 text-sm mt-1">
+              Estás a punto de revocar los accesos de <span className="text-slate-900 dark:text-white font-semibold">"{usuario.nombre}"</span>. Esta acción no se puede deshacer y el usuario perderá el acceso de forma inmediata.
             </p>
           </div>
           <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-neutral-300 text-sm font-medium hover:bg-white/5 transition-all">
+            <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-slate-600 dark:text-neutral-300 text-sm font-medium hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
               Cancelar
             </button>
             <button onClick={onConfirm} disabled={deleting}
@@ -246,8 +246,8 @@ export default function GestionUsuariosSuperAdmin() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Cuentas del Equipo</h2>
-          <p className="text-neutral-400 text-sm mt-0.5">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Cuentas del Equipo</h2>
+          <p className="text-slate-500 dark:text-neutral-400 text-sm mt-0.5">
             {usuarios.length} super-administrador{usuarios.length !== 1 ? 'es' : ''} registrado{usuarios.length !== 1 ? 'es' : ''}
           </p>
         </div>
@@ -262,13 +262,13 @@ export default function GestionUsuariosSuperAdmin() {
 
       {/* Barra de búsqueda */}
       <div className="relative">
-        <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" />
+        <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-neutral-500" />
         <input
           type="text"
           placeholder="Buscar por nombre o correo..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/8 text-white placeholder-neutral-500 text-sm focus:outline-none focus:border-violet-500/40 focus:bg-white/8 transition-all"
+          className="w-full pl-10 pr-4 py-3 rounded-xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/8 text-slate-800 dark:text-white placeholder-slate-455 dark:placeholder-neutral-500 text-sm focus:outline-none focus:border-violet-500/40 focus:bg-white dark:focus:bg-white/8 transition-all shadow-sm dark:shadow-none"
         />
       </div>
 
@@ -287,54 +287,54 @@ export default function GestionUsuariosSuperAdmin() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <Shield size={40} className="text-neutral-700 mb-4" />
-          <p className="text-neutral-400 font-medium">
+          <Shield size={40} className="text-slate-300 dark:text-neutral-700 mb-4" />
+          <p className="text-slate-550 dark:text-neutral-400 font-medium">
             {search ? 'No se encontraron resultados' : 'No hay usuarios registrados'}
           </p>
-          <p className="text-neutral-600 text-sm mt-1">
+          <p className="text-slate-400 dark:text-neutral-600 text-sm mt-1">
             {search ? 'Prueba con otro término de búsqueda' : 'Registra la primera cuenta con el botón de arriba'}
           </p>
         </div>
       ) : (
         /* Tabla de usuarios */
-        <div className="rounded-2xl bg-[#0d0d14] border border-white/5 overflow-hidden">
+        <div className="rounded-2xl bg-white dark:bg-[#0d0d14] border border-slate-200 dark:border-white/5 overflow-hidden shadow-sm">
           {/* Cabecera de tabla */}
-          <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 border-b border-white/5 text-[11px] font-semibold text-neutral-500 uppercase tracking-widest">
+          <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 border-b border-slate-200 dark:border-white/5 text-[11px] font-semibold text-slate-500 dark:text-neutral-450 uppercase tracking-widest">
             <div className="col-span-5">Super-Admin</div>
             <div className="col-span-4">Correo Electrónico</div>
             <div className="col-span-2">Fecha Registro</div>
             <div className="col-span-1 text-right">Acción</div>
           </div>
 
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-slate-100 dark:divide-white/5">
             {filtered.map((usuario) => (
-              <div key={usuario.id} className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 px-6 py-4 hover:bg-white/3 transition-colors group items-center">
+              <div key={usuario.id} className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 px-6 py-4 hover:bg-slate-50/50 dark:hover:bg-white/3 transition-colors group items-center">
                 {/* Nombre */}
                 <div className="md:col-span-5 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-violet-600/10 border border-violet-500/25 flex items-center justify-center text-violet-400 font-bold text-sm shrink-0 shadow-md">
+                  <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-600/10 border border-violet-200 dark:border-violet-500/25 flex items-center justify-center text-violet-600 dark:text-violet-400 font-bold text-sm shrink-0 shadow-md">
                     {usuario.nombre.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-white font-semibold text-sm truncate">{usuario.nombre}</p>
+                      <p className="text-slate-900 dark:text-white font-semibold text-sm truncate">{usuario.nombre}</p>
                       {usuario.id === currentUserId && (
-                        <span className="px-1.5 py-0.5 rounded bg-violet-500/20 border border-violet-500/30 text-violet-400 text-[9px] font-bold uppercase tracking-wider">
+                        <span className="px-1.5 py-0.5 rounded bg-violet-500/20 border border-violet-500/30 text-violet-600 dark:text-violet-400 text-[9px] font-bold uppercase tracking-wider">
                           Tú
                         </span>
                       )}
                     </div>
-                    <span className="text-violet-400 text-[10px] font-mono uppercase">Rol: Super-Admin</span>
+                    <span className="text-violet-600 dark:text-violet-400 text-[10px] font-mono uppercase">Rol: Super-Admin</span>
                   </div>
                 </div>
 
                 {/* Correo */}
                 <div className="md:col-span-4 flex items-center gap-2">
-                  <span className="text-sm text-neutral-300 truncate">{usuario.email}</span>
+                  <span className="text-sm text-slate-700 dark:text-neutral-300 truncate">{usuario.email}</span>
                 </div>
 
                 {/* Fecha */}
                 <div className="md:col-span-2 flex items-center gap-2">
-                  <span className="text-neutral-400 text-xs">{formatDate(usuario.created_at)}</span>
+                  <span className="text-slate-500 dark:text-neutral-400 text-xs">{formatDate(usuario.created_at)}</span>
                 </div>
 
                 {/* Acciones */}
@@ -343,7 +343,7 @@ export default function GestionUsuariosSuperAdmin() {
                   <button
                     onClick={() => setModalUsuario(usuario)}
                     title="Editar usuario"
-                    className="p-2 rounded-lg hover:bg-white/8 text-neutral-500 hover:text-violet-400 transition-all"
+                    className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/8 text-slate-400 dark:text-neutral-500 hover:text-violet-600 dark:hover:text-violet-400 transition-all"
                   >
                     <Edit2 size={14} />
                   </button>
@@ -353,7 +353,7 @@ export default function GestionUsuariosSuperAdmin() {
                     <button
                       disabled
                       title="No puedes eliminar tu propia cuenta"
-                      className="p-2 rounded-lg text-neutral-700 cursor-not-allowed opacity-40"
+                      className="p-2 rounded-lg text-slate-300 dark:text-neutral-700 cursor-not-allowed opacity-40"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -361,7 +361,7 @@ export default function GestionUsuariosSuperAdmin() {
                     <button
                       onClick={() => setDeleteTarget(usuario)}
                       title="Eliminar usuario"
-                      className="p-2 rounded-lg hover:bg-white/8 text-neutral-500 hover:text-red-400 transition-all"
+                      className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/8 text-slate-400 dark:text-neutral-500 hover:text-red-500 dark:hover:text-red-400 transition-all"
                     >
                       <Trash2 size={14} />
                     </button>

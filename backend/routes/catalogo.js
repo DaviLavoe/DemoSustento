@@ -46,7 +46,14 @@ router.get('/:slug', async (req, res) => {
         descripcion: empresa.descripcion || null,
         telefono_whatsapp: empresa.telefono_whatsapp || null,
         logo_url: empresa.logo_url || null,
-        color_primario: empresa.color_primario || '#1a1a1a'
+        color_primario: empresa.color_primario || '#1a1a1a',
+        direccion: empresa.direccion || null,
+        email_contacto: empresa.email_contacto || null,
+        banner_url: empresa.banner_url || null,
+        instagram_url: empresa.instagram_url || null,
+        facebook_url: empresa.facebook_url || null,
+        mensaje_bienvenida: empresa.mensaje_bienvenida || null,
+        activo: empresa.activo ?? true
       },
       productos: productos || []
     });

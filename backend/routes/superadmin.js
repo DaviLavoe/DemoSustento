@@ -15,7 +15,7 @@ router.get('/empresas', async (req, res) => {
     // Obtener todas las empresas
     const { data: empresas, error } = await supabase
       .from('empresas')
-      .select('id, nombre, slug, logo_url, color_primario, telefono_whatsapp, created_at')
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -51,7 +51,11 @@ router.get('/empresas', async (req, res) => {
 // ─────────────────────────────────────────────
 router.post('/empresas', async (req, res) => {
   try {
-    const { nombre, slug, color_primario, telefono_whatsapp, logo_url } = req.body;
+    const { 
+      nombre, slug, color_primario, telefono_whatsapp, logo_url,
+      descripcion, direccion, email_contacto, banner_url,
+      instagram_url, facebook_url, mensaje_bienvenida, activo
+    } = req.body;
 
     if (!nombre || !slug) {
       return res.status(400).json({ success: false, message: 'El nombre y el slug son obligatorios' });
@@ -76,6 +80,14 @@ router.post('/empresas', async (req, res) => {
         color_primario: color_primario || '#1a1a1a',
         telefono_whatsapp: telefono_whatsapp || null,
         logo_url: logo_url || null,
+        descripcion: descripcion || null,
+        direccion: direccion || null,
+        email_contacto: email_contacto || null,
+        banner_url: banner_url || null,
+        instagram_url: instagram_url || null,
+        facebook_url: facebook_url || null,
+        mensaje_bienvenida: mensaje_bienvenida || null,
+        activo: activo !== undefined ? activo : true
       })
       .select()
       .single();
@@ -96,7 +108,11 @@ router.post('/empresas', async (req, res) => {
 router.put('/empresas/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, slug, color_primario, telefono_whatsapp, logo_url } = req.body;
+    const { 
+      nombre, slug, color_primario, telefono_whatsapp, logo_url,
+      descripcion, direccion, email_contacto, banner_url,
+      instagram_url, facebook_url, mensaje_bienvenida, activo
+    } = req.body;
 
     if (!nombre) {
       return res.status(400).json({ success: false, message: 'El nombre de la empresa es obligatorio' });
@@ -110,6 +126,14 @@ router.put('/empresas/:id', async (req, res) => {
         color_primario: color_primario || '#1a1a1a',
         telefono_whatsapp: telefono_whatsapp || null,
         logo_url: logo_url || null,
+        descripcion: descripcion || null,
+        direccion: direccion || null,
+        email_contacto: email_contacto || null,
+        banner_url: banner_url || null,
+        instagram_url: instagram_url || null,
+        facebook_url: facebook_url || null,
+        mensaje_bienvenida: mensaje_bienvenida || null,
+        activo: activo !== undefined ? activo : true
       })
       .eq('id', id)
       .select()

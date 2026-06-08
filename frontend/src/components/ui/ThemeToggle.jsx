@@ -1,18 +1,49 @@
 import React, { useState, useEffect } from "react"
 import { Moon, Sun } from "lucide-react"
 
+import { useParams } from 'react-router-dom';
+
 export function ThemeToggle({ className = "" }) {
+  const { slug } = useParams();
+  
+  // Determinamos la clave de almacenamiento aislada por empresa o panel
+  const isSuperAdminPath = typeof window !== 'undefined' && window.location.pathname.startsWith('/superadmin');
+  const storageKey = slug 
+    ? `theme_${slug}` 
+    : (isSuperAdminPath ? 'theme_superadmin' : 'theme');
+
   // Inicializar estado basado en localStorage o tema preferido del sistema
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("theme");
+      const stored = localStorage.getItem(storageKey);
       if (stored) return stored === "dark";
+      
+      // Defaults premium
+      if (slug === 'tech-store-lima' || isSuperAdminPath) {
+        return true; 
+      }
       return window.matchMedia("(prefers-color-scheme: dark)").matches;
     }
     return false;
   });
 
-  // Escuchar cambios de tema globales desde otros toggles
+  // Sincronizar estado si cambia la ruta o la clave de almacenamiento
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        setIsDark(stored === "dark");
+      } else {
+        if (slug === 'tech-store-lima' || isSuperAdminPath) {
+          setIsDark(true);
+        } else {
+          setIsDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
+        }
+      }
+    }
+  }, [storageKey, slug, isSuperAdminPath]);
+
+  // Escuchar cambios de tema globales desde otros toggles en la misma pestaña
   useEffect(() => {
     const handleThemeChange = (e) => {
       setIsDark(e.detail);
@@ -21,17 +52,28 @@ export function ThemeToggle({ className = "" }) {
     return () => window.removeEventListener("theme-change", handleThemeChange);
   }, []);
 
+  // Sincronizar tema entre pestañas distintas cuando localStorage cambia (mismo storageKey)
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === storageKey && e.newValue) {
+        setIsDark(e.newValue === "dark");
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [storageKey]);
+
   // Efecto para aplicar la clase 'dark' al HTML cuando cambia el estado
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDark) {
       root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+      localStorage.setItem(storageKey, "dark");
     } else {
       root.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      localStorage.setItem(storageKey, "light");
     }
-  }, [isDark]);
+  }, [isDark, storageKey]);
 
   const handleToggleClick = () => {
     const nextDark = !isDark;

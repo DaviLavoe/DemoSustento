@@ -46,6 +46,14 @@ function ProductSkeleton({ viewMode }) {
   );
 }
 
+const formatSlugToName = (slug) => {
+  if (!slug) return 'Catálogo';
+  return slug
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 export default function CatalogoPublico() {
   const { slug } = useParams();
   const supabase = getSupabaseForSlug(slug);
@@ -296,7 +304,7 @@ export default function CatalogoPublico() {
       ></div>
 
       <PantallaCargaPublica 
-        nombreTienda={company?.nombre || "Catálogo"} 
+        nombreTienda={company?.nombre || formatSlugToName(slug)} 
         logoUrl={company?.logo_url} 
         onComplete={() => setAnimationDone(true)} 
       />

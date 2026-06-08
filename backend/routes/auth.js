@@ -10,7 +10,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 
     const { data: empresa, error } = await supabase
       .from('empresas')
-      .select('id, nombre, slug, logo_url, telefono_whatsapp, color_primario')
+      .select('*')
       .eq('id', empresa_id)
       .single();
 
@@ -39,7 +39,11 @@ router.put('/empresa', authMiddleware, async (req, res) => {
       return res.status(403).json({ success: false, message: 'Acceso denegado: Solo administradores pueden configurar la empresa' });
     }
 
-    const { nombre, color_primario, telefono_whatsapp, logo_url } = req.body;
+    const { 
+      nombre, color_primario, telefono_whatsapp, logo_url,
+      descripcion, direccion, email_contacto, banner_url,
+      instagram_url, facebook_url, mensaje_bienvenida
+    } = req.body;
 
     if (!nombre) {
       return res.status(400).json({ success: false, message: 'El nombre de la empresa es obligatorio' });
@@ -51,7 +55,14 @@ router.put('/empresa', authMiddleware, async (req, res) => {
         nombre,
         color_primario: color_primario || '#1a1a1a',
         telefono_whatsapp: telefono_whatsapp || null,
-        logo_url: logo_url || null
+        logo_url: logo_url || null,
+        descripcion: descripcion || null,
+        direccion: direccion || null,
+        email_contacto: email_contacto || null,
+        banner_url: banner_url || null,
+        instagram_url: instagram_url || null,
+        facebook_url: facebook_url || null,
+        mensaje_bienvenida: mensaje_bienvenida || null
       })
       .eq('id', empresa_id)
       .select()

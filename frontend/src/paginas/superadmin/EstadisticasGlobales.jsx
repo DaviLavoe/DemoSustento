@@ -20,8 +20,8 @@ async function getToken() {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#0d0d14] border border-white/10 rounded-xl px-3 py-2 shadow-xl">
-        <p className="text-neutral-400 text-xs mb-1">{label}</p>
+      <div className="bg-white dark:bg-[#0d0d14] border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 shadow-xl">
+        <p className="text-slate-550 dark:text-neutral-400 text-xs mb-1">{label}</p>
         {payload.map((entry, i) => (
           <p key={i} className="text-sm font-semibold" style={{ color: entry.color }}>
             {entry.name}: {entry.value}
@@ -36,18 +36,18 @@ const CustomTooltip = ({ active, payload, label }) => {
 // ─── Tarjeta KPI ─────────────────────────────────────────────────────────────
 function KpiCard({ icon: Icon, label, value, color, suffix = '' }) {
   return (
-    <div className={`rounded-2xl bg-[#0d0d14] border border-white/5 p-5 hover:border-white/10 transition-all group`}>
+    <div className={`rounded-2xl bg-white dark:bg-[#0d0d14] border border-slate-200 dark:border-white/5 p-5 hover:border-slate-350 dark:hover:border-white/10 transition-all group shadow-sm dark:shadow-none`}>
       <div className="flex items-start justify-between mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${color} shadow-lg`}>
           <Icon size={18} className="text-white" />
         </div>
-        <TrendingUp size={14} className="text-neutral-600 group-hover:text-neutral-500 transition-colors" />
+        <TrendingUp size={14} className="text-slate-400 dark:text-neutral-600 group-hover:text-slate-500 dark:group-hover:text-neutral-550 transition-colors" />
       </div>
       <div>
-        <p className="text-2xl font-bold text-white tracking-tight">
+        <p className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
           {suffix}{typeof value === 'number' ? value.toLocaleString('es-PE') : (value ?? '—')}
         </p>
-        <p className="text-neutral-500 text-sm mt-0.5">{label}</p>
+        <p className="text-slate-500 dark:text-neutral-500 text-sm mt-0.5">{label}</p>
       </div>
     </div>
   );
@@ -58,6 +58,16 @@ export default function EstadisticasGlobales() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isDark, setIsDark] = useState(() => typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : true);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   const fetchStats = useCallback(async () => {
     setLoading(true);
@@ -118,8 +128,8 @@ export default function EstadisticasGlobales() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-white tracking-tight">Estadísticas Globales</h2>
-        <p className="text-neutral-400 text-sm mt-0.5">Métricas consolidadas de toda la plataforma SaaS</p>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Estadísticas Globales</h2>
+        <p className="text-slate-500 dark:text-neutral-400 text-sm mt-0.5">Métricas consolidadas de toda la plataforma SaaS</p>
       </div>
 
       {/* KPIs */}
@@ -161,13 +171,13 @@ export default function EstadisticasGlobales() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Gráfico 1: Actividad de pedidos (últimos 30 días) */}
-        <div className="rounded-2xl bg-[#0d0d14] border border-white/5 p-6">
+        <div className="rounded-2xl bg-white dark:bg-[#0d0d14] border border-slate-200 dark:border-white/5 p-6 shadow-sm dark:shadow-none">
           <div className="flex items-center gap-2 mb-6">
-            <Activity size={16} className="text-violet-400" />
-            <h3 className="text-white font-semibold text-sm">Pedidos (últimos 30 días)</h3>
+            <Activity size={16} className="text-violet-600 dark:text-violet-400" />
+            <h3 className="text-slate-800 dark:text-white font-semibold text-sm">Pedidos (últimos 30 días)</h3>
           </div>
           {pedidosPorDia.length === 0 ? (
-            <div className="flex items-center justify-center h-48 text-neutral-600 text-sm">
+            <div className="flex items-center justify-center h-48 text-slate-450 dark:text-neutral-600 text-sm">
               Sin datos en este período
             </div>
           ) : (
@@ -179,9 +189,9 @@ export default function EstadisticasGlobales() {
                     <stop offset="95%" stopColor="#7c3aed" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
-                <XAxis dataKey="fecha" tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff08" : "#e2e8f0"} />
+                <XAxis dataKey="fecha" tick={{ fill: isDark ? '#6b7280' : '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: isDark ? '#6b7280' : '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Area
                   type="monotone"
@@ -199,24 +209,24 @@ export default function EstadisticasGlobales() {
         </div>
 
         {/* Gráfico 2: Ranking de empresas por pedidos */}
-        <div className="rounded-2xl bg-[#0d0d14] border border-white/5 p-6">
+        <div className="rounded-2xl bg-white dark:bg-[#0d0d14] border border-slate-200 dark:border-white/5 p-6 shadow-sm dark:shadow-none">
           <div className="flex items-center gap-2 mb-6">
-            <BarChart2 size={16} className="text-indigo-400" />
-            <h3 className="text-white font-semibold text-sm">Top Empresas por Pedidos</h3>
+            <BarChart2 size={16} className="text-indigo-650 dark:text-indigo-400" />
+            <h3 className="text-slate-800 dark:text-white font-semibold text-sm">Top Empresas por Pedidos</h3>
           </div>
           {!ranking_empresas?.length ? (
-            <div className="flex items-center justify-center h-48 text-neutral-600 text-sm">
+            <div className="flex items-center justify-center h-48 text-slate-455 dark:text-neutral-600 text-sm">
               Sin datos suficientes aún
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={ranking_empresas} margin={{ top: 5, right: 5, left: -20, bottom: 5 }} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" horizontal={false} />
-                <XAxis type="number" tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff08" : "#e2e8f0"} horizontal={false} />
+                <XAxis type="number" tick={{ fill: isDark ? '#6b7280' : '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <YAxis
                   type="category"
                   dataKey="nombre"
-                  tick={{ fill: '#9ca3af', fontSize: 11 }}
+                  tick={{ fill: isDark ? '#9ca3af' : '#475569', fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
                   width={100}
@@ -238,10 +248,10 @@ export default function EstadisticasGlobales() {
 
       {/* Ingresos por día (gráfico adicional) */}
       {pedidosPorDia.length > 0 && (
-        <div className="rounded-2xl bg-[#0d0d14] border border-white/5 p-6">
+        <div className="rounded-2xl bg-white dark:bg-[#0d0d14] border border-slate-200 dark:border-white/5 p-6 shadow-sm dark:shadow-none">
           <div className="flex items-center gap-2 mb-6">
-            <DollarSign size={16} className="text-emerald-400" />
-            <h3 className="text-white font-semibold text-sm">Ingresos por Día (últimos 30 días)</h3>
+            <DollarSign size={16} className="text-emerald-600 dark:text-emerald-400" />
+            <h3 className="text-slate-800 dark:text-white font-semibold text-sm">Ingresos por Día (últimos 30 días)</h3>
           </div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={pedidosPorDia} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
@@ -251,9 +261,9 @@ export default function EstadisticasGlobales() {
                   <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff08" />
-              <XAxis dataKey="fecha" tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#6b7280', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `S/${v}`} />
+              <CartesianGrid strokeDasharray="3 3" stroke={isDark ? "#ffffff08" : "#e2e8f0"} />
+              <XAxis dataKey="fecha" tick={{ fill: isDark ? '#6b7280' : '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: isDark ? '#6b7280' : '#64748b', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `S/${v}`} />
               <Tooltip content={<CustomTooltip />} formatter={(v) => `S/ ${v.toFixed(2)}`} />
               <Area
                 type="monotone"
