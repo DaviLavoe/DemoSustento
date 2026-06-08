@@ -128,6 +128,27 @@ export default function CatalogoPublico() {
   const [checkoutDireccion, setCheckoutDireccion] = useState('');
   const [checkoutSubmitting, setCheckoutSubmitting] = useState(false);
   const [checkoutError, setCheckoutError] = useState(null);
+  const [metodoPago, setMetodoPago] = useState('whatsapp');
+  const [pedidoCompletado, setPedidoCompletado] = useState(null);
+  const [portalInitialTab, setPortalInitialTab] = useState('inicio');
+
+  const handleCloseReceipt = () => {
+    setPedidoCompletado(null);
+    setIsCartOpen(false);
+    setIsCheckoutMode(false);
+    setMetodoPago('whatsapp');
+  };
+
+  const handleOpenPortalFromCheckout = (tab = 'credito') => {
+    setPortalInitialTab(tab);
+    setIsPortalOpen(true);
+    setIsCartOpen(false);
+  };
+
+  const handleOpenLoginFromCheckout = () => {
+    setIsAccountOpen(true);
+    setIsCartOpen(false);
+  };
 
   // Load wishlist
   useEffect(() => {
@@ -240,7 +261,8 @@ export default function CatalogoPublico() {
           producto_id: item.id,
           cantidad: item.cantidad,
           precio_unitario: item.precio
-        }))
+        })),
+        metodo_pago: metodoPago
       };
 
       const { data: { session } } = await supabase.auth.getSession();
@@ -256,29 +278,42 @@ export default function CatalogoPublico() {
       if (!res.ok) throw new Error(resData.message || 'Error al registrar pedido');
 
       const pedidoGuardado = resData.data?.pedido;
-      if (clienteAuth.cliente) clienteAuth.registrarPedido(cart, totalCartPrice);
+      
+      if (clienteAuth.cliente) {
+        await clienteAuth.registrarPedido(
+          cart, 
+          totalCartPrice, 
+          resData.data?.saldo, 
+          resData.data?.puntos
+        );
+      }
 
-      let message = `*Nuevo pedido de ${company.nombre}*\n`;
-      if (pedidoGuardado?.id) message += `*Pedido ID:* ${pedidoGuardado.id.substring(0, 8).toUpperCase()}\n`;
-      message += `----------------------------------------\n\n`;
+      if (metodoPago === 'credito') {
+        setPedidoCompletado(pedidoGuardado);
+        clearCart();
+      } else {
+        let message = `*Nuevo pedido de ${company.nombre}*\n`;
+        if (pedidoGuardado?.id) message += `*Pedido ID:* ${pedidoGuardado.id.substring(0, 8).toUpperCase()}\n`;
+        message += `----------------------------------------\n\n`;
 
-      cart.forEach(item => {
-        const subtotal = Number(item.precio) * item.cantidad;
-        message += `• ${item.cantidad}x *${item.nombre}* - $${Number(item.precio).toFixed(2)} (Subtotal: $${subtotal.toFixed(2)})\n`;
-      });
+        cart.forEach(item => {
+          const subtotal = Number(item.precio) * item.cantidad;
+          message += `• ${item.cantidad}x *${item.nombre}* - $${Number(item.precio).toFixed(2)} (Subtotal: $${subtotal.toFixed(2)})\n`;
+        });
 
-      message += `\n*Total a pagar: $${totalCartPrice.toFixed(2)}*\n\n`;
-      message += `*Datos de Entrega:*\n👤 Cliente: ${checkoutNombre}\n📞 Teléfono: ${checkoutTelefono}\n`;
-      if (checkoutDireccion) message += `📍 Dirección: ${checkoutDireccion}\n`;
-      message += `\n_Por favor, confírmame disponibilidad y método de pago._`;
+        message += `\n*Total a pagar: $${totalCartPrice.toFixed(2)}*\n\n`;
+        message += `*Datos de Entrega:*\n👤 Cliente: ${checkoutNombre}\n📞 Teléfono: ${checkoutTelefono}\n`;
+        if (checkoutDireccion) message += `📍 Dirección: ${checkoutDireccion}\n`;
+        message += `\n_Por favor, confírmame disponibilidad y método de pago._`;
 
-      const encodedText = encodeURIComponent(message);
-      const phoneNumber = company.telefono_whatsapp || '51999999999';
+        const encodedText = encodeURIComponent(message);
+        const phoneNumber = company.telefono_whatsapp || '51999999999';
 
-      clearCart();
-      setIsCartOpen(false);
-      setIsCheckoutMode(false);
-      window.open(`https://wa.me/${phoneNumber}?text=${encodedText}`, '_blank');
+        clearCart();
+        setIsCartOpen(false);
+        setIsCheckoutMode(false);
+        window.open(`https://wa.me/${phoneNumber}?text=${encodedText}`, '_blank');
+      }
     } catch (err) {
       console.error(err);
       setCheckoutError(err.message || 'Error interno');
@@ -458,6 +493,13 @@ export default function CatalogoPublico() {
         setCheckoutError={setCheckoutError}
         isSubmitting={checkoutSubmitting}
         primaryColor={primaryColor}
+        pedidoCompletado={pedidoCompletado}
+        onCloseReceipt={handleCloseReceipt}
+        metodoPago={metodoPago}
+        setMetodoPago={setMetodoPago}
+        clienteAuth={clienteAuth}
+        onOpenPortal={() => handleOpenPortalFromCheckout('credito')}
+        onOpenLogin={handleOpenLoginFromCheckout}
       />
 
       <DrawerCuentaCliente
@@ -473,7 +515,10 @@ export default function CatalogoPublico() {
 
       <PortalCliente
         isOpen={isPortalOpen}
-        onClose={() => setIsPortalOpen(false)}
+        onClose={() => {
+          setIsPortalOpen(false);
+          setPortalInitialTab('inicio');
+        }}
         clienteAuth={clienteAuth}
         onReorder={(orderProducts) => handleReorder(orderProducts, products)}
         wishlist={wishlist}
@@ -493,6 +538,8 @@ export default function CatalogoPublico() {
         checkoutError={checkoutError}
         handleCheckoutSubmit={handleCheckoutSubmit}
         totalCartPrice={totalCartPrice}
+        empresa={company}
+        initialTab={portalInitialTab}
       />
     </div>
   );

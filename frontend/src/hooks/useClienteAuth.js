@@ -370,14 +370,53 @@ export function useClienteAuth() {
   };
 
   // Registrar un nuevo pedido en el historial del cliente (refrescando desde la DB)
-  const registrarPedido = async (productos, total) => {
+  const registrarPedido = async (productos, total, updatedSaldo = null, updatedPuntos = null) => {
     if (!cliente) return null;
     try {
+      if (updatedSaldo !== null || updatedPuntos !== null) {
+        setCliente(prev => ({
+          ...prev,
+          ...(updatedSaldo !== null ? { saldo: updatedSaldo } : {}),
+          ...(updatedPuntos !== null ? { puntos: updatedPuntos } : {})
+        }));
+      }
       await loadPedidos();
       return true;
     } catch (err) {
       console.error('Error al registrar pedido localmente:', err);
       return null;
+    }
+  };
+
+  // Recargar saldo del cliente
+  const recargarSaldo = async ({ amount, tarjetaId }) => {
+    if (!cliente) return;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('No hay sesión activa');
+
+      const response = await fetch(`${API_BASE_URL}/api/auth/cliente/recargar-saldo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ amount, tarjetaId, slug })
+      });
+      const resData = await response.json();
+      if (response.ok && resData.success) {
+        setCliente(prev => ({
+          ...prev,
+          saldo: resData.saldo,
+          puntos: resData.puntos
+        }));
+        return resData.saldo;
+      } else {
+        throw new Error(resData.message || 'Error al procesar la recarga');
+      }
+    } catch (err) {
+      console.error('Error en recargarSaldo hook:', err);
+      throw err;
     }
   };
 
@@ -393,6 +432,7 @@ export function useClienteAuth() {
     registrarPedido,
     agregarTarjeta,
     eliminarTarjeta,
-    cargarTarjetas
+    cargarTarjetas,
+    recargarSaldo
   };
 }

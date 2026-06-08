@@ -42,7 +42,7 @@ router.put('/empresa', authMiddleware, async (req, res) => {
     const { 
       nombre, color_primario, telefono_whatsapp, logo_url,
       descripcion, direccion, email_contacto, banner_url,
-      instagram_url, facebook_url, mensaje_bienvenida
+      instagram_url, facebook_url, mensaje_bienvenida, metodos_pago
     } = req.body;
 
     if (!nombre) {
@@ -62,7 +62,8 @@ router.put('/empresa', authMiddleware, async (req, res) => {
         banner_url: banner_url || null,
         instagram_url: instagram_url || null,
         facebook_url: facebook_url || null,
-        mensaje_bienvenida: mensaje_bienvenida || null
+        mensaje_bienvenida: mensaje_bienvenida || null,
+        metodos_pago: metodos_pago || ["visa", "mastercard", "bcp", "bbva", "interbank"]
       })
       .eq('id', empresa_id)
       .select()
@@ -220,6 +221,64 @@ router.delete('/usuarios/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /api/auth/usuarios/:id
+// Actualiza un colaborador en la empresa
+router.put('/usuarios/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { email, password, nombre, rol } = req.body;
+    const { empresa_id, rol: userRol } = req.user;
+
+    if (userRol !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Acceso denegado: Solo administradores pueden editar colaboradores' });
+    }
+
+    // Verificar pertenencia
+    const { data: targetUser, error: checkError } = await supabase
+      .from('usuarios')
+      .select('empresa_id')
+      .eq('id', id)
+      .single();
+
+    if (checkError || !targetUser) {
+      return res.status(404).json({ success: false, message: 'Colaborador no encontrado' });
+    }
+
+    if (targetUser.empresa_id !== empresa_id) {
+      return res.status(403).json({ success: false, message: 'Acceso denegado: El colaborador no pertenece a tu empresa' });
+    }
+
+    // 1. Actualizar en auth
+    const updateData = {};
+    if (email) updateData.email = email;
+    if (password) updateData.password = password;
+    if (nombre) updateData.user_metadata = { name: nombre };
+
+    if (Object.keys(updateData).length > 0) {
+      const { error: authError } = await supabase.auth.admin.updateUserById(id, updateData);
+      if (authError) throw authError;
+    }
+
+    // 2. Actualizar en public.usuarios
+    const dbUpdate = {};
+    if (nombre) dbUpdate.nombre = nombre;
+    if (rol) dbUpdate.rol = rol;
+
+    if (Object.keys(dbUpdate).length > 0) {
+      const { error: dbError } = await supabase
+        .from('usuarios')
+        .update(dbUpdate)
+        .eq('id', id);
+      if (dbError) throw dbError;
+    }
+
+    res.json({ success: true, message: 'Colaborador actualizado con éxito' });
+  } catch (err) {
+    console.error('Error en PUT /api/auth/usuarios/:id:', err);
+    res.status(500).json({ success: false, message: 'Error al actualizar el colaborador', error: err.message });
+  }
+});
+
 // ─────────────────────────────────────────────
 // CONTROL Y VALIDACIÓN DE SESIONES DE CLIENTES (CATÁLOGOS)
 // ─────────────────────────────────────────────
@@ -337,7 +396,9 @@ router.post('/cliente/validar-sesion', async (req, res) => {
         email: clienteFinal.email,
         nombre: clienteFinal.nombre,
         telefono: clienteFinal.telefono,
-        direccion: clienteFinal.direccion
+        direccion: clienteFinal.direccion,
+        saldo: parseFloat(clienteFinal.saldo || 0),
+        puntos: parseInt(clienteFinal.puntos || 0)
       }
     });
 
@@ -430,10 +491,91 @@ router.put('/cliente/actualizar-perfil', clientAuthMiddleware, async (req, res) 
 
     if (updateError) throw updateError;
 
-    res.json({ success: true, data: updatedCliente });
+    res.json({
+      success: true,
+      data: {
+        ...updatedCliente,
+        saldo: parseFloat(updatedCliente.saldo || 0),
+        puntos: parseInt(updatedCliente.puntos || 0)
+      }
+    });
   } catch (err) {
     console.error('Error en PUT /api/auth/cliente/actualizar-perfil:', err);
     res.status(500).json({ success: false, message: 'Error al actualizar perfil en la base de datos', error: err.message });
+  }
+});
+
+// POST /api/auth/cliente/recargar-saldo
+// Recarga saldo en la cuenta del cliente utilizando una tarjeta guardada
+router.post('/cliente/recargar-saldo', clientAuthMiddleware, async (req, res) => {
+  try {
+    const { amount, tarjetaId, slug } = req.body;
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      return res.status(400).json({ success: false, message: 'El monto de recarga debe ser un número positivo.' });
+    }
+    if (!tarjetaId) {
+      return res.status(400).json({ success: false, message: 'Debes seleccionar una tarjeta de pago.' });
+    }
+    if (!slug) {
+      return res.status(400).json({ success: false, message: 'El slug de la empresa es requerido.' });
+    }
+
+    // Obtener empresa por slug
+    const { data: empresa, error: empresaError } = await supabase
+      .from('empresas')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    if (empresaError || !empresa) {
+      return res.status(404).json({ success: false, message: 'Empresa no encontrada.' });
+    }
+
+    // Verificar que la tarjeta pertenezca al cliente
+    const { data: tarjeta, error: tarjetaError } = await supabase
+      .from('tarjetas_pago')
+      .select('id')
+      .eq('id', tarjetaId)
+      .eq('cliente_id', req.user.id)
+      .single();
+
+    if (tarjetaError || !tarjeta) {
+      return res.status(404).json({ success: false, message: 'La tarjeta seleccionada no es válida o no te pertenece.' });
+    }
+
+    // Obtener el cliente actual
+    const { data: clienteDb, error: getClienteError } = await supabase
+      .from('clientes')
+      .select('saldo')
+      .eq('id', req.user.id)
+      .eq('empresa_id', empresa.id)
+      .single();
+
+    if (getClienteError || !clienteDb) {
+      return res.status(404).json({ success: false, message: 'Cliente no encontrado para esta empresa.' });
+    }
+
+    const nuevoSaldo = Number(clienteDb.saldo || 0) + Number(amount);
+
+    const { data: updatedCliente, error: updateError } = await supabase
+      .from('clientes')
+      .update({ saldo: nuevoSaldo })
+      .eq('id', req.user.id)
+      .eq('empresa_id', empresa.id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    res.json({
+      success: true,
+      message: `Recarga de $${Number(amount).toFixed(2)} exitosa.`,
+      saldo: parseFloat(updatedCliente.saldo),
+      puntos: parseInt(updatedCliente.puntos || 0)
+    });
+  } catch (err) {
+    console.error('Error en /api/auth/cliente/recargar-saldo:', err);
+    res.status(500).json({ success: false, message: 'Error al procesar la recarga de saldo.', error: err.message });
   }
 });
 

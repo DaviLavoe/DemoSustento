@@ -163,7 +163,7 @@ export default function DashboardLayout() {
             {/* Panel de Contenido Dinámico */}
             <main className="flex-1 overflow-y-auto p-6 md:p-8">
               <div className="max-w-7xl mx-auto h-full">
-                <Outlet context={{ empresa, setEmpresa }} />
+                <Outlet context={{ empresa, setEmpresa, user, handleCerrarSesion }} />
               </div>
             </main>
           </div>

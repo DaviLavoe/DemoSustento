@@ -2,21 +2,28 @@ import { useState, useEffect, useCallback } from 'react';
 import { useEmpresaSupabase } from '../../context/EmpresaSupabaseContext';
 import { useOutletContext } from 'react-router-dom';
 import {
-  Users, Plus, Search, Trash2, X, Check, AlertTriangle, Loader2, UserCheck, Shield
+  Users, Plus, Search, Trash2, X, Check, AlertTriangle, Loader2, UserCheck, Shield, Eye, EyeOff, Pencil
 } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // ─── Modal Crear Colaborador ─────────────────────────────────────────────────
-function ColaboradorModal({ onClose, onSaved }) {
+function ColaboradorModal({ onClose, onSaved, usuario = null }) {
+  const supabase = useEmpresaSupabase();
   const [form, setForm] = useState({
-    nombre: '',
-    email: '',
+    nombre: usuario ? usuario.nombre : '',
+    email: usuario ? usuario.email : '',
     password: '',
-    rol: 'vendedor',
+    rol: usuario ? usuario.rol : 'vendedor',
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+
+  const getToken = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,14 +31,24 @@ function ColaboradorModal({ onClose, onSaved }) {
     setError(null);
     try {
       const token = await getToken();
-      const res = await fetch(`${API_URL}/api/auth/usuarios`, {
-        method: 'POST',
+      const isEdit = !!usuario;
+      const url = isEdit 
+        ? `${API_URL}/api/auth/usuarios/${usuario.id}`
+        : `${API_URL}/api/auth/usuarios`;
+      
+      const payload = { ...form };
+      if (isEdit && !payload.password) {
+        delete payload.password;
+      }
+
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.message);
-      onSaved();
+      onSaved(form);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -49,7 +66,9 @@ function ColaboradorModal({ onClose, onSaved }) {
             <div className="w-8 h-8 rounded-lg bg-neutral-100 dark:bg-zinc-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300">
               <Users size={15} />
             </div>
-            <h2 className="text-neutral-900 dark:text-white font-semibold text-base">Nuevo Colaborador</h2>
+            <h2 className="text-neutral-900 dark:text-white font-semibold text-base">
+              {usuario ? 'Editar Colaborador' : 'Nuevo Colaborador'}
+            </h2>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-white transition-all">
             <X size={16} />
@@ -89,16 +108,27 @@ function ColaboradorModal({ onClose, onSaved }) {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Contraseña de Acceso *</label>
-            <input
-              type="password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
-              placeholder="Mínimo 6 caracteres"
-              minLength={6}
-              className="w-full px-4 py-2.5 rounded-xl bg-neutral-50 dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-850 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm focus:outline-none focus:border-neutral-900 dark:focus:border-white focus:bg-white dark:focus:bg-zinc-900 transition-all"
-            />
+            <label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+              {usuario ? 'Nueva Contraseña (Opcional)' : 'Contraseña de Acceso *'}
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                required={!usuario}
+                placeholder={usuario ? 'Dejar vacío para mantener actual' : 'Mínimo 6 caracteres'}
+                minLength={6}
+                className="w-full pl-4 pr-10 py-2.5 rounded-xl bg-neutral-50 dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-850 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm focus:outline-none focus:border-neutral-900 dark:focus:border-white focus:bg-white dark:focus:bg-zinc-900 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-white transition-all"
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-1.5">
@@ -121,7 +151,7 @@ function ColaboradorModal({ onClose, onSaved }) {
             <button type="submit" disabled={saving}
               className="flex-1 px-4 py-2.5 rounded-xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 text-sm font-semibold hover:bg-black dark:hover:bg-neutral-100 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-md">
               {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-              Crear Usuario
+              {usuario ? 'Guardar Cambios' : 'Crear Usuario'}
             </button>
           </div>
         </form>
@@ -172,11 +202,14 @@ export default function GestionTrabajadores() {
 
   const context = useOutletContext();
   const empresa = context?.empresa;
+  const currentUser = context?.user;
+  const handleCerrarSesion = context?.handleCerrarSesion;
 
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState(null);
@@ -358,7 +391,14 @@ export default function GestionTrabajadores() {
                 </div>
 
                 {/* Acción */}
-                <div className="md:col-span-1 flex items-center justify-end">
+                <div className="md:col-span-1 flex items-center justify-end gap-1.5">
+                  <button
+                    onClick={() => setEditTarget(usuario)}
+                    title="Editar colaborador"
+                    className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-zinc-800 text-neutral-450 hover:text-black dark:hover:text-white transition-all"
+                  >
+                    <Pencil size={14} />
+                  </button>
                   <button
                     onClick={() => setDeleteTarget(usuario)}
                     title="Dar de baja colaborador"
@@ -378,6 +418,32 @@ export default function GestionTrabajadores() {
         <ColaboradorModal
           onClose={() => setIsModalOpen(false)}
           onSaved={() => { setIsModalOpen(false); fetchUsuarios(); }}
+        />
+      )}
+      {editTarget && (
+        <ColaboradorModal
+          usuario={editTarget}
+          onClose={() => setEditTarget(null)}
+          onSaved={(formData) => {
+            setEditTarget(null);
+            fetchUsuarios();
+            
+            // Si el administrador se auto-edita
+            if (editTarget.id === currentUser?.id) {
+              const emailChanged = formData.email !== currentUser.email;
+              const passwordChanged = !!formData.password;
+              
+              if (emailChanged || passwordChanged) {
+                alert("Has actualizado tus credenciales. Debes iniciar sesión nuevamente.");
+                if (handleCerrarSesion) {
+                  handleCerrarSesion();
+                }
+              } else {
+                // Solo cambió nombre/rol, refrescar para actualizar visualmente la sesión
+                window.location.reload();
+              }
+            }
+          }}
         />
       )}
       {deleteTarget && (

@@ -53,7 +53,8 @@ router.get('/:slug', async (req, res) => {
         instagram_url: empresa.instagram_url || null,
         facebook_url: empresa.facebook_url || null,
         mensaje_bienvenida: empresa.mensaje_bienvenida || null,
-        activo: empresa.activo ?? true
+        activo: empresa.activo ?? true,
+        metodos_pago: empresa.metodos_pago || ["visa", "mastercard", "bcp", "bbva", "interbank"]
       },
       productos: productos || []
     });

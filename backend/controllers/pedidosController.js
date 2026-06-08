@@ -14,7 +14,7 @@ const pedidosController = {
       fs.appendFileSync(path.join(__dirname, '../request_logs.txt'), logMsg);
 
       // 1. Obtener datos del cuerpo
-      const { nombre_cliente, telefono_cliente, total, productos, empresa_id: bodyEmpresaId } = req.body;
+      const { nombre_cliente, telefono_cliente, total, productos, empresa_id: bodyEmpresaId, metodo_pago } = req.body;
       
       // 2. Determinar empresa_id (de req.user si tiene empresa asociada, o de bodyEmpresaId en caso de cliente/petición pública)
       const empresa_id = (req.user && req.user.empresa_id) ? req.user.empresa_id : bodyEmpresaId;
@@ -82,6 +82,45 @@ const pedidosController = {
         }
       }
       
+      // Validar y debitar saldo si es pago con crédito
+      if (metodo_pago === 'credito') {
+        if (!req.user || req.user.rol !== 'cliente') {
+          return res.status(401).json({ success: false, message: 'Debes iniciar sesión con tu cuenta de cliente para pagar con crédito.' });
+        }
+        
+        // Obtener datos del cliente (saldo y puntos)
+        const { data: cliente, error: clienteError } = await supabase
+          .from('clientes')
+          .select('saldo, puntos')
+          .eq('id', req.user.id)
+          .eq('empresa_id', empresa_id)
+          .single();
+          
+        if (clienteError || !cliente) {
+          return res.status(400).json({ success: false, message: 'No se pudo verificar el saldo de tu cuenta.' });
+        }
+        
+        const saldoActual = Number(cliente.saldo || 0);
+        if (saldoActual < total) {
+          return res.status(400).json({ success: false, message: `Saldo insuficiente. Tienes $${saldoActual.toFixed(2)} pero el pedido es de $${Number(total).toFixed(2)}.` });
+        }
+        
+        // Deducción y sumatoria de puntos
+        const nuevoSaldo = saldoActual - Number(total);
+        const puntosGanados = Math.round(Number(total) * 0.05);
+        const nuevosPuntos = Number(cliente.puntos || 0) + puntosGanados;
+        
+        const { error: updateError } = await supabase
+          .from('clientes')
+          .update({ saldo: nuevoSaldo, puntos: nuevosPuntos })
+          .eq('id', req.user.id)
+          .eq('empresa_id', empresa_id);
+          
+        if (updateError) {
+          return res.status(500).json({ success: false, message: 'Error al procesar el pago con crédito.', error: updateError.message });
+        }
+      }
+
       // 3. Insertar el pedido principal en la tabla 'pedidos'
       const logFile = path.join(__dirname, '../auth_debug.log');
       fs.appendFileSync(logFile, `[${new Date().toISOString()}] [crearPedido] req.user is: ${JSON.stringify(req.user)}\n`);
@@ -91,7 +130,9 @@ const pedidosController = {
         telefono_cliente: telefono_cliente || null,
         total,
         estado: 'pendiente',
-        cliente_id: req.user ? req.user.id : null
+        cliente_id: req.user ? req.user.id : null,
+        metodo_pago: metodo_pago || 'whatsapp',
+        pago_estado: metodo_pago === 'credito' ? 'pagado' : 'pendiente'
       };
       fs.appendFileSync(logFile, `[${new Date().toISOString()}] [crearPedido] inserting into pedidos: ${JSON.stringify(insertData)}\n`);
 
@@ -128,12 +169,30 @@ const pedidosController = {
         throw detallesError;
       }
       
+      // Obtenemos los valores actualizados de saldo y puntos del cliente (si es pago con crédito)
+      let saldo = null;
+      let puntos = null;
+      if (metodo_pago === 'credito') {
+        const { data: updatedCli } = await supabase
+          .from('clientes')
+          .select('saldo, puntos')
+          .eq('id', req.user.id)
+          .eq('empresa_id', empresa_id)
+          .single();
+        if (updatedCli) {
+          saldo = parseFloat(updatedCli.saldo);
+          puntos = parseInt(updatedCli.puntos || 0);
+        }
+      }
+
       res.status(201).json({
         success: true,
         message: 'Pedido registrado exitosamente',
         data: {
           pedido,
-          detalles: detallesData
+          detalles: detallesData,
+          saldo,
+          puntos
         }
       });
       

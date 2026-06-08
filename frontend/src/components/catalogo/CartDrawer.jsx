@@ -22,11 +22,23 @@ export default function CartDrawer({
   checkoutError,
   setCheckoutError,
   isSubmitting,
-  primaryColor
+  primaryColor,
+  // new props
+  pedidoCompletado,
+  onCloseReceipt,
+  metodoPago,
+  setMetodoPago,
+  clienteAuth,
+  onOpenPortal,
+  onOpenLogin
 }) {
   if (!isCartOpen) return null;
 
   const closeCart = () => {
+    if (pedidoCompletado) {
+      onCloseReceipt();
+      return;
+    }
     setIsCartOpen(false);
     setTimeout(() => {
       setIsCheckoutMode(false);
@@ -53,13 +65,18 @@ export default function CartDrawer({
         {/* Header */}
         <div className="px-6 py-5 border-b border-[#e5e5e5] dark:border-neutral-800 flex items-center justify-between bg-white sm:bg-[#fafafa] dark:bg-[#0a0a0a] dark:sm:bg-[#111111] rounded-t-3xl sm:rounded-none">
           <div className="flex items-center">
-            {isCheckoutMode ? (
+            {pedidoCompletado ? (
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-500 font-bold">✓</span>
+                <h2 className="font-serif text-xl font-bold text-[#1a1a1a] dark:text-white leading-none">Pedido Confirmado</h2>
+              </div>
+            ) : isCheckoutMode ? (
               <button 
                 onClick={() => {
                   setIsCheckoutMode(false);
                   setCheckoutError(null);
                 }}
-                className="flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white font-semibold transition-colors active:scale-95"
+                className="flex items-center gap-1.5 text-xs text-neutral-550 dark:text-neutral-450 hover:text-black dark:hover:text-white font-semibold transition-colors active:scale-95"
               >
                 <ArrowLeft size={16} />
                 <span>Volver al Carrito</span>
@@ -71,7 +88,7 @@ export default function CartDrawer({
                 </div>
                 <div>
                   <h2 className="font-serif text-xl font-bold text-[#1a1a1a] dark:text-white leading-none">Tu Carrito</h2>
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium mt-1">
+                  <p className="text-xs text-neutral-550 dark:text-neutral-400 font-medium mt-1">
                     {totalCartItems} {totalCartItems === 1 ? 'artículo' : 'artículos'}
                   </p>
                 </div>
@@ -91,7 +108,70 @@ export default function CartDrawer({
 
         {/* Content Body */}
         <div data-lenis-prevent className="flex-1 overflow-y-auto p-6 scrollbar-none space-y-4 bg-white/50 dark:bg-[#0a0a0a]/50">
-          {isCheckoutMode ? (
+          {pedidoCompletado ? (
+            <div className="space-y-6 flex flex-col justify-center items-center text-center py-4 animate-reveal">
+              {/* Animación del Check */}
+              <div className="w-16 h-16 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center animate-bounce mb-2">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="font-serif text-2xl font-bold text-[#1a1a1a] dark:text-white">¡Gracias por tu compra!</h3>
+                <p className="text-xs text-neutral-400 dark:text-neutral-500 font-light">Tu pedido ha sido procesado y pagado con crédito de cuenta.</p>
+              </div>
+
+              {/* Recibo de Compra */}
+              <div className="w-full bg-[#fafafa] dark:bg-neutral-900 border border-[#e5e5e5] dark:border-neutral-800 rounded-2xl p-5 text-left space-y-4 shadow-inner relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
+                
+                <div className="flex justify-between items-center border-b border-[#e5e5e5] dark:border-neutral-800 pb-3">
+                  <div>
+                    <span className="text-[9px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest">Código de Pedido</span>
+                    <p className="font-mono text-sm font-bold text-[#1a1a1a] dark:text-white">#{pedidoCompletado.id.substring(0, 8).toUpperCase()}</p>
+                  </div>
+                  <span className="bg-indigo-100 dark:bg-indigo-950/50 text-indigo-750 dark:text-indigo-400 text-[10px] font-bold px-2.5 py-1 rounded-full border border-indigo-200/30">
+                    PAGADO CON CRÉDITO
+                  </span>
+                </div>
+
+                {/* Detalles del cliente */}
+                <div className="space-y-1.5 text-xs">
+                  <p className="text-neutral-550 dark:text-neutral-400"><strong className="text-[#1a1a1a] dark:text-white font-semibold">Cliente:</strong> {pedidoCompletado.nombre_cliente}</p>
+                  <p className="text-neutral-550 dark:text-neutral-400"><strong className="text-[#1a1a1a] dark:text-white font-semibold">Teléfono:</strong> {pedidoCompletado.telefono_cliente}</p>
+                  {checkoutDireccion && (
+                    <p className="text-neutral-550 dark:text-neutral-400"><strong className="text-[#1a1a1a] dark:text-white font-semibold">Dirección:</strong> {checkoutDireccion}</p>
+                  )}
+                </div>
+
+                {/* Items del pedido */}
+                <div className="border-t border-b border-[#e5e5e5]/80 dark:border-neutral-800/80 py-3 space-y-1.5 max-h-36 overflow-y-auto scrollbar-none">
+                  {cart.map((item) => (
+                    <div key={item.id} className="flex justify-between text-xs">
+                      <span className="text-neutral-600 dark:text-neutral-350">{item.cantidad}x {item.nombre}</span>
+                      <span className="font-mono text-neutral-550 dark:text-neutral-400 font-bold">${(Number(item.precio) * item.cantidad).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Total y Puntos ganados */}
+                <div className="flex justify-between items-baseline pt-1">
+                  <span className="text-xs font-bold text-neutral-600 dark:text-neutral-300">Total pagado</span>
+                  <span className="font-serif text-2xl font-bold text-indigo-650 dark:text-indigo-455 font-mono">${Number(pedidoCompletado.total).toFixed(2)}</span>
+                </div>
+
+                <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-100/50 dark:border-amber-900/30 p-3 rounded-xl flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">✨</span>
+                    <div>
+                      <p className="font-bold text-amber-800 dark:text-amber-400 font-semibold">Puntos de lealtad ganados</p>
+                      <p className="text-[10px] text-neutral-500 dark:text-neutral-450">Sumados automáticamente a tu cuenta</p>
+                    </div>
+                  </div>
+                  <span className="font-bold text-amber-705 dark:text-amber-400 text-sm">+{Math.round(Number(pedidoCompletado.total) * 0.05)} PTS</span>
+                </div>
+              </div>
+            </div>
+          ) : isCheckoutMode ? (
             <CheckoutForm 
               checkoutNombre={checkoutNombre}
               setCheckoutNombre={setCheckoutNombre}
@@ -105,6 +185,11 @@ export default function CartDrawer({
               totalCartPrice={totalCartPrice}
               primaryColor={primaryColor}
               isSubmitting={isSubmitting}
+              metodoPago={metodoPago}
+              setMetodoPago={setMetodoPago}
+              clienteAuth={clienteAuth}
+              onOpenPortal={onOpenPortal}
+              onOpenLogin={onOpenLogin}
             />
           ) : (
             <div className="space-y-4">
@@ -115,7 +200,7 @@ export default function CartDrawer({
                   </div>
                   <div>
                     <h3 className="font-serif text-xl font-bold text-[#1a1a1a] dark:text-white">Carrito vacío</h3>
-                    <p className="text-neutral-500 dark:text-neutral-400 text-sm mt-2 max-w-[200px] mx-auto">Aún no has agregado ningún producto a tu carrito.</p>
+                    <p className="text-neutral-555 dark:text-neutral-400 text-sm mt-2 max-w-[200px] mx-auto">Aún no has agregado ningún producto a tu carrito.</p>
                   </div>
                   <button 
                     onClick={closeCart}
@@ -138,7 +223,7 @@ export default function CartDrawer({
                       <div className="flex justify-between items-start gap-2">
                         <div>
                           <h4 className="text-sm font-semibold text-[#1a1a1a] dark:text-white line-clamp-1 group-hover:text-black dark:group-hover:text-white transition-colors">{item.nombre}</h4>
-                          <p className="text-neutral-500 dark:text-neutral-400 text-xs font-bold font-mono mt-1">${Number(item.precio).toFixed(2)}</p>
+                          <p className="text-neutral-555 dark:text-neutral-400 text-xs font-bold font-mono mt-1">${Number(item.precio).toFixed(2)}</p>
                         </div>
                         <button 
                           onClick={() => removeFromCart(item.id)}
@@ -175,10 +260,20 @@ export default function CartDrawer({
         </div>
 
         {/* Footer */}
-        {!isCheckoutMode && cart.length > 0 && (
+        {pedidoCompletado ? (
+          <div className="p-6 border-t border-[#e5e5e5] dark:border-neutral-800 bg-white sm:bg-[#fafafa] dark:bg-[#0a0a0a] dark:sm:bg-[#111111] rounded-none sm:rounded-bl-none z-20 pb-safe shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.05)]">
+            <button
+              onClick={onCloseReceipt}
+              className="w-full py-4 text-white text-sm font-bold rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]"
+              style={{ backgroundColor: '#4f46e5', boxShadow: '0 10px 25px -5px rgba(79, 70, 229, 0.4)' }}
+            >
+              Entendido / Continuar Comprando
+            </button>
+          </div>
+        ) : !isCheckoutMode && cart.length > 0 ? (
           <div className="p-6 border-t border-[#e5e5e5] dark:border-neutral-800 bg-white sm:bg-[#fafafa] dark:bg-[#0a0a0a] dark:sm:bg-[#111111] space-y-5 rounded-none sm:rounded-bl-none z-20 pb-safe shadow-[0_-10px_40px_-10px_rgba(0,0,0,0.05)]">
             <div className="flex justify-between items-baseline">
-              <span className="text-neutral-500 dark:text-neutral-400 text-sm font-medium">Subtotal Estimado</span>
+              <span className="text-neutral-505 dark:text-neutral-450 text-sm font-medium">Subtotal Estimado</span>
               <span className="font-serif text-3xl font-bold text-[#1a1a1a] dark:text-white drop-shadow-sm">
                 <span className="text-lg opacity-50 mr-1">$</span>{totalCartPrice.toFixed(2)}
               </span>
@@ -192,7 +287,7 @@ export default function CartDrawer({
               Completar Pedido
             </button>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

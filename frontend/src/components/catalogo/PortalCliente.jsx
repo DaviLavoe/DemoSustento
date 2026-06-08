@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   X, User, Mail, Phone, MapPin, History, LogOut, Check, ShoppingBag, 
   Heart, CreditCard, Wallet, ChevronDown, ChevronUp, Clock, CheckCircle, 
-  MessageSquare, HelpCircle, ArrowLeft, Trash, Plus, Search, Send
+  MessageSquare, HelpCircle, ArrowLeft, Trash, Plus, Search, Send, Loader2
 } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
@@ -27,7 +27,8 @@ export default function PortalCliente({
   checkoutSubmitting,
   checkoutError,
   handleCheckoutSubmit,
-  totalCartPrice = 0
+  totalCartPrice = 0,
+  empresa = null
 }) {
   const { 
     cliente, 
@@ -37,7 +38,8 @@ export default function PortalCliente({
     actualizarPerfil, 
     tarjetas = [], 
     agregarTarjeta, 
-    eliminarTarjeta 
+    eliminarTarjeta,
+    recargarSaldo
   } = clienteAuth;
   const [activeTab, setActiveTab] = useState('inicio'); // inicio | pedidos | wishlist | perfil | tarjetas | credito
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -64,9 +66,18 @@ export default function PortalCliente({
   const [newCardNumber, setNewCardNumber] = useState('');
   const [newCardHolder, setNewCardHolder] = useState('');
   const [newCardExpiry, setNewCardExpiry] = useState('');
+  const [newCardType, setNewCardType] = useState('');
   const [showAddCard, setShowAddCard] = useState(false);
   const [tiltStyle, setTiltStyle] = useState({});
   const [selectedCard, setSelectedCard] = useState(null);
+
+  // Estados de Recarga de Saldo
+  const [showRechargeModal, setShowRechargeModal] = useState(false);
+  const [rechargeAmount, setRechargeAmount] = useState('');
+  const [selectedRechargeCardId, setSelectedRechargeCardId] = useState('');
+  const [rechargeSubmitting, setRechargeSubmitting] = useState(false);
+  const [rechargeSuccessMsg, setRechargeSuccessMsg] = useState(null);
+  const [rechargeErrorMsg, setRechargeErrorMsg] = useState(null);
 
   // Sincronizar tarjeta seleccionada por defecto
   useEffect(() => {
@@ -144,13 +155,74 @@ export default function PortalCliente({
     return matchesSearch && matchesDate && matchesStatus;
   });
 
+  // Mapeos de marcas de tarjeta aceptadas
+  const brandLabels = {
+    visa: 'Visa',
+    mastercard: 'Mastercard',
+    bcp: 'Banco de Crédito BCP',
+    bbva: 'BBVA Continental',
+    interbank: 'Interbank'
+  };
+
+  const getCardTheme = (type) => {
+    const t = (type || '').toLowerCase();
+    switch (t) {
+      case 'visa':
+        return {
+          gradient: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)',
+          logo: <span className="font-serif italic font-black text-white text-lg tracking-tight">Visa</span>,
+          bankName: 'VISA GLOBAL',
+        };
+      case 'mastercard':
+        return {
+          gradient: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
+          logo: (
+            <div className="flex items-center gap-1">
+              <div className="flex -space-x-1.5">
+                <div className="w-4 h-4 rounded-full bg-red-500 opacity-90" />
+                <div className="w-4 h-4 rounded-full bg-amber-500 opacity-90" />
+              </div>
+            </div>
+          ),
+          bankName: 'MASTERCARD PLATINUM',
+        };
+      case 'bcp':
+        return {
+          gradient: 'linear-gradient(135deg, #002A4E 0%, #00457A 45%, #FF6B00 100%)',
+          logo: <span className="font-sans font-black text-white text-sm tracking-tighter">BCP</span>,
+          bankName: 'BANCO DE CRÉDITO BCP',
+        };
+      case 'bbva':
+        return {
+          gradient: 'linear-gradient(135deg, #072146 0%, #004481 60%, #0073C2 100%)',
+          logo: <span className="font-sans font-black text-white text-sm italic tracking-tight">BBVA</span>,
+          bankName: 'BBVA CONTINENTAL',
+        };
+      case 'interbank':
+        return {
+          gradient: 'linear-gradient(135deg, #00802F 0%, #00B23D 100%)',
+          logo: <span className="font-sans font-extrabold text-white text-xs tracking-tight">Interbank</span>,
+          bankName: 'INTERBANK PERÚ',
+        };
+      default:
+        return {
+          gradient: `linear-gradient(135deg, ${primaryColor} 0%, #000000 100%)`,
+          logo: <span className="font-mono text-[10px] tracking-wider font-semibold">TECH WALLET</span>,
+          bankName: 'TECH DEBIT CARD',
+        };
+    }
+  };
+
+  const activeCardType = showAddCard ? newCardType : (selectedCard ? selectedCard.type : '');
+  const activeCardTheme = getCardTheme(activeCardType);
+
   // Manejo de Tarjetas (Agregar/Eliminar)
   const handleAddCard = async (e) => {
     e.preventDefault();
-    if (!newCardNumber || !newCardHolder || !newCardExpiry) return;
+    if (!newCardNumber || !newCardHolder || !newCardExpiry || !newCardType) return;
     
-    const type = newCardNumber.startsWith('5') ? 'mastercard' : 'visa';
-    const bank = type === 'visa' ? 'Visa Electrón' : 'Mastercard Platinum';
+    const type = newCardType;
+    const bank = brandLabels[newCardType] || newCardType;
     const number = `•••• •••• •••• ${newCardNumber.slice(-4)}`;
 
     try {
@@ -164,6 +236,7 @@ export default function PortalCliente({
       setNewCardNumber('');
       setNewCardHolder('');
       setNewCardExpiry('');
+      setNewCardType('');
       setShowAddCard(false);
     } catch (err) {
       alert('Error al guardar la tarjeta: ' + err.message);
@@ -178,6 +251,53 @@ export default function PortalCliente({
       alert('Error al eliminar la tarjeta: ' + err.message);
     }
   };
+
+  // Submit de Recarga de Saldo
+  const handleRechargeSubmit = async (e) => {
+    e.preventDefault();
+    if (!rechargeAmount || isNaN(rechargeAmount) || Number(rechargeAmount) <= 0) {
+      setRechargeErrorMsg('Ingresa un monto válido.');
+      return;
+    }
+    if (!selectedRechargeCardId) {
+      setRechargeErrorMsg('Selecciona una tarjeta para la recarga.');
+      return;
+    }
+
+    setRechargeSubmitting(true);
+    setRechargeErrorMsg(null);
+    setRechargeSuccessMsg(null);
+
+    try {
+      // Simular tiempo de carga de pasarela de pago para dar estética premium
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      await recargarSaldo({
+        amount: Number(rechargeAmount),
+        tarjetaId: selectedRechargeCardId
+      });
+
+      setRechargeSuccessMsg(`¡Recarga exitosa! Se han agregado $${Number(rechargeAmount).toFixed(2)} a tu saldo.`);
+      setRechargeAmount('');
+      setTimeout(() => {
+        setShowRechargeModal(false);
+        setRechargeSuccessMsg(null);
+      }, 2500);
+    } catch (err) {
+      setRechargeErrorMsg(err.message || 'Error al procesar la recarga.');
+    } finally {
+      setRechargeSubmitting(false);
+    }
+  };
+
+  const getClientLevel = (pts) => {
+    const p = pts || 0;
+    if (p >= 500) return { label: '★ Cliente Diamond', color: 'text-indigo-400 dark:text-indigo-300' };
+    if (p >= 300) return { label: '★ Cliente Gold', color: 'text-amber-400 dark:text-amber-300' };
+    if (p >= 100) return { label: '★ Cliente Silver', color: 'text-slate-400 dark:text-slate-300' };
+    return { label: '★ Cliente Standard', color: 'text-neutral-450 dark:text-neutral-500' };
+  };
+  const levelInfo = getClientLevel(cliente?.puntos);
 
   // Efecto 3D Tilt para la Tarjeta de Crédito Principal
   const handleMouseMove = (e) => {
@@ -964,7 +1084,7 @@ export default function PortalCliente({
                     onMouseLeave={handleMouseLeave}
                     style={{
                       ...tiltStyle,
-                      background: `linear-gradient(135deg, ${primaryColor} 0%, #000000 100%)`
+                      background: activeCardTheme.gradient
                     }}
                     className="w-full max-w-[340px] aspect-[1.586/1] rounded-2xl p-6 text-white flex flex-col justify-between shadow-2xl relative overflow-hidden transition-all duration-100 ease-out border border-white/10 select-none cursor-pointer"
                   >
@@ -973,9 +1093,12 @@ export default function PortalCliente({
                     <div className="absolute -left-12 -top-12 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none" />
                     
                     {/* Fila 1: Banco y Chip */}
-                    <div className="flex justify-between items-center relative z-10">
-                      <span className="text-[10px] font-mono tracking-widest text-white/70 font-semibold">TECH WALLET</span>
-                      <div className="w-10 h-8 bg-amber-200/80 rounded-md border border-amber-300/40 relative overflow-hidden">
+                    <div className="flex justify-between items-start relative z-10">
+                      <div className="flex flex-col">
+                        <span className="text-[7px] font-mono tracking-widest text-white/50 uppercase">Banco Emisor</span>
+                        <span className="text-[10px] font-sans font-bold tracking-wide uppercase text-white/95 truncate max-w-[170px]">{activeCardTheme.bankName}</span>
+                      </div>
+                      <div className="w-9 h-7 bg-amber-200/80 rounded-md border border-amber-300/40 relative overflow-hidden shrink-0">
                         <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-amber-950/20" />
                         <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-amber-950/20" />
                       </div>
@@ -1002,14 +1125,19 @@ export default function PortalCliente({
                           }
                         </p>
                       </div>
-                      <div className="shrink-0 text-right">
-                        <p className="text-[8px] text-white/50 uppercase tracking-widest">Vence</p>
-                        <p className="font-mono text-xs font-bold tracking-wider mt-0.5">
-                          {showAddCard
-                            ? (newCardExpiry || 'MM/AA')
-                            : (selectedCard ? selectedCard.expiry : 'MM/AA')
-                          }
-                        </p>
+                      <div className="shrink-0 text-right flex items-center gap-3">
+                        <div>
+                          <p className="text-[8px] text-white/50 uppercase tracking-widest">Vence</p>
+                          <p className="font-mono text-xs font-bold tracking-wider mt-0.5">
+                            {showAddCard
+                              ? (newCardExpiry || 'MM/AA')
+                              : (selectedCard ? selectedCard.expiry : 'MM/AA')
+                            }
+                          </p>
+                        </div>
+                        <div className="shrink-0">
+                          {activeCardTheme.logo}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1040,8 +1168,11 @@ export default function PortalCliente({
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center shrink-0 shadow-sm font-bold font-mono text-xs italic">
-                              {card.type === 'visa' ? 'V' : 'MC'}
+                            <div 
+                              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm font-sans font-black text-xs text-white tracking-tighter"
+                              style={{ background: getCardTheme(card.type).gradient }}
+                            >
+                              {card.type ? card.type.substring(0, 2).toUpperCase() : 'T'}
                             </div>
                             <div>
                               <p className="text-xs font-bold text-neutral-800 dark:text-white">{card.bank}</p>
@@ -1076,8 +1207,27 @@ export default function PortalCliente({
                     ) : (
                       <form onSubmit={handleAddCard} className="p-5 border border-neutral-200 dark:border-neutral-800 rounded-2xl space-y-3 bg-neutral-50/50 dark:bg-neutral-900/30 animate-reveal">
                         <div className="grid grid-cols-2 gap-3">
+                          
+                          {/* Marca/Banco dropdown */}
                           <div className="flex flex-col gap-1 col-span-2">
-                            <label className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400">Número de Tarjeta (16 dígitos)</label>
+                            <label className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400">Banco / Marca *</label>
+                            <select
+                              required
+                              value={newCardType}
+                              onChange={(e) => setNewCardType(e.target.value)}
+                              className="w-full px-3 py-2.5 bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl text-xs focus:outline-none focus:border-black dark:focus:border-neutral-500 dark:text-white"
+                            >
+                              <option value="">Selecciona el emisor...</option>
+                              {(empresa?.metodos_pago || ["visa", "mastercard", "bcp", "bbva", "interbank"]).map((brandId) => (
+                                <option key={brandId} value={brandId}>
+                                  {brandLabels[brandId] || brandId.toUpperCase()}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div className="flex flex-col gap-1 col-span-2">
+                            <label className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400">Número de Tarjeta (16 dígitos) *</label>
                             <input 
                               type="text" 
                               maxLength={16}
@@ -1155,34 +1305,43 @@ export default function PortalCliente({
                 <h2 className="font-serif text-2xl font-bold text-[#1a1a1a] dark:text-white">Crédito de la Cuenta</h2>
                 <p className="text-xs text-neutral-400 dark:text-neutral-400 font-light mt-0.5">Controla tu saldo acumulado de lealtad para canjes directos</p>
               </div>
-
+ 
               {/* Tarjeta de Crédito Principal */}
-              <div className="p-6 bg-gradient-to-r from-neutral-900 to-black text-white rounded-3xl border border-neutral-800 max-w-md space-y-6 shadow-xl relative overflow-hidden">
-                <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full blur-xl" />
+              <div className="p-6 bg-gradient-to-br from-neutral-900 to-zinc-950 text-white rounded-3xl border border-neutral-800 max-w-md space-y-6 shadow-xl relative overflow-hidden">
+                <div className="absolute right-0 top-0 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none" />
                 <div className="flex justify-between items-center">
                   <span className="text-[10px] font-mono tracking-widest text-white/50">TECH LOYALTY</span>
                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold font-serif italic text-xs">
                     S
                   </div>
                 </div>
-
+ 
                 <div>
                   <p className="text-xs text-white/60">Saldo Disponible</p>
-                  <p className="font-serif text-3xl font-bold mt-1">$0.00</p>
+                  <p className="font-serif text-3xl font-bold mt-1">${(cliente?.saldo || 0).toFixed(2)}</p>
                 </div>
-
+ 
                 <div className="flex justify-between items-center pt-4 border-t border-white/10 text-xs">
                   <div>
                     <p className="text-[10px] text-white/40">Mis Puntos de Lealtad</p>
-                    <p className="font-bold text-white/90 mt-0.5">150 Puntos</p>
+                    <p className="font-bold text-white/90 mt-0.5">{cliente?.puntos || 0} Puntos</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-white/40">Nivel de Cuenta</p>
-                    <p className="font-bold text-amber-400 mt-0.5 flex items-center gap-1">★ Cliente Gold</p>
+                    <p className={`font-bold mt-0.5 flex items-center gap-1 ${levelInfo.color}`}>{levelInfo.label}</p>
                   </div>
                 </div>
               </div>
-
+ 
+              {/* Botón de Recargar */}
+              <button
+                onClick={() => setShowRechargeModal(true)}
+                className="py-3.5 px-6 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] transition-all rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2 shadow-md w-full max-w-md"
+              >
+                <Plus size={14} />
+                Recargar Crédito de Cuenta
+              </button>
+ 
               {/* Detalle explicativo */}
               <div className="p-5 bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 rounded-2xl space-y-3 max-w-md text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
                 <p className="font-bold text-neutral-800 dark:text-white">¿Cómo funciona el crédito?</p>
@@ -1193,7 +1352,149 @@ export default function PortalCliente({
                   Cuando alcances los **500 puntos**, podrás convertirlos directamente en crédito de la cuenta para canjearlos en tu próximo pedido a través de WhatsApp.
                 </p>
               </div>
-
+ 
+              {/* Modal de Recarga */}
+              {showRechargeModal && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                  <div className="absolute inset-0 bg-black/60 dark:bg-black/85 backdrop-blur-xs" onClick={() => !rechargeSubmitting && setShowRechargeModal(false)} />
+                  <div className="relative w-full max-w-md bg-white dark:bg-zinc-900 border border-neutral-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden animate-reveal text-left">
+                    
+                    {/* Header */}
+                    <div className="p-6 border-b border-neutral-100 dark:border-zinc-800 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
+                          <Wallet size={16} />
+                        </div>
+                        <h2 className="text-neutral-900 dark:text-white font-bold text-base">Recargar Saldo de Cuenta</h2>
+                      </div>
+                      {!rechargeSubmitting && (
+                        <button onClick={() => setShowRechargeModal(false)} className="p-1.5 rounded-lg hover:bg-neutral-50 dark:hover:bg-zinc-800 text-neutral-400 hover:text-neutral-600 dark:hover:text-white transition-all">
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+ 
+                    <form onSubmit={handleRechargeSubmit} className="p-6 space-y-4">
+                      {rechargeSuccessMsg && (
+                        <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-semibold text-center animate-reveal">
+                          ✓ {rechargeSuccessMsg}
+                        </div>
+                      )}
+                      {rechargeErrorMsg && (
+                        <div className="p-3 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 text-red-650 dark:text-red-300 rounded-xl text-xs font-semibold text-center animate-reveal">
+                          {rechargeErrorMsg}
+                        </div>
+                      )}
+ 
+                      {tarjetas.length === 0 ? (
+                        <div className="text-center py-6 space-y-3">
+                          <p className="text-xs text-neutral-500 dark:text-neutral-450 leading-relaxed">
+                            No tienes tarjetas de pago vinculadas. Debes registrar al menos una tarjeta de pago para poder realizar recargas.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowRechargeModal(false);
+                              setActiveTab('tarjetas');
+                            }}
+                            className="px-4 py-2.5 bg-black dark:bg-white text-white dark:text-zinc-950 text-xs font-bold rounded-xl active:scale-95 transition-all mt-2"
+                          >
+                            Vincular Tarjeta de Pago
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          {/* Selector de tarjeta */}
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Pagar Con (Tarjeta Guardada) *</label>
+                            <select
+                              required
+                              disabled={rechargeSubmitting}
+                              value={selectedRechargeCardId}
+                              onChange={(e) => setSelectedRechargeCardId(e.target.value)}
+                              className="w-full px-3 py-2.5 bg-[#fafafa] dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-850 text-neutral-900 dark:text-white text-xs focus:outline-none focus:border-black dark:focus:border-white transition-all rounded-xl"
+                            >
+                              <option value="">Selecciona una tarjeta...</option>
+                              {tarjetas.map(t => (
+                                <option key={t.id} value={t.id}>{t.bank} ({t.number.slice(-4)})</option>
+                              ))}
+                            </select>
+                          </div>
+ 
+                          {/* Monto de recarga */}
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Monto a Recargar ($ USD) *</label>
+                            <input
+                              type="number"
+                              required
+                              min="1"
+                              disabled={rechargeSubmitting}
+                              placeholder="Monto en dólares"
+                              value={rechargeAmount}
+                              onChange={(e) => setRechargeAmount(e.target.value)}
+                              className="w-full px-4 py-2.5 rounded-xl bg-[#fafafa] dark:bg-zinc-950 border border-neutral-200 dark:border-zinc-850 text-neutral-900 dark:text-white placeholder-neutral-400 text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
+                            />
+                          </div>
+ 
+                          {/* Presets de monto */}
+                          <div className="grid grid-cols-4 gap-2 pt-1">
+                            {[10, 50, 100, 200].map(amount => (
+                              <button
+                                key={amount}
+                                type="button"
+                                disabled={rechargeSubmitting}
+                                onClick={() => setRechargeAmount(amount.toString())}
+                                className={`py-2 text-xs font-bold rounded-xl border transition-all ${
+                                  rechargeAmount === amount.toString()
+                                    ? 'bg-black dark:bg-white text-white dark:text-zinc-950 border-transparent shadow-md'
+                                    : 'bg-neutral-50 dark:bg-zinc-950 border-neutral-200 dark:border-zinc-800 text-neutral-600 dark:text-neutral-450 hover:bg-neutral-100 dark:hover:bg-zinc-800'
+                                }`}
+                              >
+                                +${amount}
+                              </button>
+                            ))}
+                          </div>
+ 
+                          {/* Advertencia Fondos Ilimitados */}
+                          <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-400 rounded-xl text-[10px] leading-relaxed">
+                            💡 **Prueba de Sandbox:** Todas las tarjetas registradas tienen fondos simulados ilimitados. Puedes recargar la cantidad que gustes para realizar tus pruebas de compra.
+                          </div>
+ 
+                          {/* Botones de acción */}
+                          <div className="flex gap-3 pt-3 border-t border-neutral-100 dark:border-zinc-800">
+                            <button
+                              type="button"
+                              disabled={rechargeSubmitting}
+                              onClick={() => setShowRechargeModal(false)}
+                              className="flex-1 px-4 py-2.5 rounded-xl border border-neutral-200 dark:border-zinc-800 text-neutral-600 dark:text-neutral-300 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-zinc-800/50 transition-all"
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              type="submit"
+                              disabled={rechargeSubmitting}
+                              className="flex-1 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md flex items-center justify-center gap-2 disabled:opacity-50 transition-all"
+                            >
+                              {rechargeSubmitting ? (
+                                <>
+                                  <Loader2 size={14} className="animate-spin" />
+                                  <span>Procesando...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Check size={14} />
+                                  <span>Confirmar Pago</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </form>
+                  </div>
+                </div>
+              )}
+ 
             </div>
           )}
 

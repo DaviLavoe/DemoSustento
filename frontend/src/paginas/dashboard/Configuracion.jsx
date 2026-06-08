@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Settings, Phone, Palette, HelpCircle, UploadCloud, Loader2, CheckCircle, Trash2, ShieldAlert, MapPin, Mail, Sparkles, Image, Globe } from 'lucide-react';
+import { Settings, Phone, Palette, HelpCircle, UploadCloud, Loader2, CheckCircle, Trash2, ShieldAlert, MapPin, Mail, Sparkles, Image, Globe, CreditCard } from 'lucide-react';
 import { useEmpresaSupabase } from '../../context/EmpresaSupabaseContext';
 import { API_BASE_URL } from '../../config/api';
 
@@ -57,6 +57,7 @@ export default function Configuracion() {
   const [instagramUrl, setInstagramUrl] = useState('');
   const [facebookUrl, setFacebookUrl] = useState('');
   const [mensajeBienvenida, setMensajeBienvenida] = useState('');
+  const [metodosPago, setMetodosPago] = useState(["visa", "mastercard", "bcp", "bbva", "interbank"]);
   
   const [loadingLogo, setLoadingLogo] = useState(false);
   const [loadingBanner, setLoadingBanner] = useState(false);
@@ -78,6 +79,7 @@ export default function Configuracion() {
       setInstagramUrl(empresa.instagram_url || '');
       setFacebookUrl(empresa.facebook_url || '');
       setMensajeBienvenida(empresa.mensaje_bienvenida || '');
+      setMetodosPago(empresa.metodos_pago || ["visa", "mastercard", "bcp", "bbva", "interbank"]);
     }
   }, [empresa]);
 
@@ -217,7 +219,8 @@ export default function Configuracion() {
           banner_url: bannerUrl || null,
           instagram_url: instagramUrl.trim() || null,
           facebook_url: facebook_url.trim() || null,
-          mensaje_bienvenida: mensajeBienvenida.trim() || null
+          mensaje_bienvenida: mensajeBienvenida.trim() || null,
+          metodos_pago: metodosPago
         })
       });
 
@@ -521,7 +524,46 @@ export default function Configuracion() {
               />
             </div>
           </div>
-
+ 
+          {/* Sección 5: Métodos de Pago Aceptados */}
+          <div className="space-y-4 pt-4 border-t border-[#e5e5e5] dark:border-zinc-800">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400 flex items-center gap-2">
+              <CreditCard size={14} />
+              Métodos de Pago Aceptados
+            </h3>
+            <p className="text-xs text-[#666666] dark:text-neutral-450">
+              Selecciona las marcas de tarjetas que tu negocio acepta. Estas opciones filtrarán las tarjetas que los clientes pueden vincular en su panel.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 pt-2">
+              {[
+                { id: 'visa', label: 'Visa' },
+                { id: 'mastercard', label: 'Mastercard' },
+                { id: 'bcp', label: 'BCP' },
+                { id: 'bbva', label: 'BBVA' },
+                { id: 'interbank', label: 'Interbank' }
+              ].map((brand) => {
+                const checked = metodosPago.includes(brand.id);
+                return (
+                  <label key={brand.id} className="flex items-center gap-3 p-3 bg-[#fafafa] dark:bg-zinc-950 border border-transparent dark:border-zinc-800 rounded-xl cursor-pointer hover:border-neutral-300 dark:hover:border-zinc-700 transition-all select-none">
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => {
+                        if (checked) {
+                          setMetodosPago(metodosPago.filter(m => m !== brand.id));
+                        } else {
+                          setMetodosPago([...metodosPago, brand.id]);
+                        }
+                      }}
+                      className="rounded text-violet-650 focus:ring-violet-500 bg-white dark:bg-zinc-950 border-neutral-350 dark:border-zinc-800 w-4 h-4 cursor-pointer"
+                    />
+                    <span className="text-sm font-semibold text-neutral-800 dark:text-white capitalize">{brand.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+ 
         </div>
 
         {/* Botón de Guardado */}
