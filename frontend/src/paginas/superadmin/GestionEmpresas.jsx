@@ -1085,7 +1085,7 @@ export default function GestionEmpresas() {
             <div className="col-span-2 text-center">Productos</div>
             <div className="col-span-2 text-center">Pedidos</div>
             <div className="col-span-2 text-center">Clientes</div>
-            <div className="col-span-2 text-right">Acciones</div>
+            <div className="col-span-2 text-center">Acciones</div>
           </div>
 
           <div className="divide-y divide-slate-100 dark:divide-white/5">
@@ -1131,21 +1131,21 @@ export default function GestionEmpresas() {
 
                 {/* Métricas */}
                 <div className="grid grid-cols-3 gap-2 md:contents pt-2 md:pt-0">
-                  <div className="md:col-span-2 flex flex-col md:flex-row md:justify-center items-center gap-1.5 md:gap-2 bg-slate-50 dark:bg-white/3 md:bg-transparent rounded-xl py-2.5 px-1 md:p-0 border border-slate-100 dark:border-white/5 md:border-0 justify-center">
+                  <div className="md:col-span-2 flex flex-col md:flex-row md:justify-center items-center gap-1.5 md:gap-2 bg-slate-50 dark:bg-white/3 md:bg-transparent md:dark:bg-transparent rounded-xl py-2.5 px-1 md:p-0 border border-slate-100 dark:border-white/5 md:border-0 justify-center">
                     <Package size={16} className="text-violet-500 md:hidden" />
                     <div className="flex flex-col md:flex-row items-center md:gap-2">
                       <span className="text-sm font-bold md:font-semibold text-slate-800 dark:text-white leading-none">{empresa.total_productos}</span>
                       <span className="text-[10px] font-semibold text-slate-400 dark:text-neutral-500 uppercase tracking-wider mt-1 md:hidden">productos</span>
                     </div>
                   </div>
-                  <div className="md:col-span-2 flex flex-col md:flex-row md:justify-center items-center gap-1.5 md:gap-2 bg-slate-50 dark:bg-white/3 md:bg-transparent rounded-xl py-2.5 px-1 md:p-0 border border-slate-100 dark:border-white/5 md:border-0 justify-center">
+                  <div className="md:col-span-2 flex flex-col md:flex-row md:justify-center items-center gap-1.5 md:gap-2 bg-slate-50 dark:bg-white/3 md:bg-transparent md:dark:bg-transparent rounded-xl py-2.5 px-1 md:p-0 border border-slate-100 dark:border-white/5 md:border-0 justify-center">
                     <ShoppingCart size={16} className="text-emerald-500 md:hidden" />
                     <div className="flex flex-col md:flex-row items-center md:gap-2">
                       <span className="text-sm font-bold md:font-semibold text-slate-800 dark:text-white leading-none">{empresa.total_pedidos}</span>
                       <span className="text-[10px] font-semibold text-slate-400 dark:text-neutral-500 uppercase tracking-wider mt-1 md:hidden">pedidos</span>
                     </div>
                   </div>
-                  <div className="md:col-span-2 flex flex-col md:flex-row md:justify-center items-center gap-1.5 md:gap-2 bg-slate-50 dark:bg-white/3 md:bg-transparent rounded-xl py-2.5 px-1 md:p-0 border border-slate-100 dark:border-white/5 md:border-0 justify-center">
+                  <div className="md:col-span-2 flex flex-col md:flex-row md:justify-center items-center gap-1.5 md:gap-2 bg-slate-50 dark:bg-white/3 md:bg-transparent md:dark:bg-transparent rounded-xl py-2.5 px-1 md:p-0 border border-slate-100 dark:border-white/5 md:border-0 justify-center">
                     <Users size={16} className="text-blue-500 md:hidden" />
                     <div className="flex flex-col md:flex-row items-center md:gap-2">
                       <span className="text-sm font-bold md:font-semibold text-slate-800 dark:text-white leading-none">{empresa.total_clientes}</span>
@@ -1155,7 +1155,7 @@ export default function GestionEmpresas() {
                 </div>
 
                 {/* Acciones */}
-                <div className="md:col-span-2 flex items-center justify-between md:justify-end gap-1 mt-3 md:mt-0 pt-3 md:pt-0 border-t border-slate-100 dark:border-white/5 md:border-0 px-2 md:px-0">
+                <div className="md:col-span-2 flex items-center justify-between md:justify-center gap-1 mt-3 md:mt-0 pt-3 md:pt-0 border-t border-slate-100 dark:border-white/5 md:border-0 px-2 md:px-0">
                   {/* Ver ficha de detalles del CMS */}
                   <button
                     onClick={() => setDetalleEmpresa(empresa)}

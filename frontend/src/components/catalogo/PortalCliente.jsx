@@ -323,36 +323,36 @@ export default function PortalCliente({
     <div data-lenis-prevent className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-[#0a0a0a] text-[#1a1a1a] dark:text-white overflow-hidden animate-reveal">
       
       {/* 1. Header del Portal */}
-      <header className="px-6 py-4 bg-white dark:bg-[#0a0a0a] border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between shrink-0 shadow-sm">
+      <header className="px-4 sm:px-6 py-4 bg-white dark:bg-[#0a0a0a] border-b border-neutral-100 dark:border-neutral-800 flex items-center justify-between shrink-0 shadow-sm gap-2">
         <button 
           onClick={onClose}
-          className="flex items-center gap-2 text-xs font-bold text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-all group"
+          className="flex items-center gap-1.5 sm:gap-2 text-xs font-bold text-neutral-600 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-all group shrink-0"
         >
           <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-          <span>Volver a la tienda</span>
+          <span className="hidden sm:inline">Volver a la tienda</span>
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-center flex-1">
           <div 
             className="w-8 h-8 rounded-lg text-white flex items-center justify-center font-serif font-bold italic"
             style={{ backgroundColor: primaryColor }}
           >
             {cliente.nombre ? cliente.nombre.charAt(0).toUpperCase() : 'C'}
           </div>
-          <span className="font-serif text-sm font-bold tracking-wider uppercase hidden sm:inline dark:text-white">Portal de Cliente</span>
+          <span className="font-serif text-sm font-bold tracking-wider uppercase hidden md:inline dark:text-white">Portal de Cliente</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <ThemeToggle />
           <button 
             onClick={() => {
               cerrarSesion();
               onClose();
             }}
-            className="px-3.5 py-1.5 rounded-xl border border-red-100 dark:border-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95"
+            className="px-2.5 sm:px-3.5 py-1.5 rounded-xl border border-red-100 dark:border-red-950/20 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95"
           >
             <LogOut size={13} />
-            <span>Cerrar sesión</span>
+            <span className="hidden sm:inline">Cerrar sesión</span>
           </button>
         </div>
       </header>
@@ -440,7 +440,7 @@ export default function PortalCliente({
         <main className="flex-1 overflow-y-auto p-6 md:p-8 scrollbar-none bg-white dark:bg-[#0a0a0a]">
           
           {/* Navegación móvil tipo píldora (solo visible en pantallas pequeñas) */}
-          <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-4 mb-4 border-b border-neutral-100 dark:border-neutral-800 scrollbar-none shrink-0">
+          <div className="flex md:hidden items-center gap-1.5 overflow-x-auto pb-4 mb-4 border-b border-neutral-100 dark:border-neutral-800 scrollbar-none shrink-0 -mx-6 px-6 snap-x snap-mandatory">
             {[
               { id: 'inicio', label: 'Inicio' },
               { id: 'pedidos', label: `Pedidos (${pedidos.length})` },
@@ -1346,10 +1346,10 @@ export default function PortalCliente({
               <div className="p-5 bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-100 dark:border-neutral-800 rounded-2xl space-y-3 max-w-md text-xs leading-relaxed text-neutral-600 dark:text-neutral-400">
                 <p className="font-bold text-neutral-800 dark:text-white">¿Cómo funciona el crédito?</p>
                 <p>
-                  Por cada compra que realizas en nuestro catálogo público, acumulas el **5% del total pagado** en puntos de lealtad.
+                  Por cada compra que realizas en nuestro catálogo público, acumulas el <strong className="font-bold text-neutral-800 dark:text-white">5% del total pagado</strong> en puntos de lealtad.
                 </p>
                 <p>
-                  Cuando alcances los **500 puntos**, podrás convertirlos directamente en crédito de la cuenta para canjearlos en tu próximo pedido a través de WhatsApp.
+                  Cuando alcances los <strong className="font-bold text-neutral-800 dark:text-white">500 puntos</strong>, podrás convertirlos directamente en crédito de la cuenta para canjearlos en tu próximo pedido a través de WhatsApp.
                 </p>
               </div>
  
@@ -1457,7 +1457,7 @@ export default function PortalCliente({
  
                           {/* Advertencia Fondos Ilimitados */}
                           <div className="p-3 bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-400 rounded-xl text-[10px] leading-relaxed">
-                            💡 **Prueba de Sandbox:** Todas las tarjetas registradas tienen fondos simulados ilimitados. Puedes recargar la cantidad que gustes para realizar tus pruebas de compra.
+                            💡 <strong className="font-bold">Prueba de Sandbox:</strong> Todas las tarjetas registradas tienen fondos simulados ilimitados. Puedes recargar la cantidad que gustes para realizar tus pruebas de compra.
                           </div>
  
                           {/* Botones de acción */}

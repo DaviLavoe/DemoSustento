@@ -44,18 +44,6 @@ export default function ProductCard({
                 {product.nombre}
               </h3>
             </div>
-            <button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toggleWishlist(product);
-              }}
-              className="text-neutral-400 dark:text-neutral-500 hover:text-red-500 active:scale-90 transition-colors shrink-0 p-1 -mr-1 -mt-1"
-              style={isInWishlist(product.id) ? { color: '#ef4444' } : {}}
-              aria-label="Agregar a favoritos"
-            >
-              <Heart size={18} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} className="drop-shadow-sm" />
-            </button>
           </div>
           <p className="text-neutral-500 dark:text-neutral-400 text-xs font-light line-clamp-2 leading-relaxed">
             {product.descripcion}
@@ -63,9 +51,23 @@ export default function ProductCard({
         </div>
 
         <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-[#e5e5e5]/50 dark:border-neutral-800/50 mt-1 sm:mt-0">
-          <span className="font-serif text-lg sm:text-xl font-bold text-neutral-900 dark:text-white drop-shadow-sm">
-            ${product.precio.toFixed(2)}
-          </span>
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleWishlist(product);
+            }}
+            className="text-neutral-400 dark:text-neutral-500 hover:text-red-500 active:scale-90 transition-colors shrink-0"
+            style={isInWishlist(product.id) ? { color: '#ef4444' } : {}}
+            aria-label="Agregar a favoritos"
+          >
+            <Heart size={20} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} className="drop-shadow-sm" />
+          </button>
+          
+          <div className="flex items-center justify-end gap-4 flex-1 sm:flex-initial">
+            <span className="font-serif text-lg sm:text-xl font-bold text-neutral-900 dark:text-white drop-shadow-sm">
+              ${product.precio.toFixed(2)}
+            </span>
           <button
             disabled={isOutOfStock}
             onClick={() => addToCart(product)}
@@ -76,6 +78,7 @@ export default function ProductCard({
           >
             <span>{isOutOfStock ? 'Agotado' : 'Añadir al Carrito'}</span>
           </button>
+          </div>
         </div>
       </div>
     );
@@ -110,18 +113,6 @@ export default function ProductCard({
               Sin Stock
             </span>
           )}
-          <button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              toggleWishlist(product);
-            }}
-            className="absolute bottom-4 right-4 p-2.5 rounded-xl bg-white/80 dark:bg-black/80 backdrop-blur-md border border-white/50 dark:border-white/10 shadow-sm hover:shadow-md active:scale-90 hover:scale-110 transition-all duration-300 text-neutral-600 dark:text-neutral-300 hover:text-red-500 z-10"
-            style={isInWishlist(product.id) ? { color: '#ef4444' } : {}}
-            aria-label="Agregar a favoritos"
-          >
-            <Heart size={16} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} className="drop-shadow-sm" />
-          </button>
         </div>
 
         <div className="p-3 sm:p-6 flex-1 flex flex-col justify-between gap-3 sm:gap-5 relative z-10 bg-white dark:bg-[#151515]">
@@ -135,9 +126,23 @@ export default function ProductCard({
           </div>
 
           <div className="flex items-center justify-between border-t border-[#e5e5e5]/60 dark:border-neutral-800/60 pt-3 sm:pt-5">
-            <span className="font-serif text-base sm:text-2xl font-bold text-[#1a1a1a] dark:text-white tracking-tight drop-shadow-sm">
-              ${product.precio.toFixed(2)}
-            </span>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleWishlist(product);
+                }}
+                className="text-neutral-400 dark:text-neutral-500 hover:text-red-500 active:scale-90 transition-colors shrink-0"
+                style={isInWishlist(product.id) ? { color: '#ef4444' } : {}}
+                aria-label="Agregar a favoritos"
+              >
+                <Heart size={20} fill={isInWishlist(product.id) ? 'currentColor' : 'none'} className="drop-shadow-sm" />
+              </button>
+              <span className="font-serif text-base sm:text-2xl font-bold text-[#1a1a1a] dark:text-white tracking-tight drop-shadow-sm">
+                ${product.precio.toFixed(2)}
+              </span>
+            </div>
             <button
               disabled={isOutOfStock}
               onClick={() => addToCart(product)}
