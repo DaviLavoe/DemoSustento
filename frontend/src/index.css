@@ -171,3 +171,46 @@ path:focus {
   box-shadow: none !important;
   border: none !important;
 }
+
+/* ==========================================================================
+   Autofill & Selection Custom Styles (fixes invisible text on highlight / autocomplete)
+   ========================================================================== */
+
+/* Dark Mode Inputs (using text-white class) */
+input.text-white:-webkit-autofill,
+input.text-white:-webkit-autofill:hover,
+input.text-white:-webkit-autofill:focus,
+input.text-white:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #161616 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #ffffff;
+}
+
+input.text-white::selection,
+textarea.text-white::selection,
+input.text-white *::selection,
+textarea.text-white *::selection {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+/* Light Mode Inputs (inputs without text-white) */
+input:not(.text-white):-webkit-autofill,
+input:not(.text-white):-webkit-autofill:hover,
+input:not(.text-white):-webkit-autofill:focus,
+input:not(.text-white):-webkit-autofill:active {
+  -webkit-text-fill-color: #1a1a1a !important;
+  -webkit-box-shadow: 0 0 0px 1000px #fafafa inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  caret-color: #1a1a1a;
+}
+
+input:not(.text-white)::selection,
+textarea:not(.text-white)::selection,
+input:not(.text-white) *::selection,
+textarea:not(.text-white) *::selection {
+  background-color: rgba(0, 0, 0, 0.15) !important;
+  color: #1a1a1a !important;
+}
+

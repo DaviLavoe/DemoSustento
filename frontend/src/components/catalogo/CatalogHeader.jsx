@@ -150,17 +150,17 @@ export default function CatalogHeader({
           </div>
 
           {/* Alternar Vista */}
-          <div className="hidden md:flex items-center gap-1 p-1.5 bg-[#fafafa] dark:bg-neutral-900 border border-[#e5e5e5] dark:border-neutral-800 rounded-2xl animate-reveal delay-500 shadow-inner">
+          <div className="hidden md:flex items-center gap-1 p-1.5 bg-[#fafafa] dark:bg-neutral-900 border border-[#e5e5e5] dark:border-neutral-800 rounded-2xl animate-reveal delay-500 shadow-inner transition-all duration-150">
             <button 
               onClick={() => setViewMode('list')}
-              className={`p-2.5 rounded-xl transition-all duration-300 ${viewMode === 'list' ? 'bg-white dark:bg-neutral-800 text-[#1a1a1a] dark:text-white shadow-sm' : 'text-neutral-400 dark:text-neutral-500 hover:text-[#1a1a1a] dark:hover:text-white'}`}
+              className={`p-2.5 rounded-xl transition-all duration-150 ${viewMode === 'list' ? 'bg-white dark:bg-neutral-800 text-[#1a1a1a] dark:text-white shadow-sm' : 'text-neutral-400 dark:text-neutral-500 hover:text-[#1a1a1a] dark:hover:text-white'}`}
               title="Vista de lista"
             >
               <List size={16} />
             </button>
             <button 
               onClick={() => setViewMode('grid')}
-              className={`p-2.5 rounded-xl transition-all duration-300 ${viewMode === 'grid' ? 'bg-white dark:bg-neutral-800 text-[#1a1a1a] dark:text-white shadow-sm' : 'text-neutral-400 dark:text-neutral-500 hover:text-[#1a1a1a] dark:hover:text-white'}`}
+              className={`p-2.5 rounded-xl transition-all duration-150 ${viewMode === 'grid' ? 'bg-white dark:bg-neutral-800 text-[#1a1a1a] dark:text-white shadow-sm' : 'text-neutral-400 dark:text-neutral-500 hover:text-[#1a1a1a] dark:hover:text-white'}`}
               title="Vista de cuadrícula"
             >
               <Grid size={16} />
